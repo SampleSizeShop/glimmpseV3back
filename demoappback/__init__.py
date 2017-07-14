@@ -1,7 +1,7 @@
 from flask import Flask
-app = Flask(__name__)
-
 from flask_cors import CORS
+
+app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 import demoappback.views
