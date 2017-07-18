@@ -1,7 +1,12 @@
+from unittest.mock import patch
+
 import demoappback
+from demoappback import db
 import unittest
 import json
 import re
+
+from demoappback.views import storedexpression
 
 
 class ViewsTestCase(unittest.TestCase):
@@ -11,15 +16,6 @@ class ViewsTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
-
-    def test_mcsquared(self):
-        """Should return {"texString": "$e=mc^2$"}"""
-        expected = '$e = mc^2$'
-        with demoappback.app.app_context():
-            response = self.app.post('/mcsquared')
-            data = json.loads(response.data)
-            actual = data['texString']
-            self.assertEqual(expected, actual)
 
     def test_cmatrix(self):
         """It should return a 5x5 matrix in TeX format"""
