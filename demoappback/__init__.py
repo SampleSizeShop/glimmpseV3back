@@ -8,7 +8,7 @@ db = client['test-database']
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 import demoappback.models
-import demoappback.views
+import demoappback.api
 
 if __name__ == '__main__':
     app.run()
