@@ -24,7 +24,8 @@ def client_side_log():
     """print a log recieved from the client side logger"""
     level = request.get_json()
     print(level)
-    return Response(None, status=200, mimetype='application/json')
+    json_response = json.dumps({'message':'OK', 'status':'200', 'mimetype':'application/json'})
+    return json_response
 
 @app.route('/')
 def hello_world():
