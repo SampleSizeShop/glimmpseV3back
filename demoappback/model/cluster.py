@@ -3,7 +3,7 @@ from demoappback.model.isu_factor import IsuFactor, IsuFactorType, IsuFactorNatu
 
 class Cluster(IsuFactor):
     """
-    Class describing outcomes.
+    Class describing clusters.
     """
 
     def __init__(self, name: str = None, cluster_level: int = 0):
