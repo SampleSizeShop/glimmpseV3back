@@ -28,16 +28,25 @@ class StudyDesign:
         self.exceptions = []
 
         # FED IN
+        self.isu_factors = []
+        self.between_isu_relative_group_sizes = []
+        self.marginal_means = []
+        self.smallest_group_size = None
+        self.outcome_correlation_matrix = None
+        self.outcome_repeated_measure_st_devs = []
         self.target_event = None
         self.samplesize = 0
-        self.solve_for = ''
+        self.solve_for = None
         self.alpha = 0.05
-        self.smallest_group
+        self.confidence_interval_width = None
+        self.target_power = None
+        self.sample_size = None
+        self.selected_tests = []
         self.gaussian_covariate = None
-        self.hypothesis = None
-        self.hypothesis_between = None
-        self.hypothesis_between = None
-        self.marginal_means  = {}
+        self.scale_factor = None
+        self.variance_scale_fator = None
+        self.power_curve = None
+
 
         self.essencex = np.matrix()
         self.beta = np.matrix()
@@ -73,3 +82,5 @@ class StudyDesign:
 
         if source['_solveFor']:
             self.solve_for = source['_solveFor']
+
+
