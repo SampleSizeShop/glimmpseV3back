@@ -10,19 +10,19 @@ class IsuFactor(object):
     """
 
 
-    def __init__(self, name: str = None, nature: str = None, isu_factor_type: IsuFactorType = None):
+    def __init__(self, name: str = None, nature: str = None, isu_factor_type: IsuFactorType = None, hypothesis_type: IsuFactorHypothesisType = None):
         self.name = name
         self.nature = nature
-        self.isu_factor_type = isu_factor_type
+        self.factor_type = isu_factor_type
         self.nature = None
         self.values = []
         self.child = None
         self.partialMatrix = None
         self.inHypothesis = False
-        self.isuFactorNature = IsuFactorNature.GLOBAL_TRENDS
+        self.hypothesis_type = hypothesis_type
 
 
-class IsuFactorNature(Enum):
+class IsuFactorHypothesisType(Enum):
     GLOBAL_TRENDS = 1
     IDENTITY = 2
     POLYNOMIAL = 3
