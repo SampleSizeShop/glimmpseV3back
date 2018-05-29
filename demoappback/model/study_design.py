@@ -13,14 +13,14 @@ class StudyDesign:
                  isu_factors: IsuFactors = None,
                  target_event: TargetEvent = None,
                  solve_for: SolveFor = None,
-                 alpha = 0.05,
+                 alpha: float = 0.05,
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
                  target_power: float = None,
                  selected_tests: [] = None,
                  gaussian_covariate: float = None,
                  scale_factor: float = None,
-                 variance_scale_fator: float = None,
+                 variance_scale_factor: float = None,
                  power_curve: int = None):
 
         # I think these properties will probably end up as variables in power calc methods....
@@ -54,7 +54,7 @@ class StudyDesign:
         self.selected_tests = selected_tests
         self.gaussian_covariate = gaussian_covariate
         self.scale_factor = scale_factor
-        self.variance_scale_fator = variance_scale_fator
+        self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
 
         # calculated
