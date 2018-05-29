@@ -1,4 +1,4 @@
-from demoappback.model.isu_factor import IsuFactor, IsuFactorType, IsuFactorNature, IsuFactorHypothesisType
+from demoappback.model.isu_factor import IsuFactor, IsuFactorType, Nature, HypothesisType
 
 
 class Outcome(IsuFactor):
@@ -7,5 +7,5 @@ class Outcome(IsuFactor):
     """
 
     def __init__(self, name: str = None, standard_deviation: float = 1):
-        super().__init__(name, IsuFactorNature.WITHIN, IsuFactorType.OUTCOME, IsuFactorHypothesisType.GLOBAL_TRENDS)
+        super().__init__(name, Nature.WITHIN, IsuFactorType.OUTCOME, HypothesisType.GLOBAL_TRENDS)
         self.standard_deviation = standard_deviation

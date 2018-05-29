@@ -1,6 +1,6 @@
 import numpy as np
 
-from demoappback.model.isu_factor import IsuFactor, IsuFactorType, IsuFactorNature
+from demoappback.model.isu_factor import IsuFactor, IsuFactorType, Nature
 
 
 class RepeatedMeasure(IsuFactor):
@@ -9,7 +9,7 @@ class RepeatedMeasure(IsuFactor):
     """
 
     def __init__(self, name: str = None, units: str = None, type: str = None, no_repeats: int = 2, partial_u_matrix: [] = [], correlation_matrix: [] = []):
-        super().__init__(name, IsuFactorNature.WITHIN, IsuFactorType.REPEATED_MEASURE)
+        super().__init__(name, Nature.WITHIN, IsuFactorType.REPEATED_MEASURE)
         self.units = ''
         self.type = ''
         self.no_repeats = 0

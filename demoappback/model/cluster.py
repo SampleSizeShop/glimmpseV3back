@@ -1,4 +1,4 @@
-from demoappback.model.isu_factor import IsuFactor, IsuFactorType, IsuFactorNature
+from demoappback.model.isu_factor import IsuFactor, IsuFactorType, Nature
 
 
 class Cluster(IsuFactor):
@@ -7,5 +7,5 @@ class Cluster(IsuFactor):
     """
 
     def __init__(self, name: str = None, cluster_level: int = 0):
-        super().__init__(name, IsuFactorNature.WITHIN, IsuFactorType.CLUSTER)
+        super().__init__(name, Nature.WITHIN, IsuFactorType.CLUSTER)
         self.cluster_level = cluster_level

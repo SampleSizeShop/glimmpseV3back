@@ -1,4 +1,5 @@
 from enum import Enum
+import numpy as np
 
 class IsuFactor(object):
     """
@@ -10,19 +11,25 @@ class IsuFactor(object):
     """
 
 
-    def __init__(self, name: str = None, nature: str = None, isu_factor_type: IsuFactorType = None, hypothesis_type: IsuFactorHypothesisType = None):
+    def __init__(self,
+                 name: str = None,
+                 nature: str = None,
+                 factor_type: IsuFactorType = None,
+                 values: [] = None, in_hypothesis: bool = False,
+                 hypothesis_type: HypothesisType = None,
+                 child = None,
+                 partial_matrix = None):
         self.name = name
         self.nature = nature
-        self.factor_type = isu_factor_type
-        self.nature = None
-        self.values = []
-        self.child = None
-        self.partialMatrix = None
-        self.inHypothesis = False
+        self.factor_type = factor_type
+        self.values = values
+        self.in_hypothesis = in_hypothesis
         self.hypothesis_type = hypothesis_type
+        self.child = child
+        self.partialMatrix = partial_matrix
 
 
-class IsuFactorHypothesisType(Enum):
+class HypothesisType(Enum):
     GLOBAL_TRENDS = 1
     IDENTITY = 2
     POLYNOMIAL = 3
@@ -35,6 +42,6 @@ class IsuFactorType(Enum):
     CLUSTER = 3
 
 
-class IsuFactorNature(Enum):
+class Nature(Enum):
     WITHIN = 1
     BETWEEN = 2
