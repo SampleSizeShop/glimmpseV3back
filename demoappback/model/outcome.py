@@ -10,7 +10,6 @@ class Outcome(IsuFactor):
                  name: str = None,
                  values: [] = None,
                  in_hypothesis: bool = False,
-                 hypothesis_type: HypothesisType = HypothesisType.GLOBAL_TRENDS,
                  child = None,
                  partial_matrix = None,
                  standard_deviation: float = 1):
