@@ -14,7 +14,7 @@ class IsuFactors(object):
                  between_isu_relative_group_sizes: []=None,
                  marginal_means: []=None,
                  smallest_group_size: int=None,
-                 outcome_correlation_matrix: np.Matrix=None):
+                 outcome_correlation_matrix=None):
         self.variables = variables
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
         self.marginal_means = marginal_means

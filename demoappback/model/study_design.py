@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from demoappback.model.isu_factor import TargetEvent, SolveFor
+from demoappback.model.enums import TargetEvent, SolveFor
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
 
@@ -58,10 +58,10 @@ class StudyDesign:
         self.power_curve = power_curve
 
         # calculated
-        self.essencex = np.matrix()
-        self.beta = np.matrix()
-        self.c_matrix = np.matrix()
-        self.u_matrix = np.matrix()
+        self.essencex = None
+        self.beta = None
+        self.c_matrix = None
+        self.u_matrix = None
         self.sigma = 0
         self.theta_zero = 0
 

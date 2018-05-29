@@ -1,4 +1,5 @@
-from demoappback.model.isu_factor import IsuFactor, IsuFactorType, Nature, HypothesisType
+from demoappback.model.isu_factor import IsuFactor
+from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
 
 
 class Outcome(IsuFactor):
