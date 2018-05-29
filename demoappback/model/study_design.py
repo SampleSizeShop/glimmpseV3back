@@ -29,11 +29,6 @@ class StudyDesign:
 
         # FED IN
         self.isu_factors = []
-        self.between_isu_relative_group_sizes = []
-        self.marginal_means = []
-        self.smallest_group_size = None
-        self.outcome_correlation_matrix = None
-        self.outcome_repeated_measure_st_devs = []
         self.target_event = None
         self.samplesize = 0
         self.solve_for = None
