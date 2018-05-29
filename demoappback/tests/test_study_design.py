@@ -1,7 +1,14 @@
 import unittest
 import numpy as np
-import re
+import os
+import json
 
+from demoappback.model.cluster import Cluster, ClusterLevel
+from demoappback.model.enums import TargetEvent, SolveFor, Tests
+from demoappback.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
+from demoappback.model.outcome import Outcome
+from demoappback.model.predictor import Predictor
+from demoappback.model.repeated_measure import RepeatedMeasure
 from demoappback.model.study_design import StudyDesign
 from demoappback.models import Matrix
 
@@ -41,9 +48,39 @@ class StudyDesignTestCase(unittest.TestCase):
         self.assertTrue(expected)
 
     def test_load_from_json(self):
-        """Should return a TeX bmatrix"""
-        pattern = "begin{bmatrix}.*\n.*\n.*\n.*\n.*\n.*\n.*end{bmatrix}"
-        self.assertTrue(re.search(pattern, self.m.bmatrix()))
+        """Should read the study design correctly from the model on model_1.json"""
+        expected = StudyDesign()
+
+        outcome_1 = Outcome(name='one')
+        outcome_2 = Outcome(name='teo')
+        rep_meas_1 = RepeatedMeasure(name='repMeas', values=[0, 1], units='time', type='Numeric', partial_u_matrix=np.matrix([[1],[-1]]), correlation_matrix=np.matrix([[1, 0],[0, 1]]))
+        cluster_1 = Cluster(name='clstr', levels=[ClusterLevel(level_name='1'), ClusterLevel(level_name='2', no_elements=2)])
+        predictor_1 = Predictor(name='prdctr', values=['grp1', 'grp2'])
+
+        isu_factors = IsuFactors(variables=[outcome_1, outcome_2, rep_meas_1, cluster_1, predictor_1],
+                                 smallest_group_size=2,
+                                 outcome_correlation_matrix=np.matrix([[1, 0], [0, 1]]),
+                                 outcome_repeated_measure_st_devs=[
+                                     OutcomeRepeatedMeasureStDev(outcome='one', repeated_measure='repMeas', values=[]),
+                                     OutcomeRepeatedMeasureStDev(outcome='teo', repeated_measure='repMeas', values=[])])
+        
+        sd = StudyDesign(isu_factors=isu_factors,
+                         target_event=TargetEvent.REJECTION,
+                         solve_for=SolveFor.POWER,
+                         confidence_interval_width=1,
+                         sample_size=10,
+                         selected_tests=[Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
+                         gaussian_covariate=1,
+                         scale_factor=1,
+                         variance_scale_factor=[3, 4],
+                         power_curve=None)
+
+        json_data = open("demoappback/tests/model_1.json")
+        data = json_data.read()
+        json_data.close()
+        actual = StudyDesign()
+        actual.load_from_json(data)
+        #self.assertEqual(vars(expected), vars(actual))
 
 
 if __name__ == '__main__':

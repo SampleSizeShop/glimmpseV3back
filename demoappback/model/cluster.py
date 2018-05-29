@@ -2,6 +2,20 @@ from demoappback.model.isu_factor import IsuFactor
 from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
 
 
+class ClusterLevel(object):
+    """
+    Class describing cluster levels
+    """
+
+    def __init__(self,
+                 level_name: int = None,
+                 no_elements: int = 1,
+                 intra_class_correlation = 1):
+        self.level_name = level_name
+        self.no_elements = no_elements
+        self.intra_class_corellation = intra_class_correlation
+
+
 class Cluster(IsuFactor):
     """
     Class describing clusters.
@@ -13,7 +27,7 @@ class Cluster(IsuFactor):
                  in_hypothesis: bool=False,
                  child=None,
                  partial_matrix=None,
-                 cluster_level: int=0):
+                 levels: [] = None):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.CLUSTER,
@@ -22,4 +36,4 @@ class Cluster(IsuFactor):
                          hypothesis_type=HypothesisType.GLOBAL_TRENDS,
                          child=child,
                          partial_matrix=partial_matrix)
-        self.cluster_level = cluster_level
+        self.levels = levels

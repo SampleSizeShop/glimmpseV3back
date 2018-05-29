@@ -13,7 +13,7 @@ class IsuFactor(object):
     def __init__(self,
                  name: str=None,
                  nature: str=None,
-                 factor_type: IsuFactorType =None,
+                 factor_type: IsuFactorType=None,
                  values: []=None, in_hypothesis: bool=False,
                  hypothesis_type: HypothesisType =None,
                  child=None,

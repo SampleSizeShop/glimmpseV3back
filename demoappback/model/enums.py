@@ -33,3 +33,15 @@ class SolveFor(Enum):
 class ClType(Enum):
     CLTYPE_DESIRED = 1
     CLTYPE_NOT_DESIRED = 2
+
+
+class Tests(Enum):
+    HOTELLING_LAWLEY = 'Hotelling Lawley Trace'
+    PILLAI_BARTLET = 'Pillai-Bartlett Trace'
+    WILKS_LIKLIEHOOD = 'Wilks Likelihood Ratio'
+    BOX_CORRECTION = 'Repeated Measures: Box Correction'
+    GEISSER_GREENHOUSE = 'Repeated Measures: Geisser-Greenhouse Correction'
+    HUYNH_FELDT = 'Repeated Measures: Huynh-Feldt Correction'
+    UNCORRECTED = 'Repeated Measure: uncorrected'
+    UNIREP = 'High Dimension low sample size- UNIREP'
+    MULTIREP = 'High Dimension low sample size - MULTIREP'
