@@ -1,5 +1,4 @@
 import numpy as np
-
 from demoappback.model.isu_factor import IsuFactor, IsuFactorType, Nature, HypothesisType
 
 

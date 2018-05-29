@@ -39,6 +39,7 @@ class IsuFactorType(Enum):
     OUTCOME = 1
     REPEATED_MEASURE = 2
     CLUSTER = 3
+    PREDICTOR = 4
 
 
 class Nature(Enum):
