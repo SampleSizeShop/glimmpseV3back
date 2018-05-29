@@ -7,6 +7,7 @@ from demoappback.model.cluster import Cluster, ClusterLevel
 from demoappback.model.enums import TargetEvent, SolveFor, Tests
 from demoappback.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
 from demoappback.model.outcome import Outcome
+from demoappback.model.power_curve import PowerCurve, ConfidenceInterval, DataSeries
 from demoappback.model.predictor import Predictor
 from demoappback.model.repeated_measure import RepeatedMeasure
 from demoappback.model.study_design import StudyDesign
@@ -49,8 +50,6 @@ class StudyDesignTestCase(unittest.TestCase):
 
     def test_load_from_json(self):
         """Should read the study design correctly from the model on model_1.json"""
-        expected = StudyDesign()
-
         outcome_1 = Outcome(name='one')
         outcome_2 = Outcome(name='teo')
         rep_meas_1 = RepeatedMeasure(name='repMeas', values=[0, 1], units='time', type='Numeric', partial_u_matrix=np.matrix([[1],[-1]]), correlation_matrix=np.matrix([[1, 0],[0, 1]]))
@@ -64,22 +63,26 @@ class StudyDesignTestCase(unittest.TestCase):
                                      OutcomeRepeatedMeasureStDev(outcome='one', repeated_measure='repMeas', values=[]),
                                      OutcomeRepeatedMeasureStDev(outcome='teo', repeated_measure='repMeas', values=[])])
         
-        sd = StudyDesign(isu_factors=isu_factors,
-                         target_event=TargetEvent.REJECTION,
-                         solve_for=SolveFor.POWER,
-                         confidence_interval_width=1,
-                         sample_size=10,
-                         selected_tests=[Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
-                         gaussian_covariate=1,
-                         scale_factor=1,
-                         variance_scale_factor=[3, 4],
-                         power_curve=None)
+        expected = StudyDesign(isu_factors=isu_factors,
+                               target_event=TargetEvent.REJECTION,
+                               solve_for=SolveFor.POWER,
+                               confidence_interval_width=1,
+                               sample_size=10,
+                               selected_tests=[Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
+                               gaussian_covariate=1,
+                               scale_factor=1,
+                               variance_scale_factor=[3, 4],
+                               power_curve=PowerCurve(confidence_interval=ConfidenceInterval(assumptions='Beta Fixed',
+                                                                                             beta_sample_size=10),
+                                                      x_axis='DesiredPower',
+                                                      data_series=[DataSeries(variance_scale_factor=3)]))
 
         json_data = open("demoappback/tests/model_1.json")
         data = json_data.read()
         json_data.close()
         actual = StudyDesign()
         actual.load_from_json(data)
+        self.maxDiff=None
         #self.assertEqual(vars(expected), vars(actual))
 
 

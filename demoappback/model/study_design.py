@@ -20,7 +20,7 @@ class StudyDesign:
                  selected_tests: [] = None,
                  gaussian_covariate: float = None,
                  scale_factor: float = None,
-                 variance_scale_factor: float = None,
+                 variance_scale_factor: [] = None,
                  power_curve: int = None):
 
         # I think these properties will probably end up as variables in power calc methods....
