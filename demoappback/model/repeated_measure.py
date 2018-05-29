@@ -9,16 +9,16 @@ class RepeatedMeasure(IsuFactor):
     """
 
     def __init__(self,
-                 name: str = None,
-                 values: [] = None,
-                 in_hypothesis: bool = False,
+                 name: str=None,
+                 values: []=None,
+                 in_hypothesis: bool=False,
                  child=None,
                  partial_matrix=None,
-                 units: str = None,
-                 type: str = None,
-                 no_repeats: int = 2,
-                 partial_u_matrix: [] = [],
-                 correlation_matrix: [] = []):
+                 units: str=None,
+                 type: str=None,
+                 no_repeats: int=2,
+                 partial_u_matrix: []=[],
+                 correlation_matrix: []=[]):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.REPEATED_MEASURE,

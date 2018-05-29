@@ -7,12 +7,12 @@ class Outcome(IsuFactor):
     """
 
     def __init__(self,
-                 name: str = None,
-                 values: [] = None,
-                 in_hypothesis: bool = False,
-                 child = None,
-                 partial_matrix = None,
-                 standard_deviation: float = 1):
+                 name: str=None,
+                 values: []=None,
+                 in_hypothesis: bool=False,
+                 child=None,
+                 partial_matrix=None,
+                 standard_deviation: float=1):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.OUTCOME,
