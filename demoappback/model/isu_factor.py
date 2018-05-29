@@ -45,3 +45,15 @@ class IsuFactorType(Enum):
 class Nature(Enum):
     WITHIN = 1
     BETWEEN = 2
+
+
+class TargetEvent(Enum):
+    REJECTION = 1
+    CI_WIDTH = 2
+    WAVR = 3
+
+
+class SolveFor(Enum):
+    POWER = 1
+    SAMPLESIZE = 2
+
