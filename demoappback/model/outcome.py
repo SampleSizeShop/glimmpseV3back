@@ -22,13 +22,3 @@ class Outcome(IsuFactor):
                          child=child,
                          partial_matrix=partial_matrix)
         self.standard_deviation = standard_deviation
-
-
-name: str = None,
-nature: str = None,
-factor_type: IsuFactorType = None,
-values: [] = None,
-in_hypothesis: bool = False,
-hypothesis_type: HypothesisType = None,
-child = None,
-partial_matrix = None
