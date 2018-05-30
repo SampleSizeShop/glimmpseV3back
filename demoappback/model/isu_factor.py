@@ -26,3 +26,19 @@ class IsuFactor(object):
         self.hypothesis_type = hypothesis_type
         self.child = child
         self.partialMatrix = partial_matrix
+
+    def from_dict(self, source):
+        if source.get('name'):
+            self.name = source['name']
+        if source.get('nature'):
+            self.nature = source['nature']
+        if source.get('valueNames'):
+            self.values = [value for value in source['valueNames']]
+        if source.get('inHypothesis'):
+            self.in_hypothesis = source['inHypothesis']
+        if source.get('isuFactorNature'):
+            self.hypothesis_type = HypothesisType(source['isuFactorNature'])
+        if source.get('child'):
+            self.child = source['child']
+        if source.get('partialMatrix'):
+            self.partial_matrix = source['partialMatrix']

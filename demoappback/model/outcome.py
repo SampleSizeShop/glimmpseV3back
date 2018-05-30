@@ -25,4 +25,9 @@ class Outcome(IsuFactor):
                          partial_matrix=partial_matrix)
         self.standard_deviation = standard_deviation
         if kwargs.get('source'):
-            pass
+            self.from_dict(kwargs['source'])
+
+    def from_dict(self, source):
+        super().from_dict(source)
+        if source.get('standardDeviation'):
+            self.standard_deviation = source['standardDeviation']

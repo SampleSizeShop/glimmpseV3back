@@ -35,4 +35,22 @@ class RepeatedMeasure(IsuFactor):
         self.correlation_matrix = np.matrix(correlation_matrix)
 
         if kwargs.get('source'):
-            pass
+            self.from_dict(kwargs['source'])
+
+    def from_dict(self, source):
+        super().from_dict(source)
+        if source.get('units'):
+            self.units = source['units']
+        if source.get('type'):
+            self.type = source['type']
+        if source.get('_noRepeats'):
+            self.no_repeats = source['_noRepeats']
+        if (source.get('partialUMatrix')
+                and source['partialUMatrix'].get('_values')
+                and source['partialUMatrix']['_values'].get('data')):
+            self.partial_u_matrix = np.matrix(source['partialUMatrix']['_values']['data'])
+        if (source.get('correlationMatrix')
+                and source['correlationMatrix'].get('_values')
+                and source['correlationMatrix']['_values'].get('data')):
+            self.correlation_matrix = np.matrix(source['correlationMatrix']['_values']['data'])
+

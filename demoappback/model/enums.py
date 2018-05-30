@@ -2,10 +2,10 @@ from enum import Enum
 
 
 class HypothesisType(Enum):
-    GLOBAL_TRENDS = 1
-    IDENTITY = 2
-    POLYNOMIAL = 3
-    USER_DEFINED = 4
+    GLOBAL_TRENDS = 'GLOBAL_TRENDS'
+    IDENTITY = 'IDENTITY'
+    POLYNOMIAL = 'POLYNOMIAL'
+    USER_DEFINED = 'USER_DEFINED'
 
 
 class IsuFactorType(Enum):
