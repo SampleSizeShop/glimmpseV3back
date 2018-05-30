@@ -1,7 +1,7 @@
 import warnings
 import functools
 
-from pyglimmpse.constants import Constants
+from demoappback.model.enums import ClType
 
 
 def check_options( function ):
@@ -17,7 +17,7 @@ def check_options( function ):
             if key == 'Option':
                 Option = value
 
-        if CL and Option and CL.cl_type == Constants.CLTYPE_NOT_DESIRED and Option.opt_noncencl:
+        if CL and Option and CL.cl_type == ClType.CLTYPE_NOT_DESIRED and Option.opt_noncencl:
             raise Exception("ERROR 83: NONCENCL is not a valid option when CL not desired.")
         return function( **kwargs )
     return check_options_wrapper
