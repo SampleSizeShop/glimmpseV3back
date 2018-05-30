@@ -118,6 +118,6 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_varianceScaleFactors'):
             study_design.variance_scale_factor = d['_varianceScaleFactors']
         if d.get('_powerCurve'):
-            study_design.power_curve = PowerCurve().from_dict(d['_powerCurve'])
+            study_design.power_curve = PowerCurve(source=d['_powerCurve'])
 
         return study_design
