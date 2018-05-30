@@ -9,10 +9,10 @@ class HypothesisType(Enum):
 
 
 class IsuFactorType(Enum):
-    OUTCOME = 1
-    REPEATED_MEASURE = 2
-    CLUSTER = 3
-    PREDICTOR = 4
+    OUTCOME = 'Outcome'
+    REPEATED_MEASURE = 'Repeated Measure'
+    CLUSTER = 'Cluster'
+    PREDICTOR = 'Between ISU Predictor'
 
 
 class Nature(Enum):

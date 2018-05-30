@@ -18,7 +18,8 @@ class RepeatedMeasure(IsuFactor):
                  type: str=None,
                  no_repeats: int=2,
                  partial_u_matrix: []=[],
-                 correlation_matrix: []=[]):
+                 correlation_matrix: []=[],
+                 **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.REPEATED_MEASURE,
@@ -32,3 +33,6 @@ class RepeatedMeasure(IsuFactor):
         self.no_repeats = no_repeats
         self.partial_u_matrix = np.matrix(partial_u_matrix)
         self.correlation_matrix = np.matrix(correlation_matrix)
+
+        if kwargs.get('source'):
+            pass

@@ -12,7 +12,8 @@ class Predictor(IsuFactor):
                  values: []=None,
                  in_hypothesis: bool=False,
                  child=None,
-                 partial_matrix=None):
+                 partial_matrix=None,
+                 **kwargs):
         super().__init__(name=name,
                          nature=Nature.BETWEEN,
                          factor_type=IsuFactorType.PREDICTOR,
@@ -21,3 +22,6 @@ class Predictor(IsuFactor):
                          hypothesis_type=HypothesisType.GLOBAL_TRENDS,
                          child=child,
                          partial_matrix=partial_matrix)
+
+        if kwargs.get('source'):
+            pass

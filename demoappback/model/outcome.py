@@ -13,7 +13,8 @@ class Outcome(IsuFactor):
                  in_hypothesis: bool=False,
                  child=None,
                  partial_matrix=None,
-                 standard_deviation: float=1):
+                 standard_deviation: float=1,
+                 **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.OUTCOME,
@@ -23,3 +24,5 @@ class Outcome(IsuFactor):
                          child=child,
                          partial_matrix=partial_matrix)
         self.standard_deviation = standard_deviation
+        if kwargs.get('source'):
+            pass

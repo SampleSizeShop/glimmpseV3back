@@ -69,7 +69,7 @@ class StudyDesignTestCase(unittest.TestCase):
                                confidence_interval_width=1,
                                sample_size=10,
                                selected_tests=[Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
-                               gaussian_covariate=1,
+                               gaussian_covariate={'variance': 1},
                                scale_factor=1,
                                variance_scale_factor=[3, 4],
                                power_curve=PowerCurve(confidence_interval=ConfidenceInterval(assumptions='Beta Fixed',
@@ -80,8 +80,7 @@ class StudyDesignTestCase(unittest.TestCase):
         json_data = open("demoappback/tests/model_1.json")
         data = json_data.read()
         json_data.close()
-        actual = StudyDesign()
-        actual.load_from_json(data)
+        actual = StudyDesign().load_from_json(data)
         self.maxDiff=None
         #self.assertEqual(vars(expected), vars(actual))
 

@@ -43,3 +43,6 @@ class PowerCurve(object):
         self.confidence_interval = confidence_interval
         self.x_axis = x_axis
         self.data_series = data_series
+
+    def from_dict(self, source):
+        return PowerCurve()

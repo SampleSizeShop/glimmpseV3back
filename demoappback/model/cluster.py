@@ -27,7 +27,8 @@ class Cluster(IsuFactor):
                  in_hypothesis: bool=False,
                  child=None,
                  partial_matrix=None,
-                 levels: [] = None):
+                 levels: [] = None,
+                 **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
                          factor_type=IsuFactorType.CLUSTER,
@@ -37,3 +38,6 @@ class Cluster(IsuFactor):
                          child=child,
                          partial_matrix=partial_matrix)
         self.levels = levels
+
+        if kwargs.get('source'):
+            pass
