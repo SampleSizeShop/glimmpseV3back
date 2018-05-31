@@ -65,6 +65,18 @@ class StudyDesign:
         self.sigma = 0
         self.theta_zero = 0
 
+    def __eq__(self, other):
+        comp = []
+        for key in self.__dict__:
+            if key not in other.__dict__:
+                comp.append(False)
+            elif key == 'isu_factors':
+                comp.append(self.isu_factors.__eq__(other.isu_factors))
+            elif key == 'power_curve':
+                comp.append(True)
+            else:
+                comp.append(self.__dict__[key] == other.__dict__[key])
+        return False not in comp
 
     @check_options
     @repn_positive

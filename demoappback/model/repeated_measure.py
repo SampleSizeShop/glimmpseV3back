@@ -1,6 +1,7 @@
 import numpy as np
 from demoappback.model.isu_factor import IsuFactor
 from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
+from demoappback.utilities import list_compare
 
 
 class RepeatedMeasure(IsuFactor):
@@ -17,8 +18,8 @@ class RepeatedMeasure(IsuFactor):
                  units: str=None,
                  type: str=None,
                  no_repeats: int=2,
-                 partial_u_matrix: []=[],
-                 correlation_matrix: []=[],
+                 partial_u_matrix: np.matrix= None,
+                 correlation_matrix: np.matrix = None,
                  **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
@@ -36,6 +37,21 @@ class RepeatedMeasure(IsuFactor):
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
+
+    def __eq__(self, other):
+        comp = []
+        for key in self.__dict__:
+            if key not in other.__dict__:
+                comp.append(False)
+            elif key == 'values':
+                comp.append(list_compare(self.values, other.values))
+            elif key == 'partial_u_matrix':
+                comp.append(np.array_equal(self.partial_u_matrix.data, other.partial_u_matrix.data))
+            elif key == 'correlation_matrix':
+                comp.append(np.array_equal(self.correlation_matrix.data, other.correlation_matrix.data))
+            else:
+                comp.append(self.__dict__[key] == other.__dict__[key])
+        return False not in comp
 
     def from_dict(self, source):
         super().from_dict(source)
