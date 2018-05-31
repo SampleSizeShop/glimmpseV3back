@@ -16,19 +16,19 @@ class IsuFactorType(Enum):
 
 
 class Nature(Enum):
-    WITHIN = 1
-    BETWEEN = 2
+    WITHIN = 'Within'
+    BETWEEN = 'Between'
 
 
 class TargetEvent(Enum):
-    REJECTION = 1
-    CI_WIDTH = 2
-    WAVR = 3
+    REJECTION = 'REJECTION'
+    CI_WIDTH = 'CI_WIDTH'
+    WAVR = 'WAVR'
 
 
 class SolveFor(Enum):
-    POWER = 1
-    SAMPLESIZE = 2
+    POWER = 'POWER'
+    SAMPLESIZE = 'SAMPLESIZE'
 
 class ClType(Enum):
     CLTYPE_DESIRED = 1

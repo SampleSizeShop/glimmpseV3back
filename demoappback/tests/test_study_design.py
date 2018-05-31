@@ -65,6 +65,7 @@ class StudyDesignTestCase(unittest.TestCase):
         
         expected = StudyDesign(isu_factors=isu_factors,
                                target_event=TargetEvent.REJECTION,
+                               target_power=0.5,
                                solve_for=SolveFor.POWER,
                                confidence_interval_width=1,
                                sample_size=10,
@@ -81,8 +82,6 @@ class StudyDesignTestCase(unittest.TestCase):
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)
-        self.maxDiff=None
-        c = actual == expected
         self.assertEqual(expected, actual)
 
 
