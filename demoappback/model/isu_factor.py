@@ -27,6 +27,9 @@ class IsuFactor(object):
         self.child = child
         self.partialMatrix = partial_matrix
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def from_dict(self, source):
         if source.get('name'):
             self.name = source['name']

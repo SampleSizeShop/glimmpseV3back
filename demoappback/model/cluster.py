@@ -1,5 +1,6 @@
 from demoappback.model.isu_factor import IsuFactor
 from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
+from demoappback.utilities import list_compare
 
 
 class ClusterLevel(object):
@@ -18,6 +19,9 @@ class ClusterLevel(object):
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
 
     def from_dict(self, source):
         if source.get('levelName'):
@@ -52,6 +56,17 @@ class Cluster(IsuFactor):
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
+
+    def __eq__(self, other):
+        comp = []
+        for key in self.__dict__:
+            if key not in other.__dict__:
+                comp.append(False)
+            elif key == 'levels':
+                comp.append(list_compare(self.levels, other.levels))
+            else:
+                comp.append(self.__dict__[key] == other.__dict__[key])
+        return False not in comp
 
     def from_dict(self, source):
         super().from_dict(source)

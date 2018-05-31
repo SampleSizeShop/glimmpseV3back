@@ -82,7 +82,8 @@ class StudyDesignTestCase(unittest.TestCase):
         json_data.close()
         actual = StudyDesign().load_from_json(data)
         self.maxDiff=None
-        #self.assertEqual(vars(expected), vars(actual))
+        c = actual == expected
+        self.assertEqual(expected, actual)
 
 
 if __name__ == '__main__':
