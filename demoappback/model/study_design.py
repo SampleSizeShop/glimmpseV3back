@@ -1,7 +1,7 @@
 import json
 from json import JSONDecoder
 
-from demoappback.model.enums import TargetEvent, SolveFor
+from demoappback.model.enums import TargetEvent, SolveFor, Tests
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.power_curve import PowerCurve
 from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
@@ -110,9 +110,9 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_isuFactors'):
             study_design.isu_factors = IsuFactors(source=d['_isuFactors'])
         if d.get('_targetEvent'):
-            study_design.target_event = d['_targetEvent']
+            study_design.target_event = TargetEvent(d['_targetEvent'])
         if d.get('_solveFor'):
-            study_design.solve_for = d['_solveFor']
+            study_design.solve_for = SolveFor(d['_solveFor'])
         if d.get('_typeOneErrorRate'):
             study_design.alpha = d['_typeOneErrorRate']
         if d.get('_power'):
@@ -122,7 +122,7 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_selectedTests'):
-            study_design.selected_tests = d['_selectedTests']
+            study_design.selected_tests = [Tests(t) for t in d['_selectedTests']]
         if d.get('_gaussianCovariate'):
             study_design.gaussian_covariate = d['_gaussianCovariate']
         if d.get('_scaleFactor'):

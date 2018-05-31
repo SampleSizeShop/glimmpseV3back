@@ -1,4 +1,4 @@
-from demoappback.model.enums import HypothesisType, IsuFactorType
+from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
 
 
 class IsuFactor(object):
@@ -34,7 +34,7 @@ class IsuFactor(object):
         if source.get('name'):
             self.name = source['name']
         if source.get('nature'):
-            self.nature = source['nature']
+            self.nature = Nature(source['nature'])
         if source.get('valueNames'):
             self.values = [value for value in source['valueNames']]
         if source.get('inHypothesis'):

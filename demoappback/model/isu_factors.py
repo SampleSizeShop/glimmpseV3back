@@ -24,7 +24,15 @@ class OutcomeRepeatedMeasureStDev(object):
             self.from_dict(kwargs['source'])
 
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+        comp = []
+        for key in self.__dict__:
+            if key not in other.__dict__:
+                comp.append(False)
+            elif key == 'values':
+                comp.append(self.values.__eq__(other.values))
+            else:
+                comp.append(self.__dict__[key] == other.__dict__[key])
+        return False not in comp
 
     def from_dict(self, source):
         if source['outcome']:
@@ -68,6 +76,8 @@ class IsuFactors(object):
                 comp.append(False)
             if key == 'variables':
                 comp.append(list_compare(self.variables, other.variables))
+            elif key == 'outcome_correlation_matrix':
+                comp.append(np.array_equal(self.outcome_correlation_matrix.data, other.outcome_correlation_matrix.data))
             else:
                 comp.append(self.__dict__[key] == other.__dict__[key])
         return False not in comp
