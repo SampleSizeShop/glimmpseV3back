@@ -110,3 +110,9 @@ class IsuFactors(object):
         if source.get('outcomeRepeatedMeasureStDevs'):
             self.outcome_repeated_measure_st_devs = \
                 [OutcomeRepeatedMeasureStDev(source=stdev) for stdev in source['outcomeRepeatedMeasureStDevs']]
+
+    def get_hypothesis(self):
+        return [f for f in self.variables if f.in_hypothesis]
+
+    def get_predictors(self):
+        return [f for f in self.variables if type(f) == Predictor]

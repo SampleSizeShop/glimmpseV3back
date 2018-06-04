@@ -1,7 +1,7 @@
 import json
 from json import JSONDecoder
 
-from demoappback.model.enums import TargetEvent, SolveFor, Tests
+from demoappback.model.enums import TargetEvent, SolveFor, Tests, Nature
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.power_curve import PowerCurve
 from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
@@ -57,14 +57,6 @@ class StudyDesign:
         self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
 
-        # calculated
-        self.essencex = None
-        self.beta = None
-        self.c_matrix = None
-        self.u_matrix = None
-        self.sigma = 0
-        self.theta_zero = 0
-
     def __eq__(self, other):
         comp = []
         for key in self.__dict__:
@@ -101,6 +93,11 @@ class StudyDesign:
 
     def load_from_json(self, json_str: str):
         return json.loads(json_str, cls=StudyDesignDecoder)
+
+    def calculate_c_matrix(self):
+        """Calculate the C Matrix from the hypothesis"""
+        partials = [p for p in self.isu_factors.get_hypothesis() if p.nature == Nature.BETWEEN]
+        averages = [p for p in self.isu_factors.variables if p.nature == Nature.BETWEEN and not p.in_hypothesis]
 
 
 class StudyDesignDecoder(JSONDecoder):
