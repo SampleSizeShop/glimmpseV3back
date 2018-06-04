@@ -116,3 +116,9 @@ class IsuFactors(object):
 
     def get_predictors(self):
         return [f for f in self.variables if type(f) == Predictor]
+
+    def get_repeated_measures(self):
+        return [f for f in self.variables if type(f) == RepeatedMeasure]
+
+    def get_repeated_measures(self):
+        return [f for f in self.variables if type(f) == Outcome]
