@@ -45,3 +45,21 @@ class Tests(Enum):
     UNCORRECTED = 'Repeated Measure: uncorrected'
     UNIREP = 'High Dimension low sample size- UNIREP'
     MULTIREP = 'High Dimension low sample size - MULTIREP'
+
+
+class PolynomialMatrices(Enum):
+    LINEAR_POLYNOMIAL_CMATRIX = [-1, 1]
+    QUADRATIC_POLYNOMIAL_CMATRIX = [[-1, 0, 1],
+                                   [1, -2, 1]]
+    CUBIC_POLYNOMIAL_CMATRIX = [[-3, -1, 1, 3],
+                                [1, -1, -1, 1],
+                                [-1, 3, -3, 1]]
+    QUINTIC_POLYNOMIAL_CMATRIX = [[-2, -1, 0, 1, 2],
+                                  [2, -1, -2, -1, 2],
+                                  [-1, 2, 0, -2, 1],
+                                  [1, -4, 6, -4, 1]]
+    SEXTIC_POLYNOMIAL_CMATRIX = [[-5, -3, -1, 1, 3, 5],
+                                 [5, -1, -4, -4, -1, 5],
+                                 [-5, 7, 4, -4, -7, 5],
+                                 [1, -3, 2, 2, -3, 1],
+                                 [-1, 5, -10, 10, -5, 1]]
