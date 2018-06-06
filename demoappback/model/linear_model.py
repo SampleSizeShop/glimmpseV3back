@@ -1,8 +1,10 @@
 import warnings
 
 import numpy as np
+import pyglimmpse as pg
 
 from demoappback.model.enums import PolynomialMatrices, HypothesisType
+from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.study_design import StudyDesign
 from demoappback.utilities import kronecker_list
 
@@ -54,6 +56,7 @@ class LinearModel(object):
         self.beta = study_design.isu_factors.marginal_means
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
+        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = 0
         self.alpha = study_design.alpha
 
@@ -130,5 +133,21 @@ class LinearModel(object):
     @staticmethod
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
+
+    def calculate_sigma_star(self, isu_factors: IsuFactors):
+        outcome_component = self.calculate_outcome_sigma_star(isu_factors)
+        repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors.get_repeated_measures())
+        cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters())
+        return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+
+    def calculate_outcome_sigma_star(self, isu_factors):
+        return (isu_factors.outcome_correlation_matrix *
+                np.matrix([o.standard_deviation for o in isu_factors.get_outcomes()]))
+
+    def calculate_rep_measure_sigma_star(self, repeated_measures):
+        return kronecker_list([m.correlation_matrix for m in repeated_measures])
+
+    def calculate_cluster_sigma_star(self, cluster):
+        return len(cluster.levels)
 
 
