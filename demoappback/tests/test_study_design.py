@@ -2,10 +2,13 @@ import unittest
 import numpy as np
 import os
 import json
+from pyglimmpse import unirep
+
 
 from demoappback.model.cluster import Cluster, ClusterLevel
 from demoappback.model.enums import TargetEvent, SolveFor, Tests
 from demoappback.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
+from demoappback.model.linear_model import LinearModel
 from demoappback.model.outcome import Outcome
 from demoappback.model.power_curve import PowerCurve, ConfidenceInterval, DataSeries
 from demoappback.model.predictor import Predictor
@@ -82,6 +85,10 @@ class StudyDesignTestCase(unittest.TestCase):
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)
+        model = LinearModel()
+        model.from_study_design(actual)
+        power = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,rank_U=np.rank(model.u_matrix), total_N=20, rank_X=np.rank(model.essence_design_matrix))
+
         self.assertEqual(expected, actual)
 
 

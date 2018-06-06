@@ -54,7 +54,7 @@ class LinearModel(object):
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors.get_predictors())
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
         self.beta = study_design.isu_factors.marginal_means
-        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
+        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = 0
@@ -77,7 +77,7 @@ class LinearModel(object):
     def calculate_u_matrix(isu_factors):
         u_outcomes = np.identity(len(isu_factors.get_outcomes()))
         u_cluster = 1
-        u_repeated_measures = kronecker_list([r.partia_u_matrix for r in isu_factors.get_repeated_measures()])
+        u_repeated_measures = kronecker_list([r.partial_u_matrix for r in isu_factors.get_repeated_measures()])
 
         u_matrix = kronecker_list([u_outcomes, u_cluster, u_repeated_measures])
         return u_matrix
@@ -142,12 +142,12 @@ class LinearModel(object):
 
     def calculate_outcome_sigma_star(self, isu_factors):
         return (isu_factors.outcome_correlation_matrix *
-                np.matrix([o.standard_deviation for o in isu_factors.get_outcomes()]))
+                np.matrix([[o.standard_deviation] for o in isu_factors.get_outcomes()]))
 
     def calculate_rep_measure_sigma_star(self, repeated_measures):
         return kronecker_list([m.correlation_matrix for m in repeated_measures])
 
     def calculate_cluster_sigma_star(self, cluster):
-        return len(cluster.levels)
+        return len(cluster[0].levels)
 
 
