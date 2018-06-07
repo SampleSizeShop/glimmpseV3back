@@ -1,7 +1,5 @@
 import unittest
 import numpy as np
-import os
-import json
 from pyglimmpse import unirep
 
 
@@ -63,8 +61,8 @@ class StudyDesignTestCase(unittest.TestCase):
                                  smallest_group_size=2,
                                  outcome_correlation_matrix=np.matrix([[1, 0], [0, 1]]),
                                  outcome_repeated_measure_st_devs=[
-                                     OutcomeRepeatedMeasureStDev(outcome='one', repeated_measure='repMeas', values=[]),
-                                     OutcomeRepeatedMeasureStDev(outcome='teo', repeated_measure='repMeas', values=[])])
+                                     OutcomeRepeatedMeasureStDev(outcome='one', repeated_measure='repMeas', values=[2, 3]),
+                                     OutcomeRepeatedMeasureStDev(outcome='teo', repeated_measure='repMeas', values=[4, 5])])
         
         expected = StudyDesign(isu_factors=isu_factors,
                                target_event=TargetEvent.REJECTION,
@@ -87,7 +85,10 @@ class StudyDesignTestCase(unittest.TestCase):
         actual = StudyDesign().load_from_json(data)
         model = LinearModel()
         model.from_study_design(actual)
-        power = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,rank_U=np.rank(model.u_matrix), total_N=20, rank_X=np.rank(model.essence_design_matrix))
+        power = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
+                                                      rank_U=np.rank(model.u_matrix),
+                                                      total_N=20,
+                                                      rank_X=np.rank(model.essence_design_matrix))
 
         self.assertEqual(expected, actual)
 

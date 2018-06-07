@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import pyglimmpse as pg
 
+
 from demoappback.model.enums import PolynomialMatrices, HypothesisType
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.study_design import StudyDesign
@@ -136,18 +137,42 @@ class LinearModel(object):
 
     def calculate_sigma_star(self, isu_factors: IsuFactors):
         outcome_component = self.calculate_outcome_sigma_star(isu_factors)
-        repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors.get_repeated_measures())
-        cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters())
+        repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+        cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
         return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
 
     def calculate_outcome_sigma_star(self, isu_factors):
-        return (isu_factors.outcome_correlation_matrix *
-                np.matrix([[o.standard_deviation] for o in isu_factors.get_outcomes()]))
+        outcomes = isu_factors.get_outcomes()
+        standard_deviations = np.identity(len(outcomes))*[o.standard_deviation for o in outcomes]
+        sigma_star_outcomes = standard_deviations * isu_factors.outcome_correlation_matrix * standard_deviations
+        return sigma_star_outcomes
 
-    def calculate_rep_measure_sigma_star(self, repeated_measures):
-        return kronecker_list([m.correlation_matrix for m in repeated_measures])
+    def calculate_rep_measure_sigma_star(self, isu_factors):
+        outcomes = isu_factors.get_outcomes()
+        repeated_measures = isu_factors.get_repeated_measures()
+        st_devs = isu_factors.outcome_repeated_measure_st_devs
+        sigma_star_rep_measure_components = [
+            self.calculate_rep_measure_component(measure.correlation_matrix, st_dev.values)
+            for measure in repeated_measures for st_dev in st_devs for outcome in outcomes
+            if st_dev.repeated_measure == measure.name and st_dev.outcome == outcome.name
+        ]
+        sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
+        return sigma_star_rep_measures
+
+    def calculate_rep_measure_component(self, correlation_matrix, st_devs):
+        st = np.identity(len(st_devs))*st_devs
+        return st * correlation_matrix * st
 
     def calculate_cluster_sigma_star(self, cluster):
-        return len(cluster[0].levels)
+        components = [
+            (1 + (level.no_elements - 1) * level.intra_class_correlation)/level.no_elements
+            for level in cluster.levels
+        ]
+        cluster_sigma_star = 1
+        for c in components:
+            cluster_sigma_star = cluster_sigma_star * c
+        return cluster_sigma_star
+
+
 
 

@@ -16,7 +16,7 @@ class OutcomeRepeatedMeasureStDev(object):
                  repeated_measure: str=None,
                  values: []=None,
                  **kwargs):
-        self.outome = outcome
+        self.outcome = outcome
         self.repeated_measure = repeated_measure
         self.values = values
 
@@ -36,7 +36,7 @@ class OutcomeRepeatedMeasureStDev(object):
 
     def from_dict(self, source):
         if source['outcome']:
-            self.outome = source['outcome']
+            self.outcome = source['outcome']
         if source['repMeasure']:
             self.repeated_measure = source['repMeasure']
         if source['values']:
