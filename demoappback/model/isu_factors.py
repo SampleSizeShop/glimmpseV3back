@@ -100,7 +100,7 @@ class IsuFactors(object):
         if source.get('betweenIsuRelativeGroupSizes'):
             self.between_isu_relative_group_sizes = source['betweenIsuRelativeGroupSizes']
         if source.get('marginalMeans'):
-            self.marginal_means = source['marginalMeans']
+            self.marginal_means = np.matrix(source['marginalMeans'])
         if source.get('smallestGroupSize'):
             self.smallest_group_size = source['smallestGroupSize']
         if (source.get('outcomeCorrelationMatrix')

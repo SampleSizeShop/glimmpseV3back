@@ -16,12 +16,13 @@ class LinearModel(object):
     def __init__(self,
                  essence_design_matrix: np.matrix = None,
                  repeated_rows_in_design_matrix: float = None,
-                 beta: np.matrix = None,
+                 hypothesis_beta: np.matrix = None,
                  c_matrix: np.matrix = None,
                  u_matrix: np.matrix = None,
                  sigma_star: np.matrix = None,
                  theta_zero: np.matrix = None,
                  alpha: float = None,
+                 total_n: float = None,
                  **kwargs):
         """
         Parameters
@@ -41,12 +42,19 @@ class LinearModel(object):
         """
         self.essence_design_matrix = essence_design_matrix
         self.repeated_rows_in_design_matrix = repeated_rows_in_design_matrix
-        self.beta = beta
+        self.hypothesis_beta = hypothesis_beta
         self.c_matrix = c_matrix
         self.u_matrix = u_matrix
         self.sigma_star = sigma_star
         self.theta_zero = theta_zero
         self.alpha = alpha
+        self.total_n = total_n
+        self.theta = None
+        self.m = None
+        self.error_sum_square = None
+        self.hypothesis_sum_square = None
+        self.nu_e = None
+        self.calc_metadata()
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -54,12 +62,23 @@ class LinearModel(object):
     def from_study_design(self, study_design: StudyDesign):
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors.get_predictors())
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
-        self.beta = study_design.isu_factors.marginal_means
+        self.hypothesis_beta = study_design.isu_factors.marginal_means
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = 0
         self.alpha = study_design.alpha
+        self.total_n = study_design.sample_size
+        self.calc_metadata()
+
+    def calc_metadata(self):
+        self.theta = self.calc_theta()
+        self.m = self.calc_m()
+        self.nu_e = self.calc_nu_e()
+        self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
+        self.error_sum_square = self.calc_error_sum_square()
+
+
 
     @staticmethod
     def calculate_design_matrix(predictors):
@@ -172,6 +191,34 @@ class LinearModel(object):
         for c in components:
             cluster_sigma_star = cluster_sigma_star * c
         return cluster_sigma_star
+
+    def calc_theta(self):
+        if self.c_matrix is None or self.hypothesis_beta is None or self.u_matrix is None:
+            return None
+        return self.c_matrix*self.hypothesis_beta*self.u_matrix
+
+    def calc_m(self):
+        if self.c_matrix is None or self.essence_design_matrix is None:
+            return None
+        return (self.c_matrix *
+                np.linalg.inv((np.transpose(self.essence_design_matrix)*self.essence_design_matrix))
+                * np.transpose(self.c_matrix))
+
+    def calc_nu_e(self):
+        if self.total_n is None or self.essence_design_matrix is None:
+            return None
+        return self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
+
+    def calc_error_sum_square(self):
+        if self.nu_e is None or self.sigma_star is None:
+            return None
+        return self.nu_e * self.sigma_star
+
+    def calc_hypothesis_sum_square(self):
+        if self.theta is None or self.theta_zero is None or self.m is None:
+            return None
+        t = (self.theta - self.theta_zero)
+        return np.transpose(t) * np.linalg.inv(self.m) * t
 
 
 
