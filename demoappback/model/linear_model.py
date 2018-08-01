@@ -62,7 +62,7 @@ class LinearModel(object):
     def from_study_design(self, study_design: StudyDesign):
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors.get_predictors())
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
-        self.hypothesis_beta = study_design.isu_factors.marginal_means
+        self.hypothesis_beta = self.get_beta(study_design.isu_factors)#study_design.isu_factors.marginal_means
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
@@ -78,7 +78,19 @@ class LinearModel(object):
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
 
+    def get_beta(self, isu_factors):
+        components = [self.get_combination_table_matrix(t) for t in isu_factors.marginal_means]
+        beta = np.concatenate(tuple(components), axis = 1)
+        return beta
 
+    def get_combination_table_matrix(self, table):
+        rows = [row for row in table.get('_table')]
+        t = [self._get_row_values(row) for row in rows]
+        m = np.matrix(t)
+        return m
+
+    def _get_row_values(self, row):
+        return [col.get('value') for col in row ]
 
     @staticmethod
     def calculate_design_matrix(predictors):
@@ -97,7 +109,9 @@ class LinearModel(object):
     def calculate_u_matrix(isu_factors):
         u_outcomes = np.identity(len(isu_factors.get_outcomes()))
         u_cluster = 1
-        u_repeated_measures = kronecker_list([r.partial_u_matrix for r in isu_factors.get_repeated_measures()])
+        u_repeated_measures = np.matrix([[1]])
+        if len(isu_factors.get_repeated_measures()) > 0:
+            u_repeated_measures = kronecker_list([r.partial_u_matrix for r in isu_factors.get_repeated_measures()])
 
         u_matrix = kronecker_list([u_outcomes, u_cluster, u_repeated_measures])
         return u_matrix
@@ -105,13 +119,13 @@ class LinearModel(object):
     def calculate_partial_c_matrix(self, predictor):
         partial = None
         if predictor.in_hypothesis:
-            if predictor.isu_factor_nature == HypothesisType.GLOBAL_TRENDS:
+            if predictor.hypothesis_type == HypothesisType.GLOBAL_TRENDS:
                 partial = self.calculate_main_effect_partial_c_matrix(predictor)
-            if predictor.isu_factor_nature == HypothesisType.IDENTITY:
+            if predictor.hypothesis_type == HypothesisType.IDENTITY:
                 partial = self.calculate_identity_partial_c_matrix(predictor)
-            if predictor.isu_factor_nature == HypothesisType.POLYNOMIAL:
+            if predictor.hypothesis_type == HypothesisType.POLYNOMIAL:
                 partial = self.calculate_polynomial_partial_c_matrix(predictor)
-            if predictor.isu_factor_nature == HypothesisType.USER_DEFINED:
+            if predictor.hypothesis_type == HypothesisType.USER_DEFINED:
                 partial = predictor.partial_matrix
         else:
             partial = self.calculate_average_partial_c_matrix(predictor)
@@ -126,8 +140,8 @@ class LinearModel(object):
     @staticmethod
     def calculate_main_effect_partial_c_matrix(predictor):
         i = np.identity(len(predictor.values))
-        v = np.ones(len(predictor.values))
-        main_effect = np.concatenate(v, i, axis=0)
+        v = np.matrix([np.ones(len(predictor.values))])
+        main_effect = np.concatenate((v, i), axis=0)
         return main_effect
 
     @staticmethod
@@ -156,8 +170,14 @@ class LinearModel(object):
 
     def calculate_sigma_star(self, isu_factors: IsuFactors):
         outcome_component = self.calculate_outcome_sigma_star(isu_factors)
-        repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
-        cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+        if len(isu_factors.get_repeated_measures()) > 0:
+            repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+        else:
+            repeated_measure_component = np.matrix([[1]])
+        if len(isu_factors.get_clusters()) > 0:
+            cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+        else:
+            cluster_component = np.matrix([[1]])
         return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
 
     def calculate_outcome_sigma_star(self, isu_factors):
