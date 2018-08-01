@@ -79,7 +79,7 @@ class StudyDesignTestCase(unittest.TestCase):
                                                       x_axis='DesiredPower',
                                                       data_series=[DataSeries(variance_scale_factor=3)]))
 
-        json_data = open("model_2.json")
+        json_data = open("demoappback/tests/model_2.json")
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)
