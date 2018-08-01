@@ -62,14 +62,25 @@ class LinearModel(object):
     def from_study_design(self, study_design: StudyDesign):
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors.get_predictors())
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
-        self.hypothesis_beta = self.get_beta(study_design.isu_factors)#study_design.isu_factors.marginal_means
+        self.hypothesis_beta = self.get_beta(study_design.isu_factors)
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = 0
         self.alpha = study_design.alpha
-        self.total_n = study_design.sample_size
+        self.total_n = self.calculate_total_n(study_design.isu_factors);
         self.calc_metadata()
+
+    def calculate_total_n(self, isu_factors):
+        smallest_group = isu_factors.smallest_group_size
+        groups = self.get_groups(isu_factors)
+        total_n = sum([smallest_group * g for g in groups])
+        return total_n
+
+    def get_groups(self, isu_factors):
+        tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
+        groups = [c.get('value') for t in tables for r in t for c in r]
+        return groups
 
     def calc_metadata(self):
         self.theta = self.calc_theta()

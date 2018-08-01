@@ -114,8 +114,6 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.alpha = d['_typeOneErrorRate']
         if d.get('_power'):
             study_design.target_power = d['_power']
-        if d.get('_samplesize'):
-            study_design.sample_size = d['_samplesize']
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_selectedTests'):
