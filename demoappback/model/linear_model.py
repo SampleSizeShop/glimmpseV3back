@@ -1,4 +1,6 @@
+import json
 import warnings
+from json import JSONEncoder
 
 import numpy as np
 import pyglimmpse as pg
@@ -251,6 +253,31 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return np.transpose(t) * np.linalg.inv(self.m) * t
 
+    def serialize(self):
+        return json.dumps(self, cls=LinearModelEncoder)
 
-
-
+class LinearModelEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, LinearModel):
+            return {'essence_design_matrix':self.serialise_matrix(obj.essence_design_matrix),
+                    'repeated_rows_in_design_matrix':obj.repeated_rows_in_design_matrix,
+                    'hypothesis_beta':self.serialise_matrix(obj.hypothesis_beta),
+                    'c_matrix':self.serialise_matrix(obj.c_matrix),
+                    'u_matrix':self.serialise_matrix(obj.u_matrix),
+                    'sigma_star':self.serialise_matrix(obj.sigma_star),
+                    'theta_zero':self.serialise_matrix(obj.theta_zero),
+                    'alpha':obj.alpha,
+                    'total_n':obj.total_n,
+                    'theta':self.serialise_matrix(obj.theta),
+                    'm':self.serialise_matrix(obj.m),
+                    'nu_e':obj.nu_e,
+                    'hypothesis_sum_square':obj.hypothesis_sum_square,
+                    'error_sum_square':obj.error_sum_square}
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
+    
+    def serialise_matrix(self, m):
+        if isinstance(m, np.matrix):
+            return m.tolist()
+        else:
+            return None

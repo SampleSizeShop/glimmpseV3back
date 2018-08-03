@@ -46,7 +46,7 @@ def calculate():
     model.from_study_design(actual)
     power = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,rank_U=np.linalg.matrix_rank(model.u_matrix),total_N=model.total_n,rank_X=np.linalg.matrix_rank(model.essence_design_matrix))
     print(power)
-    json_response = json.dumps({'message': 'OK', 'status': '200', 'mimetype': 'application/json'})
+    json_response = json.dumps({'message': 'OK', 'status': '200', 'mimetype': 'application/json', 'power': power, 'model': model.serialize()})
     return json_response
 
 @app.route('/')
