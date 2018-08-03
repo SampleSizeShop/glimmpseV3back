@@ -254,10 +254,10 @@ class LinearModel(object):
         return np.transpose(t) * np.linalg.inv(self.m) * t
 
     def to_dict(self):
-        essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
+        ret = dict(essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
         repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
         hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
-        c_matrix = utilities.serialise_matrix(self.c_matrix),
+        c_matrix = utilities.serialise_matrix(self.c_matrix)[0],
         u_matrix = utilities.serialise_matrix(self.u_matrix),
         sigma_star = utilities.serialise_matrix(self.sigma_star),
         theta_zero = utilities.serialise_matrix(self.theta_zero),
@@ -267,23 +267,8 @@ class LinearModel(object):
         m = utilities.serialise_matrix(self.m),
         nu_e = self.nu_e,
         hypothesis_sum_square = self.hypothesis_sum_square,
-        error_sum_square = self.error_sum_square
-        return dict(
-            essence_design_matrix= essence_design_matrix,
-            repeated_rows_in_design_matrix=repeated_rows_in_design_matrix,
-            hypothesis_beta=hypothesis_beta,
-            c_matrix=c_matrix,
-            u_matrix=u_matrix,
-            sigma_star=sigma_star,
-            theta_zero=theta_zero,
-            alpha=alpha,
-            total_n= total_n,
-            theta=theta,
-            m=m,
-            nu_e=nu_e,
-            hypothesis_sum_square=hypothesis_sum_square,
-            error_sum_square=error_sum_square
-        )
+        error_sum_square = self.error_sum_square)
+        return ret
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)

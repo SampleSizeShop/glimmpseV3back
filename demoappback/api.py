@@ -40,7 +40,6 @@ def client_side_log():
 def calculate():
     """Calculate power/samplesize from a study design"""
     data = request.data
-    print(data)
     actual = StudyDesign().load_from_json(data)
     model = LinearModel()
     model.from_study_design(actual)

@@ -17,6 +17,7 @@ def kronecker_list(l: []):
 
 def serialise_matrix(m):
     if isinstance(m, np.matrix):
-        return m.tolist()
+        ret = m.tolist()
+        return ret
     else:
         return None
