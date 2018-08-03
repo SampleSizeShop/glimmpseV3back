@@ -4,7 +4,7 @@ from json import JSONEncoder
 
 import numpy as np
 import pyglimmpse as pg
-
+from demoappback import utilities
 
 from demoappback.model.enums import PolynomialMatrices, HypothesisType
 from demoappback.model.isu_factors import IsuFactors
@@ -253,31 +253,44 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return np.transpose(t) * np.linalg.inv(self.m) * t
 
+    def to_dict(self):
+        essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
+        repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
+        hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
+        c_matrix = utilities.serialise_matrix(self.c_matrix),
+        u_matrix = utilities.serialise_matrix(self.u_matrix),
+        sigma_star = utilities.serialise_matrix(self.sigma_star),
+        theta_zero = utilities.serialise_matrix(self.theta_zero),
+        alpha = self.alpha,
+        total_n = self.total_n,
+        theta = utilities.serialise_matrix(self.theta),
+        m = utilities.serialise_matrix(self.m),
+        nu_e = self.nu_e,
+        hypothesis_sum_square = self.hypothesis_sum_square,
+        error_sum_square = self.error_sum_square
+        return dict(
+            essence_design_matrix= essence_design_matrix,
+            repeated_rows_in_design_matrix=repeated_rows_in_design_matrix,
+            hypothesis_beta=hypothesis_beta,
+            c_matrix=c_matrix,
+            u_matrix=u_matrix,
+            sigma_star=sigma_star,
+            theta_zero=theta_zero,
+            alpha=alpha,
+            total_n= total_n,
+            theta=theta,
+            m=m,
+            nu_e=nu_e,
+            hypothesis_sum_square=hypothesis_sum_square,
+            error_sum_square=error_sum_square
+        )
+
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
 
 class LinearModelEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, LinearModel):
-            return {'essence_design_matrix':self.serialise_matrix(obj.essence_design_matrix),
-                    'repeated_rows_in_design_matrix':obj.repeated_rows_in_design_matrix,
-                    'hypothesis_beta':self.serialise_matrix(obj.hypothesis_beta),
-                    'c_matrix':self.serialise_matrix(obj.c_matrix),
-                    'u_matrix':self.serialise_matrix(obj.u_matrix),
-                    'sigma_star':self.serialise_matrix(obj.sigma_star),
-                    'theta_zero':self.serialise_matrix(obj.theta_zero),
-                    'alpha':obj.alpha,
-                    'total_n':obj.total_n,
-                    'theta':self.serialise_matrix(obj.theta),
-                    'm':self.serialise_matrix(obj.m),
-                    'nu_e':obj.nu_e,
-                    'hypothesis_sum_square':obj.hypothesis_sum_square,
-                    'error_sum_square':obj.error_sum_square}
+            return obj.to_dict()
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
-    
-    def serialise_matrix(self, m):
-        if isinstance(m, np.matrix):
-            return m.tolist()
-        else:
-            return None

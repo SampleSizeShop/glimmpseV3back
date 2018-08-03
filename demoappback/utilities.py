@@ -14,3 +14,9 @@ def kronecker_list(l: []):
     while len(l) > 0:
         prod = np.kron(prod, l.pop())
     return prod
+
+def serialise_matrix(m):
+    if isinstance(m, np.matrix):
+        return m.tolist()
+    else:
+        return None
