@@ -23,26 +23,6 @@ class StudyDesign:
                  variance_scale_factor: [] = None,
                  power_curve: int = None):
 
-        # I think these properties will probably end up as variables in power calc methods....
-        ######################################
-        # Calculated
-        #self.df1 = 0
-        #self.df2 = 0
-        #self.dfh = []
-        #self.dfe2 = 0
-        ########################################
-        #self.alphatest = 0
-        #self.n2 = 0
-        #self.cl_type = 0
-        #self.n_est = 0
-        #self.rank_est = 0
-        #self.alpha_cl = 0
-        #self.alpha_cu = 0
-        #self.tolerance = 0.000000000000000001
-        #self.omega = 0
-        #self.power = Power()
-        #self.exceptions = []
-
         # fed in
         self.isu_factors = isu_factors
         self.target_event = target_event

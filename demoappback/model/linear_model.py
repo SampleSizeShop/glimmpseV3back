@@ -107,7 +107,7 @@ class LinearModel(object):
 
     @staticmethod
     def calculate_design_matrix(predictors):
-        components = [np.identity(1)].append([np.identity(len(p.values)) for p in predictors])
+        components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
         return kronecker_list(components)
 
     def get_rep_n_from_study_design(self, study_design):
@@ -240,7 +240,8 @@ class LinearModel(object):
     def calc_nu_e(self):
         if self.total_n is None or self.essence_design_matrix is None:
             return None
-        return self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
+        nu_e = self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
+        return int(nu_e)
 
     def calc_error_sum_square(self):
         if self.nu_e is None or self.sigma_star is None:
@@ -248,7 +249,7 @@ class LinearModel(object):
         return self.nu_e * self.sigma_star
 
     def calc_hypothesis_sum_square(self):
-        if self.theta is None or self.theta_zero is None or self.m is None:
+        if self.theta is None or self.theta_zero is None or self.m is None or np.linalg.det(self.m) == 0:
             return None
         t = (self.theta - self.theta_zero)
         return np.transpose(t) * np.linalg.inv(self.m) * t
@@ -267,7 +268,7 @@ class LinearModel(object):
         m = utilities.serialise_matrix(self.m),
         nu_e = self.nu_e,
         hypothesis_sum_square = self.hypothesis_sum_square,
-        error_sum_square = self.error_sum_square)
+        error_sum_square = utilities.serialise_matrix(self.error_sum_square))
         return ret
 
     def serialize(self):
