@@ -56,6 +56,7 @@ class IsuFactors(object):
                  between_isu_relative_group_sizes: []=None,
                  marginal_means: []=None,
                  smallest_group_size: int=None,
+                 theta0: [] = None,
                  outcome_correlation_matrix=None,
                  outcome_repeated_measure_st_devs=None,
                  **kwargs):
@@ -63,6 +64,7 @@ class IsuFactors(object):
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
         self.marginal_means = marginal_means
         self.smallest_group_size = smallest_group_size
+        self.theta0 = theta0
         self.outcome_correlation_matrix = outcome_correlation_matrix
         self.outcome_repeated_measure_st_devs = outcome_repeated_measure_st_devs
 
@@ -103,6 +105,8 @@ class IsuFactors(object):
             self.marginal_means = source['marginalMeans']
         if source.get('smallestGroupSize'):
             self.smallest_group_size = source['smallestGroupSize']
+        if source.get('theta0'):
+            self.theta0 = np.matrix(source['theta0'])
         if (source.get('outcomeCorrelationMatrix')
                 and source['outcomeCorrelationMatrix'].get('_values')
                 and source['outcomeCorrelationMatrix']['_values'].get('data')):

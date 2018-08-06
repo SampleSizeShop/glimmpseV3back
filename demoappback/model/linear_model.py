@@ -68,7 +68,7 @@ class LinearModel(object):
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
-        self.theta_zero = 0
+        self.theta_zero = study_design.isu_factors.theta0
         self.alpha = study_design.alpha
         self.total_n = self.calculate_total_n(study_design.isu_factors);
         self.calc_metadata()
@@ -257,7 +257,7 @@ class LinearModel(object):
         ret = dict(essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
         repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
         hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
-        c_matrix = utilities.serialise_matrix(self.c_matrix)[0],
+        c_matrix = utilities.serialise_matrix(self.c_matrix),
         u_matrix = utilities.serialise_matrix(self.u_matrix),
         sigma_star = utilities.serialise_matrix(self.sigma_star),
         theta_zero = utilities.serialise_matrix(self.theta_zero),
