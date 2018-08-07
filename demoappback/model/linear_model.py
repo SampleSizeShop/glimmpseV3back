@@ -125,7 +125,7 @@ class LinearModel(object):
         u_cluster = 1
         u_repeated_measures = np.matrix([[1]])
         if len(isu_factors.get_repeated_measures()) > 0:
-            u_repeated_measures = kronecker_list([r.partial_u_matrix for r in isu_factors.get_repeated_measures()])
+            u_repeated_measures = kronecker_list([r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis])
 
         u_matrix = kronecker_list([u_outcomes, u_cluster, u_repeated_measures])
         return u_matrix
@@ -202,7 +202,7 @@ class LinearModel(object):
 
     def calculate_rep_measure_sigma_star(self, isu_factors):
         outcomes = isu_factors.get_outcomes()
-        repeated_measures = isu_factors.get_repeated_measures()
+        repeated_measures = [ measure for measure in isu_factors.get_repeated_measures() if measure.in_hypothesis]
         st_devs = isu_factors.outcome_repeated_measure_st_devs
         sigma_star_rep_measure_components = [
             self.calculate_rep_measure_component(measure.partial_u_matrix, st_dev.values)
