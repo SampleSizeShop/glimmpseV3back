@@ -103,18 +103,19 @@ class LinearModel(object):
         return m
 
     def _get_row_values(self, row):
-        return [col.get('value') for col in row ]
+        return [col.get('value') for col in row]
 
     @staticmethod
     def calculate_design_matrix(predictors):
-        components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
+        components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if p.in_hypothesis]
         return kronecker_list(components)
 
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
 
     def calculate_c_matrix(self, predictors):
-        partials = [self.calculate_partial_c_matrix(p) for p in predictors]
+        partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
+        partials.append(np.matrix(np.identity(1)))
         c_matrix = kronecker_list(partials)
         return c_matrix
 
@@ -152,9 +153,9 @@ class LinearModel(object):
 
     @staticmethod
     def calculate_main_effect_partial_c_matrix(predictor):
-        i = np.identity(len(predictor.values))
-        v = np.matrix([np.ones(len(predictor.values))])
-        main_effect = np.concatenate((v, i), axis=0)
+        i = np.identity(len(predictor.values) - 1) * -1
+        v = np.matrix([np.ones(len(predictor.values) - 1)])
+        main_effect = np.transpose(np.concatenate((v, i), axis = 0))
         return main_effect
 
     @staticmethod
@@ -204,16 +205,17 @@ class LinearModel(object):
         repeated_measures = isu_factors.get_repeated_measures()
         st_devs = isu_factors.outcome_repeated_measure_st_devs
         sigma_star_rep_measure_components = [
-            self.calculate_rep_measure_component(measure.correlation_matrix, st_dev.values)
+            self.calculate_rep_measure_component(measure.partial_u_matrix, st_dev.values)
             for measure in repeated_measures for st_dev in st_devs for outcome in outcomes
             if st_dev.repeated_measure == measure.name and st_dev.outcome == outcome.name
         ]
         sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
         return sigma_star_rep_measures
 
-    def calculate_rep_measure_component(self, correlation_matrix, st_devs):
-        st = np.identity(len(st_devs))*st_devs
-        return st * correlation_matrix * st
+    def calculate_rep_measure_component(self, partial_u_matrix, st_devs):
+        st = np.matrix(np.diag(st_devs.tolist()[0]))
+        component = partial_u_matrix.transpose() * st * partial_u_matrix
+        return component
 
     def calculate_cluster_sigma_star(self, cluster):
         components = [
@@ -267,7 +269,7 @@ class LinearModel(object):
         theta = utilities.serialise_matrix(self.theta),
         m = utilities.serialise_matrix(self.m),
         nu_e = self.nu_e,
-        hypothesis_sum_square = self.hypothesis_sum_square,
+        hypothesis_sum_square = utilities.serialise_matrix(self.hypothesis_sum_square),
         error_sum_square = utilities.serialise_matrix(self.error_sum_square))
         return ret
 

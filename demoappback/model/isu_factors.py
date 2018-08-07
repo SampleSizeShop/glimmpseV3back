@@ -40,7 +40,7 @@ class OutcomeRepeatedMeasureStDev(object):
         if source['repMeasure']:
             self.repeated_measure = source['repMeasure']
         if source['values']:
-            self.values = source['values']
+            self.values = np.matrix(source['values'])
 
 class IsuFactors(object):
     """
