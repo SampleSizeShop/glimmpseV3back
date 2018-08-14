@@ -15,7 +15,7 @@ class ClusterLevel(object):
                  **kwargs):
         self.level_name = level_name
         self.no_elements = no_elements
-        self.intra_class_corellation = intra_class_correlation
+        self.intra_class_correlation = intra_class_correlation
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
@@ -29,7 +29,7 @@ class ClusterLevel(object):
         if source.get('noElements'):
             self.no_elements = source['noElements']
         if source.get('intraClassCorellation'):
-            self.intra_class_corellation = source['intraClassCorellation']
+            self.intra_class_correlation = source['intraClassCorellation']
 
 class Cluster(IsuFactor):
     """

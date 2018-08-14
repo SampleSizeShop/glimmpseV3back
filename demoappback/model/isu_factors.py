@@ -16,7 +16,7 @@ class OutcomeRepeatedMeasureStDev(object):
                  repeated_measure: str=None,
                  values: []=None,
                  **kwargs):
-        self.outome = outcome
+        self.outcome = outcome
         self.repeated_measure = repeated_measure
         self.values = values
 
@@ -36,11 +36,11 @@ class OutcomeRepeatedMeasureStDev(object):
 
     def from_dict(self, source):
         if source['outcome']:
-            self.outome = source['outcome']
+            self.outcome = source['outcome']
         if source['repMeasure']:
             self.repeated_measure = source['repMeasure']
         if source['values']:
-            self.values = source['values']
+            self.values = np.matrix(source['values'])
 
 class IsuFactors(object):
     """
@@ -56,6 +56,7 @@ class IsuFactors(object):
                  between_isu_relative_group_sizes: []=None,
                  marginal_means: []=None,
                  smallest_group_size: int=None,
+                 theta0: [] = None,
                  outcome_correlation_matrix=None,
                  outcome_repeated_measure_st_devs=None,
                  **kwargs):
@@ -63,6 +64,7 @@ class IsuFactors(object):
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
         self.marginal_means = marginal_means
         self.smallest_group_size = smallest_group_size
+        self.theta0 = theta0
         self.outcome_correlation_matrix = outcome_correlation_matrix
         self.outcome_repeated_measure_st_devs = outcome_repeated_measure_st_devs
 
@@ -103,6 +105,8 @@ class IsuFactors(object):
             self.marginal_means = source['marginalMeans']
         if source.get('smallestGroupSize'):
             self.smallest_group_size = source['smallestGroupSize']
+        if source.get('theta0'):
+            self.theta0 = np.matrix(source['theta0'])
         if (source.get('outcomeCorrelationMatrix')
                 and source['outcomeCorrelationMatrix'].get('_values')
                 and source['outcomeCorrelationMatrix']['_values'].get('data')):
@@ -110,3 +114,18 @@ class IsuFactors(object):
         if source.get('outcomeRepeatedMeasureStDevs'):
             self.outcome_repeated_measure_st_devs = \
                 [OutcomeRepeatedMeasureStDev(source=stdev) for stdev in source['outcomeRepeatedMeasureStDevs']]
+
+    def get_hypothesis(self):
+        return [f for f in self.variables if f.in_hypothesis]
+
+    def get_outcomes(self):
+        return [f for f in self.variables if type(f) == Outcome]
+
+    def get_predictors(self):
+        return [f for f in self.variables if type(f) == Predictor]
+
+    def get_repeated_measures(self):
+        return [f for f in self.variables if type(f) == RepeatedMeasure]
+
+    def get_clusters(self):
+        return [f for f in self.variables if type(f) == Cluster]

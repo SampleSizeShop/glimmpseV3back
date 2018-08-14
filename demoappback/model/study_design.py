@@ -1,7 +1,7 @@
 import json
 from json import JSONDecoder
 
-from demoappback.model.enums import TargetEvent, SolveFor, Tests
+from demoappback.model.enums import TargetEvent, SolveFor, Tests, Nature
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.power_curve import PowerCurve
 from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
@@ -23,26 +23,6 @@ class StudyDesign:
                  variance_scale_factor: [] = None,
                  power_curve: int = None):
 
-        # I think these properties will probably end up as variables in power calc methods....
-        ######################################
-        # Calculated
-        #self.df1 = 0
-        #self.df2 = 0
-        #self.dfh = []
-        #self.dfe2 = 0
-        ########################################
-        #self.alphatest = 0
-        #self.n2 = 0
-        #self.cl_type = 0
-        #self.n_est = 0
-        #self.rank_est = 0
-        #self.alpha_cl = 0
-        #self.alpha_cu = 0
-        #self.tolerance = 0.000000000000000001
-        #self.omega = 0
-        #self.power = Power()
-        #self.exceptions = []
-
         # fed in
         self.isu_factors = isu_factors
         self.target_event = target_event
@@ -56,14 +36,6 @@ class StudyDesign:
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
-
-        # calculated
-        self.essencex = None
-        self.beta = None
-        self.c_matrix = None
-        self.u_matrix = None
-        self.sigma = 0
-        self.theta_zero = 0
 
     def __eq__(self, other):
         comp = []
@@ -102,6 +74,11 @@ class StudyDesign:
     def load_from_json(self, json_str: str):
         return json.loads(json_str, cls=StudyDesignDecoder)
 
+    def calculate_c_matrix(self):
+        """Calculate the C Matrix from the hypothesis"""
+        partials = [p for p in self.isu_factors.get_hypothesis() if p.nature == Nature.BETWEEN]
+        averages = [p for p in self.isu_factors.variables if p.nature == Nature.BETWEEN and not p.in_hypothesis]
+
 
 class StudyDesignDecoder(JSONDecoder):
     def decode(self, s: str) -> StudyDesign:
@@ -117,8 +94,6 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.alpha = d['_typeOneErrorRate']
         if d.get('_power'):
             study_design.target_power = d['_power']
-        if d.get('_samplesize'):
-            study_design.sample_size = d['_samplesize']
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_selectedTests'):
