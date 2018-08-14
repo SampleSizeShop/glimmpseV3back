@@ -1,7 +1,8 @@
 import json
 from json import JSONDecoder
+from pyglimmpse.constants import Constants
 
-from demoappback.model.enums import TargetEvent, SolveFor, Tests, Nature
+from demoappback.model.enums import TargetEvent, SolveFor, Tests, Nature, OptionalArgs
 from demoappback.model.isu_factors import IsuFactors
 from demoappback.model.power_curve import PowerCurve
 from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
@@ -81,6 +82,20 @@ class StudyDesign:
 
 
 class StudyDesignDecoder(JSONDecoder):
+    def default_optional_args(self):
+        args = {
+            OptionalArgs.APPROXIMATION.value: Constants.UN,
+            OptionalArgs.EPSILON_ESTIMATOR.value: Constants.UCDF_MULLER2004_APPROXIMATION,
+            OptionalArgs.UNIREPMETHOD.value: Constants.SIGMA_KNOWN,
+            OptionalArgs.N_EST.value: 1,
+            OptionalArgs.RANK_EST.value: 1,
+            OptionalArgs.ALPHA_CL.value: 1,
+            OptionalArgs.ALPHA_CU.value: 1,
+            OptionalArgs.N_IP.value: 1,
+            OptionalArgs.RANK_IP.value: 1,
+            OptionalArgs.TOLERANCE.value: 1e-10}
+        return args
+
     def decode(self, s: str) -> StudyDesign:
         study_design = StudyDesign()
         d = json.loads(s)
@@ -106,5 +121,6 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.variance_scale_factor = d['_varianceScaleFactors']
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
+        study_design.optional_args = self.default_optional_args()
 
         return study_design
