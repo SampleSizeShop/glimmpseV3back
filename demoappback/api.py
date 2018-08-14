@@ -64,8 +64,8 @@ def calculate():
                                     betaScale=1,
                                     beta=model.hypothesis_beta,
                                     targetPower=scenario.target_power,
-                                    rank_X=model.error_sum_square,
-                                    eval_HINVE=np.linalg.eig)
+                                    rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                    eval_HINVE=model.hypothesis_sum_square*model.nu_e)
         json_response = json.dumps(dict(message='OK',
                                         status=200,
                                         mimetype='application/json',
