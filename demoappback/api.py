@@ -46,19 +46,13 @@ def calculate():
     model.from_study_design(scenario)
     if scenario.solve_for == SolveFor.POWER:
         results = calculate_power(model, scenario)
-        json_response = json.dumps(dict(message='OK',
-                                        status=200,
-                                        mimetype='application/json',
-                                        results=results,
-                                        model=model.to_dict()))
-
     else:
-        size = calculate_sample_size(model, scenario)
-        json_response = json.dumps(dict(message='OK',
-                                        status=200,
-                                        mimetype='application/json',
-                                        samplesize=size,
-                                        model=model.to_dict()))
+        results = calculate_sample_size(model, scenario)
+    json_response = json.dumps(dict(message='OK',
+                                    status=200,
+                                    mimetype='application/json',
+                                    results=results,
+                                    model=model.to_dict()))
 
     return json_response
 
