@@ -87,11 +87,11 @@ class StudyDesignDecoder(JSONDecoder):
             OptionalArgs.APPROXIMATION.value: Constants.UN,
             OptionalArgs.EPSILON_ESTIMATOR.value: Constants.UCDF_MULLER2004_APPROXIMATION,
             OptionalArgs.UNIREPMETHOD.value: Constants.SIGMA_KNOWN,
-            OptionalArgs.N_EST.value: 10,
+            OptionalArgs.N_EST.value: 33,
             OptionalArgs.RANK_EST.value: 1,
-            OptionalArgs.ALPHA_CL.value: 0.01,
-            OptionalArgs.ALPHA_CU.value: 0.01,
-            OptionalArgs.N_IP.value: 1,
+            OptionalArgs.ALPHA_CL.value: 0.025,
+            OptionalArgs.ALPHA_CU.value: 0.025,
+            OptionalArgs.N_IP.value: 33,
             OptionalArgs.RANK_IP.value: 1,
             OptionalArgs.TOLERANCE.value: 1e-10}
         return args

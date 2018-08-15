@@ -259,7 +259,7 @@ class LinearModel(object):
         if self.theta is None or self.theta_zero is None or self.m is None or np.linalg.det(self.m) == 0:
             return None
         t = (self.theta - self.theta_zero)
-        return np.transpose(t) * np.linalg.inv(self.m) * t
+        return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
     def to_dict(self):
         ret = dict(essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
