@@ -63,3 +63,15 @@ class PolynomialMatrices(Enum):
                                  [-5, 7, 4, -4, -7, 5],
                                  [1, -3, 2, 2, -3, 1],
                                  [-1, 5, -10, 10, -5, 1]]
+
+class OptionalArgs(Enum):
+    APPROXIMATION = 'approximation'
+    EPSILON_ESTIMATOR = 'epsilon_estimator'
+    UNIREPMETHOD = 'unirepmethod'
+    N_EST = 'n_est'
+    RANK_EST = 'rank_est'
+    ALPHA_CL = 'alpha_cl'
+    ALPHA_CU = 'alpha_cu'
+    N_IP = 'n_ip'
+    RANK_IP = 'rank_ip'
+    TOLERANCE = 'tolerance'
