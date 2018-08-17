@@ -10,10 +10,11 @@ def list_compare(list_a: [], list_b: []) -> bool:
 def kronecker_list(l: []):
     if not l or len(l) == 0:
         return None
-    newlist = l[::-1]
-    prod = newlist.pop()
-    while len(newlist) > 0:
-        prod = np.kron(prod, newlist.pop())
+    # reverse list so that list is multiplied i the correct order when elements are accessed by l.pop()
+    l[::-1]
+    prod = l.pop()
+    while len(l) > 0:
+        prod = np.kron(prod, l.pop())
     return prod
 
 def serialise_matrix(m):
