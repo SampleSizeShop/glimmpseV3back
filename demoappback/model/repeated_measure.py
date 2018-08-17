@@ -20,6 +20,7 @@ class RepeatedMeasure(IsuFactor):
                  no_repeats: int=2,
                  partial_u_matrix: np.matrix= None,
                  correlation_matrix: np.matrix = None,
+                 standard_deviations: [] = None,
                  **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
@@ -34,6 +35,7 @@ class RepeatedMeasure(IsuFactor):
         self.no_repeats = no_repeats
         self.partial_u_matrix = np.matrix(partial_u_matrix)
         self.correlation_matrix = np.matrix(correlation_matrix)
+        self.standard_deviations = np.matrix(standard_deviations)
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
@@ -69,4 +71,6 @@ class RepeatedMeasure(IsuFactor):
                 and source['correlationMatrix'].get('_values')
                 and source['correlationMatrix']['_values'].get('data')):
             self.correlation_matrix = np.matrix(source['correlationMatrix']['_values']['data'])
+        if source.get('standard_deviations'):
+            self.standard_deviations = source['standard_deviations']
 
