@@ -192,7 +192,7 @@ def calculate_power(model, scenario):
                                                                      hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value, power=power.power))
         elif test == Tests.BOX_CORRECTION:
-            power = unirep.box(rank_C=np.linalg.matrix_rank(model.c_matrix),
+            power = unirep.box(rank_C=np.linalg.matrix_rank(promodel.c_matrix),
                                rank_U=np.linalg.matrix_rank(model.u_matrix),
                                total_N=model.total_n,
                                rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
