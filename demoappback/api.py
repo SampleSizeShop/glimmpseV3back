@@ -71,7 +71,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.HOTELLING_LAWLEY.value, samplesize=size))
         elif test == Tests.PILLAI_BARTLET:
             size = samplesize.samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
@@ -84,7 +86,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.PILLAI_BARTLET.value, samplesize=size))
         elif test == Tests.WILKS_LIKLIEHOOD:
             size = samplesize.samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
@@ -97,7 +101,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value, samplesize=size))
         elif test == Tests.BOX_CORRECTION:
             size = samplesize.samplesize(test=unirep.box,
@@ -180,6 +186,7 @@ def calculate_power(model, scenario):
                                                                      rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
                                                                      total_N=model.total_n,
                                                                      alpha=model.alpha,
+                                                                     total_N=model.total_n,
                                                                      error_sum_square=model.error_sum_square,
                                                                      hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.PILLAI_BARTLET.value, power=power.power))
