@@ -178,6 +178,7 @@ def calculate_power(model, scenario):
             power = multirep.pbt_two_moment_null_approx_obrien_shieh(rank_C=np.linalg.matrix_rank(model.c_matrix),
                                                                      rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                                      rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                                                     total_N=model.total_n,
                                                                      alpha=model.alpha,
                                                                      error_sum_square=model.error_sum_square,
                                                                      hypothesis_sum_square=model.hypothesis_sum_square)

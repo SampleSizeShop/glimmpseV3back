@@ -128,7 +128,7 @@ class LinearModel(object):
             measure_list = [np.matrix([[1]])]
         u_repeated_measures = kronecker_list(measure_list)
 
-        u_matrix = kronecker_list([u_outcomes, u_cluster, u_repeated_measures])
+        u_matrix = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
         return u_matrix
 
     def calculate_partial_c_matrix(self, predictor):
