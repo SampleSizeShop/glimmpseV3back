@@ -1,6 +1,6 @@
-from demoappback.model.isu_factor import IsuFactor
-from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
-from demoappback.utilities import list_compare
+from app.calculation_service.model.enums import Nature, IsuFactorType, HypothesisType
+from app.calculation_service.model.isu_factor import IsuFactor
+from app.calculation_service.utilities import list_compare
 
 
 class ClusterLevel(object):

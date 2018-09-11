@@ -1,5 +1,4 @@
-from demoappback.model.isu_factor import IsuFactor
-from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
+
 
 class ConfidenceInterval(object):
     """

@@ -2,10 +2,10 @@ import json
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
 
-from demoappback.model.enums import TargetEvent, SolveFor, Tests, Nature, OptionalArgs
-from demoappback.model.isu_factors import IsuFactors
-from demoappback.model.power_curve import PowerCurve
-from demoappback.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
+from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
+from app.calculation_service.model.isu_factors import IsuFactors
+from app.calculation_service.model.power_curve import PowerCurve
+from app.calculation_service.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
 
 
 class StudyDesign:

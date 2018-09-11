@@ -1,4 +1,4 @@
-from demoappback import db
+from app import db
 
 
 def populate_mongo():

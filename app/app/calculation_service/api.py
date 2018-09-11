@@ -1,32 +1,34 @@
 from pyglimmpse import unirep, multirep, samplesize
 
-from demoappback import app, db
 import json, random
-from flask import Response, request
+from flask import Blueprint, Response, request
 from flask_cors import cross_origin
 
-from demoappback.model.enums import SolveFor, Tests
-from demoappback.model.linear_model import LinearModel
-from demoappback.model.study_design import StudyDesign
+from app.calculation_service.model.enums import SolveFor, Tests
+from app.calculation_service.model.linear_model import LinearModel
+from app.calculation_service.model.study_design import StudyDesign
 import numpy as np
 
+#from app.main import db
+
+bp = Blueprint('pyglimmpse', __name__, url_prefix='/api')
 
 def jsonify_tex(texString):
     data = {'texString': texString}
     json_response = json.dumps(data)
     return Response(json_response, status=200, mimetype='application/json')
 
+#
+# @bp.route('/storedtex', methods=['POST'])
+# @cross_origin()
+# def storedexpression():
+#     """return a TeX expression from Mongo DB"""
+#     cur = db.expressions.find({'name': '{0}'.format(random.randrange(1, 6, 1))})
+#     expr = cur.next()['expression']
+#     return jsonify_tex(expr)
 
-@app.route('/api/storedtex', methods=['POST'])
-@cross_origin()
-def storedexpression():
-    """return a TeX expression from Mongo DB"""
-    cur = db.expressions.find({'name': '{0}'.format(random.randrange(1, 6, 1))})
-    expr = cur.next()['expression']
-    return jsonify_tex(expr)
 
-
-@app.route('/api/clientsidelog', methods=['POST'])
+@bp.route('/clientsidelog', methods=['POST'])
 @cross_origin()
 def client_side_log():
     """print a log recieved from the client side logger"""
@@ -36,7 +38,7 @@ def client_side_log():
     return json_response
 
 
-@app.route('/api/calculate', methods=['POST'])
+@bp.route('/calculate', methods=['POST'])
 @cross_origin()
 def calculate():
     """Calculate power/samplesize from a study design"""
@@ -243,12 +245,6 @@ def calculate_power(model, scenario):
                                        optional_args=scenario.optional_args)
             results.append(dict(test=Tests.UNCORRECTED.value, power=power.power))
     return results
-
-
-@app.route('/')
-def hello_world():
-    """Hello world!"""
-    return 'Hello World!'
 
 
 
