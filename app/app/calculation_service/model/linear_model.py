@@ -3,13 +3,11 @@ import warnings
 from json import JSONEncoder
 
 import numpy as np
-import pyglimmpse as pg
-from demoappback import utilities
-
-from demoappback.model.enums import PolynomialMatrices, HypothesisType
-from demoappback.model.isu_factors import IsuFactors
-from demoappback.model.study_design import StudyDesign
-from demoappback.utilities import kronecker_list
+from app.calculation_service import utilities
+from app.calculation_service.model.enums import PolynomialMatrices, HypothesisType
+from app.calculation_service.model.isu_factors import IsuFactors
+from app.calculation_service.model.study_design import StudyDesign
+from app.calculation_service.utilities import kronecker_list
 
 
 class LinearModel(object):
@@ -128,7 +126,7 @@ class LinearModel(object):
             measure_list = [np.matrix([[1]])]
         u_repeated_measures = kronecker_list(measure_list)
 
-        u_matrix = kronecker_list([u_outcomes, u_cluster, u_repeated_measures])
+        u_matrix = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
         return u_matrix
 
     def calculate_partial_c_matrix(self, predictor):
@@ -259,19 +257,19 @@ class LinearModel(object):
 
     def to_dict(self):
         ret = dict(essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
-        repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
-        hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
-        c_matrix = utilities.serialise_matrix(self.c_matrix),
-        u_matrix = utilities.serialise_matrix(self.u_matrix),
-        sigma_star = utilities.serialise_matrix(self.sigma_star),
-        theta_zero = utilities.serialise_matrix(self.theta_zero),
-        alpha = self.alpha,
-        total_n = self.total_n,
-        theta = utilities.serialise_matrix(self.theta),
-        m = utilities.serialise_matrix(self.m),
-        nu_e = self.nu_e,
-        hypothesis_sum_square = utilities.serialise_matrix(self.hypothesis_sum_square),
-        error_sum_square = utilities.serialise_matrix(self.error_sum_square))
+                   repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
+                   hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
+                   c_matrix = utilities.serialise_matrix(self.c_matrix),
+                   u_matrix = utilities.serialise_matrix(self.u_matrix),
+                   sigma_star = utilities.serialise_matrix(self.sigma_star),
+                   theta_zero = utilities.serialise_matrix(self.theta_zero),
+                   alpha = self.alpha,
+                   total_n = self.total_n,
+                   theta = utilities.serialise_matrix(self.theta),
+                   m = utilities.serialise_matrix(self.m),
+                   nu_e = self.nu_e,
+                   hypothesis_sum_square = utilities.serialise_matrix(self.hypothesis_sum_square),
+                   error_sum_square = utilities.serialise_matrix(self.error_sum_square))
         return ret
 
     def serialize(self):

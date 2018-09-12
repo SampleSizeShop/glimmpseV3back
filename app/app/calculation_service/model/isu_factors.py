@@ -1,11 +1,11 @@
 import numpy as np
 
-from demoappback.model.cluster import Cluster
-from demoappback.model.enums import IsuFactorType
-from demoappback.model.outcome import Outcome
-from demoappback.model.predictor import Predictor
-from demoappback.model.repeated_measure import RepeatedMeasure
-from demoappback.utilities import list_compare
+from app.calculation_service.model.cluster import Cluster
+from app.calculation_service.model.enums import IsuFactorType
+from app.calculation_service.model.outcome import Outcome
+from app.calculation_service.model.predictor import Predictor
+from app.calculation_service.model.repeated_measure import RepeatedMeasure
+from app.calculation_service.utilities import list_compare
 
 
 class OutcomeRepeatedMeasureStDev(object):

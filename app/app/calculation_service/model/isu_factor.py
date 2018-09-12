@@ -1,4 +1,4 @@
-from demoappback.model.enums import HypothesisType, IsuFactorType, Nature
+from app.calculation_service.model.enums import IsuFactorType, HypothesisType, Nature
 
 
 class IsuFactor(object):

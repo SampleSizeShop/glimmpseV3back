@@ -1,32 +1,34 @@
 from pyglimmpse import unirep, multirep, samplesize
 
-from demoappback import app, db
 import json, random
-from flask import Response, request
+from flask import Blueprint, Response, request
 from flask_cors import cross_origin
 
-from demoappback.model.enums import SolveFor, Tests
-from demoappback.model.linear_model import LinearModel
-from demoappback.model.study_design import StudyDesign
+from app.calculation_service.model.enums import SolveFor, Tests
+from app.calculation_service.model.linear_model import LinearModel
+from app.calculation_service.model.study_design import StudyDesign
 import numpy as np
 
+#from app.main import db
+
+bp = Blueprint('pyglimmpse', __name__, url_prefix='/api')
 
 def jsonify_tex(texString):
     data = {'texString': texString}
     json_response = json.dumps(data)
     return Response(json_response, status=200, mimetype='application/json')
 
+#
+# @bp.route('/storedtex', methods=['POST'])
+# @cross_origin()
+# def storedexpression():
+#     """return a TeX expression from Mongo DB"""
+#     cur = db.expressions.find({'name': '{0}'.format(random.randrange(1, 6, 1))})
+#     expr = cur.next()['expression']
+#     return jsonify_tex(expr)
 
-@app.route('/api/storedtex', methods=['POST'])
-@cross_origin()
-def storedexpression():
-    """return a TeX expression from Mongo DB"""
-    cur = db.expressions.find({'name': '{0}'.format(random.randrange(1, 6, 1))})
-    expr = cur.next()['expression']
-    return jsonify_tex(expr)
 
-
-@app.route('/api/clientsidelog', methods=['POST'])
+@bp.route('/clientsidelog', methods=['POST'])
 @cross_origin()
 def client_side_log():
     """print a log recieved from the client side logger"""
@@ -36,7 +38,7 @@ def client_side_log():
     return json_response
 
 
-@app.route('/api/calculate', methods=['POST'])
+@bp.route('/calculate', methods=['POST'])
 @cross_origin()
 def calculate():
     """Calculate power/samplesize from a study design"""
@@ -71,7 +73,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.HOTELLING_LAWLEY.value, samplesize=size))
         elif test == Tests.PILLAI_BARTLET:
             size = samplesize.samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
@@ -84,7 +88,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.PILLAI_BARTLET.value, samplesize=size))
         elif test == Tests.WILKS_LIKLIEHOOD:
             size = samplesize.samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
@@ -97,7 +103,9 @@ def calculate_sample_size(model, scenario):
                                          beta=model.hypothesis_beta,
                                          targetPower=scenario.target_power,
                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e)
+                                         eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                         error_sum_square=model.error_sum_square,
+                                         hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value, samplesize=size))
         elif test == Tests.BOX_CORRECTION:
             size = samplesize.samplesize(test=unirep.box,
@@ -178,6 +186,7 @@ def calculate_power(model, scenario):
             power = multirep.pbt_two_moment_null_approx_obrien_shieh(rank_C=np.linalg.matrix_rank(model.c_matrix),
                                                                      rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                                      rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                                                     total_N=model.total_n,
                                                                      alpha=model.alpha,
                                                                      error_sum_square=model.error_sum_square,
                                                                      hypothesis_sum_square=model.hypothesis_sum_square)
@@ -236,12 +245,6 @@ def calculate_power(model, scenario):
                                        optional_args=scenario.optional_args)
             results.append(dict(test=Tests.UNCORRECTED.value, power=power.power))
     return results
-
-
-@app.route('/')
-def hello_world():
-    """Hello world!"""
-    return 'Hello World!'
 
 
 

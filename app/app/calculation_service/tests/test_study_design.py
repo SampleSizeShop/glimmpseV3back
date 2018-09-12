@@ -3,16 +3,16 @@ import numpy as np
 from pyglimmpse import unirep
 
 
-from demoappback.model.cluster import Cluster, ClusterLevel
-from demoappback.model.enums import TargetEvent, SolveFor, Tests
-from demoappback.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
-from demoappback.model.linear_model import LinearModel
-from demoappback.model.outcome import Outcome
-from demoappback.model.power_curve import PowerCurve, ConfidenceInterval, DataSeries
-from demoappback.model.predictor import Predictor
-from demoappback.model.repeated_measure import RepeatedMeasure
-from demoappback.model.study_design import StudyDesign
-from demoappback.models import Matrix
+from app.model.cluster import Cluster, ClusterLevel
+from app.model.enums import TargetEvent, SolveFor, Tests
+from app.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
+from app.model.linear_model import LinearModel
+from app.model.outcome import Outcome
+from app.model.power_curve import PowerCurve, ConfidenceInterval, DataSeries
+from app.model.predictor import Predictor
+from app.model.repeated_measure import RepeatedMeasure
+from app.model.study_design import StudyDesign
+from app.models import Matrix
 
 
 class StudyDesignTestCase(unittest.TestCase):
@@ -79,7 +79,7 @@ class StudyDesignTestCase(unittest.TestCase):
                                                       x_axis='DesiredPower',
                                                       data_series=[DataSeries(variance_scale_factor=3)]))
 
-        json_data = open("demoappback/tests/model_2.json")
+        json_data = open("app/tests/model_2.json")
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)
@@ -122,7 +122,7 @@ class StudyDesignTestCase(unittest.TestCase):
                                                       x_axis='DesiredPower',
                                                       data_series=[DataSeries(variance_scale_factor=3)]))
 
-        json_data = open("demoappback/tests/model_3.json")
+        json_data = open("app/tests/model_3.json")
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)

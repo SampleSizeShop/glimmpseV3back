@@ -1,7 +1,8 @@
 import warnings
 import functools
 
-from demoappback.model.enums import ClType
+from pyglimmpse.constants import Constants
+from app.calculation_service.model.enums import ClType
 
 
 def check_options( function ):
