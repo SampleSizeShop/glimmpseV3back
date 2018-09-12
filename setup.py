@@ -4,7 +4,7 @@ setup(
     name='app',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=['flask', 'flask_cors', ],
+    install_requires=['Flask>1.0.0', 'flask_cors', ],
     setup_requires=[],
     tests_require=[],
 )
