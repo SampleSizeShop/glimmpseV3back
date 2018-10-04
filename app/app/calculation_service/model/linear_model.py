@@ -120,14 +120,24 @@ class LinearModel(object):
     @staticmethod
     def calculate_u_matrix(isu_factors):
         u_outcomes = np.identity(len(isu_factors.get_outcomes()))
-        u_cluster = 1
-        measure_list = [r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
-        if len(measure_list) == 0:
-            measure_list = [np.matrix([[1]])]
-        u_repeated_measures = kronecker_list(measure_list)
+        u_cluster = np.matrix([[1]])
+        u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(isu_factors)
+        u_orth = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
+        return u_orth
 
-        u_matrix = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
-        return u_matrix
+    @staticmethod
+    def _get_repeated_measures_u_matrix(isu_factors):
+        partial_u_list = [r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
+        if len(partial_u_list) == 0:
+            partial_u_list = [np.matrix([[1]])]
+        orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
+        orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
+        return orth_u_repeated_measures
+
+    @staticmethod
+    def _get_orthonormal_u_matrix(u_matrix):
+        u_orth, t_decomp = np.linalg.qr(u_matrix)
+        return u_orth
 
     def calculate_partial_c_matrix(self, predictor):
         partial = None
@@ -213,7 +223,8 @@ class LinearModel(object):
     def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        component = np.transpose(repeated_measure.partial_u_matrix) * sigma_r * repeated_measure.partial_u_matrix
+        u_orth = LinearModel._get_orthonormal_u_matrix(repeated_measure.partial_u_matrix)
+        component = np.transpose(u_orth) * sigma_r * u_orth
         return component
 
     def calculate_cluster_sigma_star(self, cluster):
