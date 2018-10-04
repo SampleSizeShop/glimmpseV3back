@@ -121,13 +121,18 @@ class LinearModel(object):
     def calculate_u_matrix(isu_factors):
         u_outcomes = np.identity(len(isu_factors.get_outcomes()))
         u_cluster = np.matrix([[1]])
+        u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(isu_factors)
+        u_orth = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
+        return u_orth
+
+    @staticmethod
+    def _get_repeated_measures_u_matrix(isu_factors):
         partial_u_list = [r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
         orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
         orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
-        u_orth = kronecker_list([u_outcomes, orth_u_repeated_measures, u_cluster])
-        return u_orth
+        return orth_u_repeated_measures
 
     @staticmethod
     def _get_orthonormal_u_matrix(u_matrix):
