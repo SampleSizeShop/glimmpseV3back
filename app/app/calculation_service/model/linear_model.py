@@ -60,7 +60,7 @@ class LinearModel(object):
             self.from_study_design(kwargs['study_design'])
 
     def from_study_design(self, study_design: StudyDesign):
-        self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors.get_predictors())
+        self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
         self.hypothesis_beta = self.get_beta(study_design.isu_factors)
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
@@ -103,10 +103,12 @@ class LinearModel(object):
     def _get_row_values(self, row):
         return [col.get('value') for col in row]
 
-    @staticmethod
-    def calculate_design_matrix(predictors):
+    def calculate_design_matrix(self, isu_factors):
+        predictors = isu_factors.get_predictors()
         components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if p.in_hypothesis]
-        return kronecker_list(components)
+        kron_components = kronecker_list(components)
+        groups = self.get_groups(isu_factors)
+        return np.repeat(kron_components, groups, axis=0)
 
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
