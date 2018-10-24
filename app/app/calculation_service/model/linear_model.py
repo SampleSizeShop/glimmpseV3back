@@ -55,6 +55,7 @@ class LinearModel(object):
         self.hypothesis_sum_square = None
         self.nu_e = None
         self.calc_metadata()
+        self.errors = []
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -68,7 +69,7 @@ class LinearModel(object):
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = study_design.isu_factors.theta0
         self.alpha = study_design.alpha
-        self.total_n = self.calculate_total_n(study_design.isu_factors);
+        self.total_n = self.calculate_total_n(study_design.isu_factors)
         self.calc_metadata()
 
     def calculate_total_n(self, isu_factors):
@@ -91,7 +92,7 @@ class LinearModel(object):
 
     def get_beta(self, isu_factors):
         components = [self.get_combination_table_matrix(t) for t in isu_factors.marginal_means]
-        beta = np.concatenate(tuple(components), axis = 1)
+        beta = np.concatenate(tuple(components), axis=1)
         return beta
 
     def get_combination_table_matrix(self, table):
@@ -157,14 +158,14 @@ class LinearModel(object):
     @staticmethod
     def calculate_average_partial_c_matrix(predictor):
         no_groups = len(predictor.values)
-        average_matrix = np.ones(no_groups)/no_groups
+        average_matrix = np.ones(no_groups) / no_groups
         return average_matrix
 
     @staticmethod
     def calculate_main_effect_partial_c_matrix(predictor):
         i = np.identity(len(predictor.values) - 1) * -1
         v = np.matrix([np.ones(len(predictor.values) - 1)])
-        main_effect = np.transpose(np.concatenate((v, i), axis = 0))
+        main_effect = np.transpose(np.concatenate((v, i), axis=0))
         return main_effect
 
     @staticmethod
@@ -205,7 +206,7 @@ class LinearModel(object):
 
     def calculate_outcome_sigma_star(self, isu_factors):
         outcomes = isu_factors.get_outcomes()
-        standard_deviations = np.identity(len(outcomes))*[o.standard_deviation for o in outcomes]
+        standard_deviations = np.identity(len(outcomes)) * [o.standard_deviation for o in outcomes]
         sigma_star_outcomes = standard_deviations * isu_factors.outcome_correlation_matrix * standard_deviations
         return sigma_star_outcomes
 
@@ -229,7 +230,7 @@ class LinearModel(object):
 
     def calculate_cluster_sigma_star(self, cluster):
         components = [
-            (1 + (level.no_elements - 1) * level.intra_class_correlation)/level.no_elements
+            (1 + (level.no_elements - 1) * level.intra_class_correlation) / level.no_elements
             for level in cluster.levels
         ]
         cluster_sigma_star = 1
@@ -240,13 +241,13 @@ class LinearModel(object):
     def calc_theta(self):
         if self.c_matrix is None or self.hypothesis_beta is None or self.u_matrix is None:
             return None
-        return self.c_matrix*self.hypothesis_beta*self.u_matrix
+        return self.c_matrix * self.hypothesis_beta * self.u_matrix
 
     def calc_m(self):
         if self.c_matrix is None or self.essence_design_matrix is None:
             return None
         return (self.c_matrix *
-                np.linalg.inv((np.transpose(self.essence_design_matrix)*self.essence_design_matrix))
+                np.linalg.inv((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
                 * np.transpose(self.c_matrix))
 
     def calc_nu_e(self):
@@ -267,20 +268,21 @@ class LinearModel(object):
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
     def to_dict(self):
-        ret = dict(essence_design_matrix = utilities.serialise_matrix(self.essence_design_matrix),
-                   repeated_rows_in_design_matrix = self.repeated_rows_in_design_matrix,
-                   hypothesis_beta = utilities.serialise_matrix(self.hypothesis_beta),
-                   c_matrix = utilities.serialise_matrix(self.c_matrix),
-                   u_matrix = utilities.serialise_matrix(self.u_matrix),
-                   sigma_star = utilities.serialise_matrix(self.sigma_star),
-                   theta_zero = utilities.serialise_matrix(self.theta_zero),
-                   alpha = self.alpha,
-                   total_n = self.total_n,
-                   theta = utilities.serialise_matrix(self.theta),
-                   m = utilities.serialise_matrix(self.m),
-                   nu_e = self.nu_e,
-                   hypothesis_sum_square = utilities.serialise_matrix(self.hypothesis_sum_square),
-                   error_sum_square = utilities.serialise_matrix(self.error_sum_square))
+        ret = dict(essence_design_matrix=utilities.serialise_matrix(self.essence_design_matrix),
+                   repeated_rows_in_design_matrix=self.repeated_rows_in_design_matrix,
+                   hypothesis_beta=utilities.serialise_matrix(self.hypothesis_beta),
+                   c_matrix=utilities.serialise_matrix(self.c_matrix),
+                   u_matrix=utilities.serialise_matrix(self.u_matrix),
+                   sigma_star=utilities.serialise_matrix(self.sigma_star),
+                   theta_zero=utilities.serialise_matrix(self.theta_zero),
+                   alpha=self.alpha,
+                   total_n=self.total_n,
+                   theta=utilities.serialise_matrix(self.theta),
+                   m=utilities.serialise_matrix(self.m),
+                   nu_e=self.nu_e,
+                   hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
+                   error_sum_square=utilities.serialise_matrix(self.error_sum_square),
+                   errors=self.errors)
         return ret
 
     def serialize(self):
