@@ -13,6 +13,7 @@ import numpy as np
 
 bp = Blueprint('pyglimmpse', __name__, url_prefix='/api')
 
+
 def jsonify_tex(texString):
     data = {'texString': texString}
     json_response = json.dumps(data)
@@ -50,7 +51,13 @@ def calculate():
         results = calculate_power(model, scenario)
     else:
         results = calculate_sample_size(model, scenario)
-    json_response = json.dumps(dict(message='OK',
+
+    if model.errors:
+        message = 'Error!'
+    else:
+        message = 'OK'
+
+    json_response = json.dumps(dict(message=message,
                                     status=200,
                                     mimetype='application/json',
                                     results=results,
@@ -184,21 +191,25 @@ def calculate_power(model, scenario):
             results.append(dict(test=Tests.HOTELLING_LAWLEY.value, power=power.power))
         elif test == Tests.PILLAI_BARTLET:
             power = multirep.pbt_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                                                     total_N=model.total_n,
-                                                                     alpha=model.alpha,
-                                                                     error_sum_square=model.error_sum_square,
-                                                                     hypothesis_sum_square=model.hypothesis_sum_square)
+                                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                                        total_N=model.total_n,
+                                                        alpha=model.alpha,
+                                                        error_sum_square=model.error_sum_square,
+                                                        hypothesis_sum_square=model.hypothesis_sum_square)
             results.append(dict(test=Tests.PILLAI_BARTLET.value, power=power.power))
         elif test == Tests.WILKS_LIKLIEHOOD:
             power = multirep.wlk_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                                                     total_N=model.total_n,
-                                                                     alpha=model.alpha,
-                                                                     error_sum_square=model.error_sum_square,
-                                                                     hypothesis_sum_square=model.hypothesis_sum_square)
+                                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                                        total_N=model.total_n,
+                                                        alpha=model.alpha,
+                                                        error_sum_square=model.error_sum_square,
+                                                        hypothesis_sum_square=model.hypothesis_sum_square)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test, errormessage=power.error_message))
+
             results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value, power=power.power))
         elif test == Tests.BOX_CORRECTION:
             power = unirep.box(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -245,6 +256,3 @@ def calculate_power(model, scenario):
                                        optional_args=scenario.optional_args)
             results.append(dict(test=Tests.UNCORRECTED.value, power=power.power))
     return results
-
-
-
