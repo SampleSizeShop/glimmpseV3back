@@ -44,10 +44,8 @@ def client_side_log():
 def calculate():
     """Calculate power/samplesize from a study design"""
     data = request.data
-    # TODO: warning or exception
     scenario = StudyDesign().load_from_json(data)
     model = LinearModel()
-    # TODO: a lot of warning.
     model.from_study_design(scenario)
     if scenario.solve_for == SolveFor.POWER:
         results = calculate_power(model, scenario)
