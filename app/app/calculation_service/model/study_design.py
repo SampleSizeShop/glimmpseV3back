@@ -22,7 +22,8 @@ class StudyDesign:
                  gaussian_covariate: float = None,
                  scale_factor: float = None,
                  variance_scale_factor: [] = None,
-                 power_curve: int = None):
+                 power_curve: int = None,
+                 tolerance = 1e-10):
 
         # fed in
         self.isu_factors = isu_factors
@@ -37,6 +38,7 @@ class StudyDesign:
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
+        self.tolerance = tolerance
 
     def __eq__(self, other):
         comp = []
@@ -121,6 +123,8 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.variance_scale_factor = d['_varianceScaleFactors']
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
+        if d.get('tolerance'):
+            study_design.tolerance = d['tolerance']
         study_design.optional_args = self.default_optional_args()
 
         return study_design

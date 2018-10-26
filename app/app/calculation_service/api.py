@@ -205,10 +205,11 @@ def calculate_power(model, scenario):
                                                         total_N=model.total_n,
                                                         alpha=model.alpha,
                                                         error_sum_square=model.error_sum_square,
-                                                        hypothesis_sum_square=model.hypothesis_sum_square)
+                                                        hypothesis_sum_square=model.hypothesis_sum_square,
+                                                        tolerance=model.tolerance)
 
             if power.error_message:
-                model.errors.append(dict(errorname=test, errormessage=power.error_message))
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
 
             results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value, power=power.power))
         elif test == Tests.BOX_CORRECTION:

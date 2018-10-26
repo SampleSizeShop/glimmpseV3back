@@ -56,6 +56,7 @@ class LinearModel(object):
         self.nu_e = None
         self.calc_metadata()
         self.errors = []
+        self.tolerance = None
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -70,6 +71,7 @@ class LinearModel(object):
         self.theta_zero = study_design.isu_factors.theta0
         self.alpha = study_design.alpha
         self.total_n = self.calculate_total_n(study_design.isu_factors)
+        self.tolerance = study_design.tolerance
         self.calc_metadata()
 
     def calculate_total_n(self, isu_factors):
@@ -284,7 +286,8 @@ class LinearModel(object):
                    nu_e=self.nu_e,
                    hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
                    error_sum_square=utilities.serialise_matrix(self.error_sum_square),
-                   errors=self.errors)
+                   errors=self.errors,
+                   tolerance=self.tolerance)
         return ret
 
     def serialize(self):
