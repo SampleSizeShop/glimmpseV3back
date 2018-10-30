@@ -62,9 +62,9 @@ def calculate():
                                     mimetype='application/json',
                                     results=results,
                                     model=model.to_dict()))
+    json_response = json_response.replace('NaN', 'null')
 
     return json_response
-
 
 def calculate_sample_size(model, scenario):
     results = []
