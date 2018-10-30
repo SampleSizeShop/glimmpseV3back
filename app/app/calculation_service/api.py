@@ -188,6 +188,10 @@ def calculate_power(model, scenario):
                                                                            alpha=model.alpha,
                                                                            error_sum_square=model.error_sum_square,
                                                                            hypothesis_sum_square=model.hypothesis_sum_square)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.HOTELLING_LAWLEY.value, power=power.power))
         elif test == Tests.PILLAI_BARTLET:
             power = multirep.pbt_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -197,6 +201,10 @@ def calculate_power(model, scenario):
                                                         alpha=model.alpha,
                                                         error_sum_square=model.error_sum_square,
                                                         hypothesis_sum_square=model.hypothesis_sum_square)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.PILLAI_BARTLET.value, power=power.power))
         elif test == Tests.WILKS_LIKLIEHOOD:
             power = multirep.wlk_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -222,6 +230,10 @@ def calculate_power(model, scenario):
                                sigma_star=model.sigma_star,
                                alpha=model.alpha,
                                optional_args=scenario.optional_args)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.BOX_CORRECTION.value, power=power.power))
         elif test == Tests.GEISSER_GREENHOUSE:
             power = unirep.geisser_greenhouse(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -233,6 +245,10 @@ def calculate_power(model, scenario):
                                               sigma_star=model.sigma_star,
                                               alpha=model.alpha,
                                               optional_args=scenario.optional_args)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.GEISSER_GREENHOUSE.value, power=power.power))
         elif test == Tests.HUYNH_FELDT:
             power = unirep.hyuhn_feldt(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -244,6 +260,10 @@ def calculate_power(model, scenario):
                                        sigma_star=model.sigma_star,
                                        alpha=model.alpha,
                                        optional_args=scenario.optional_args)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.HUYNH_FELDT.value, power=power.power))
         elif test == Tests.UNCORRECTED:
             power = unirep.uncorrected(rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -255,5 +275,9 @@ def calculate_power(model, scenario):
                                        sigma_star=model.sigma_star,
                                        alpha=model.alpha,
                                        optional_args=scenario.optional_args)
+
+            if power.error_message:
+                model.errors.append(dict(errorname=test.value, errormessage=power.error_message))
+
             results.append(dict(test=Tests.UNCORRECTED.value, power=power.power))
     return results
