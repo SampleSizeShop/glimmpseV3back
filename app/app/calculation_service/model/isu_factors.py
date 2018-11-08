@@ -60,8 +60,8 @@ class IsuFactors(object):
                  theta0: [] = None,
                  outcome_correlation_matrix=None,
                  outcome_repeated_measure_st_devs=None,
-                 cMatrix = None,
-                 uMatrix = None,
+                 cMatrix: ContrastMatrix = None,
+                 uMatrix: ContrastMatrix = None,
                  **kwargs):
         self.variables = variables
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
