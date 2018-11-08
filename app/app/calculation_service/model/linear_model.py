@@ -64,7 +64,7 @@ class LinearModel(object):
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
         self.hypothesis_beta = self.get_beta(study_design.isu_factors)
-        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors.get_predictors())
+        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = study_design.isu_factors.theta0
@@ -114,23 +114,39 @@ class LinearModel(object):
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
 
-    def calculate_c_matrix(self, predictors):
-        partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
-        partials.append(np.matrix(np.identity(1)))
-        c_matrix = kronecker_list(partials)
-        return c_matrix
+    def calculate_c_matrix(self, isu_factors):
+        if isu_factors.cMatrix and isu_factors.cMatrix.hypothesis_type == HypothesisType.CUSTOM_C_MATRIX.value:
+            c_matrix = isu_factors.cMatrix.values
+            return c_matrix
+        else:
+            predictors = isu_factors.get_predictors()
+            partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
+            partials.append(np.matrix(np.identity(1)))
+            c_matrix = kronecker_list(partials)
+            return c_matrix
 
     @staticmethod
     def calculate_u_matrix(isu_factors):
-        u_outcomes = np.identity(len(isu_factors.get_outcomes()))
-        u_cluster = np.matrix([[1]])
-        u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(isu_factors)
-        u_orth = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
-        return u_orth
+        if isu_factors.uMatrix and isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+            u_matrix = isu_factors.uMatrix.values
+            return u_matrix
+        else:
+            u_outcomes = np.identity(len(isu_factors.get_outcomes()))
+            u_cluster = np.matrix([[1]])
+            u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(isu_factors)
+            u_orth = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
+            return u_orth
+
+    @staticmethod
+    def calculate_partial_u_matrix(repeated_measure):
+        if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
+            return repeated_measure.partial_matrix
+        else:
+            return repeated_measure.partial_u_matrix
 
     @staticmethod
     def _get_repeated_measures_u_matrix(isu_factors):
-        partial_u_list = [r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
+        partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
         orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
