@@ -5,7 +5,7 @@ class HypothesisType(Enum):
     GLOBAL_TRENDS = 'Global Trends'
     IDENTITY = 'Identity'
     POLYNOMIAL = 'Polynomial'
-    USER_DEFINED = 'Define partial C Matrix'
+    USER_DEFINED = 'Define partial contrasts'
     CUSTOM_C_MATRIX = 'Define hypothesis C Matrix'
     CUSTOM_U_MATRIX = 'Define hypothesis U Matrix'
 
