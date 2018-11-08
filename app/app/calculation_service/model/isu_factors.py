@@ -7,6 +7,21 @@ from app.calculation_service.model.predictor import Predictor
 from app.calculation_service.model.repeated_measure import RepeatedMeasure
 from app.calculation_service.utilities import list_compare
 
+class ContrastMatrix(object):
+    """Class to store a custom contrast matrix"""
+
+    def __init_(self,
+                matrixType: str = None,
+                values: np.matrix = None):
+        self.matrixType = matrixType
+        self.values = values
+
+    def from_dict(self, source):
+        if source['_type']:
+            self.matrixType =  source['_type']
+        if source['_values'] and source['_values']['data']:
+            self.values =  np.matrix(source['_values']['data'])
+
 
 class OutcomeRepeatedMeasureStDev(object):
     """Class to describe outcome repeated measure st deviations"""
@@ -59,6 +74,8 @@ class IsuFactors(object):
                  theta0: [] = None,
                  outcome_correlation_matrix=None,
                  outcome_repeated_measure_st_devs=None,
+                 cMatrix = None,
+                 uMatrix = None,
                  **kwargs):
         self.variables = variables
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
@@ -67,6 +84,8 @@ class IsuFactors(object):
         self.theta0 = theta0
         self.outcome_correlation_matrix = outcome_correlation_matrix
         self.outcome_repeated_measure_st_devs = outcome_repeated_measure_st_devs
+        self.cMatrix = cMatrix
+        self.uMatrix = uMatrix
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
@@ -114,6 +133,12 @@ class IsuFactors(object):
         if source.get('outcomeRepeatedMeasureStDevs'):
             self.outcome_repeated_measure_st_devs = \
                 [OutcomeRepeatedMeasureStDev(source=stdev) for stdev in source['outcomeRepeatedMeasureStDevs']]
+        if source.get('cMatrix'):
+            self.cMatrix = ContrastMatrix()
+            self.cMatrix.from_dict(source.get('cMatrix'))
+        if source.get('uMatrix'):
+            self.uMatrix = ContrastMatrix()
+            self.uMatrix.from_dict(source.get('uMatrix'))
 
     def get_hypothesis(self):
         return [f for f in self.variables if f.in_hypothesis]
