@@ -138,8 +138,15 @@ class LinearModel(object):
             return u_orth
 
     @staticmethod
+    def calculate_partial_u_matrix(repeated_measure):
+        if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
+            return repeated_measure.partial_matrix
+        else:
+            return repeated_measure.partial_u_matrix
+
+    @staticmethod
     def _get_repeated_measures_u_matrix(isu_factors):
-        partial_u_list = [r.partial_u_matrix for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
+        partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
         orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]

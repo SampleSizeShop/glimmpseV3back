@@ -1,5 +1,5 @@
 from app.calculation_service.model.enums import IsuFactorType, HypothesisType, Nature
-
+import numpy as np
 
 class IsuFactor(object):
     """
@@ -44,4 +44,4 @@ class IsuFactor(object):
         if source.get('child'):
             self.child = source['child']
         if source.get('partialMatrix'):
-            self.partial_matrix = source['partialMatrix']
+            self.partial_matrix = np.matrix(source['partialMatrix']['_values']['data'])
