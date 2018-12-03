@@ -14,6 +14,7 @@ class LinearModel(object):
     """class describing a GLMM"""
 
     def __init__(self,
+                 full_beta = False,
                  essence_design_matrix: np.matrix = None,
                  repeated_rows_in_design_matrix: float = None,
                  hypothesis_beta: np.matrix = None,
@@ -40,6 +41,7 @@ class LinearModel(object):
         theta_zero
             the matrix of constants to be subtracted from C*BETA*U (CBU)
         """
+        self.full_beta = full_beta
         self.essence_design_matrix = essence_design_matrix
         self.repeated_rows_in_design_matrix = repeated_rows_in_design_matrix
         self.hypothesis_beta = hypothesis_beta
@@ -120,7 +122,7 @@ class LinearModel(object):
             return c_matrix
         else:
             predictors = isu_factors.get_predictors()
-            if isu_factors.full_beta:
+            if self.full_beta:
                 partials = [self.calculate_partial_c_matrix(p) for p in predictors]
             else:
                 partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
@@ -151,9 +153,9 @@ class LinearModel(object):
             partial = LinearModel.calculate_average_partial_u_matrix(repeated_measure)
         return partial
 
-    @staticmethod
-    def _get_repeated_measures_u_matrix(isu_factors):
-        if isu_factors.full_beta:
+
+    def _get_repeated_measures_u_matrix(self, isu_factors):
+        if self.full_beta:
             partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
         else:
             partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
@@ -245,7 +247,7 @@ class LinearModel(object):
         return sigma_star_outcomes
 
     def calculate_rep_measure_sigma_star(self, isu_factors):
-        if isu_factors.full_beta:
+        if self.full_beta:
             repeated_measures = [measure for measure in isu_factors.get_repeated_measures()]
         else:
             repeated_measures = [measure for measure in isu_factors.get_repeated_measures() if measure.in_hypothesis]
