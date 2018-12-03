@@ -120,7 +120,10 @@ class LinearModel(object):
             return c_matrix
         else:
             predictors = isu_factors.get_predictors()
-            partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
+            if isu_factors.full_beta:
+                partials = [self.calculate_partial_c_matrix(p) for p in predictors]
+            else:
+                partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
             partials.append(np.matrix(np.identity(1)))
             c_matrix = kronecker_list(partials)
             return c_matrix
@@ -139,14 +142,21 @@ class LinearModel(object):
 
     @staticmethod
     def calculate_partial_u_matrix(repeated_measure):
-        if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
-            return repeated_measure.partial_matrix
+        if repeated_measure.in_hypothesis:
+            if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
+                partial = repeated_measure.partial_matrix
+            else:
+                partial = repeated_measure.partial_u_matrix
         else:
-            return repeated_measure.partial_u_matrix
+            partial = LinearModel.calculate_average_partial_u_matrix(repeated_measure)
+        return partial
 
     @staticmethod
     def _get_repeated_measures_u_matrix(isu_factors):
-        partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
+        if isu_factors.full_beta:
+            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
+        else:
+            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
         orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
@@ -157,6 +167,12 @@ class LinearModel(object):
     def _get_orthonormal_u_matrix(u_matrix):
         u_orth, t_decomp = np.linalg.qr(u_matrix)
         return u_orth
+
+    @staticmethod
+    def calculate_average_partial_u_matrix(repeated_measure):
+        no_rep = len(repeated_measure)
+        average_matrix = np.ones(no_rep) / no_rep
+        return average_matrix.T
 
     def calculate_partial_c_matrix(self, predictor):
         partial = None
@@ -229,7 +245,10 @@ class LinearModel(object):
         return sigma_star_outcomes
 
     def calculate_rep_measure_sigma_star(self, isu_factors):
-        repeated_measures = [measure for measure in isu_factors.get_repeated_measures() if measure.in_hypothesis]
+        if isu_factors.full_beta:
+            repeated_measures = [measure for measure in isu_factors.get_repeated_measures()]
+        else:
+            repeated_measures = [measure for measure in isu_factors.get_repeated_measures() if measure.in_hypothesis]
         if len(repeated_measures) == 0:
             return np.matrix([[1]])
         else:
