@@ -45,17 +45,20 @@ def calculate():
     """Calculate power/samplesize from a study design"""
     data = request.data
     scenario = StudyDesign().load_from_json(data)
-    model = LinearModel()
-    model.from_study_design(scenario)
-    if scenario.solve_for == SolveFor.POWER:
-        results = calculate_power(model, scenario)
-    else:
-        results = calculate_sample_size(model, scenario)
+    models = _generate_models(scenario)
 
-    if model.errors:
-        message = 'Error!'
-    else:
-        message = 'OK'
+    results = []
+    for model in models:
+        if scenario.solve_for == SolveFor.POWER:
+            result = calculate_power(model, scenario)
+        else:
+            result = calculate_sample_size(model, scenario)
+        results.append(result)
+
+        if model.errors:
+            message = 'Error!'
+        else:
+            message = 'OK'
 
     json_response = json.dumps(dict(message=message,
                                     status=200,
@@ -64,6 +67,17 @@ def calculate():
                                     model=model.to_dict()))
 
     return json_response
+
+
+def _generate_models(scenario):
+    """ Create a LinearModel object for each distinct set of parameters defined in the scenario"""
+    models = []
+    for alpha in scenario.alpha:
+        for target_power in scenario.target_power:
+            model = LinearModel()
+            model.from_study_design(scenario, alpha, target_power)
+            models.append(model)
+    return models
 
 
 def calculate_sample_size(model, scenario):

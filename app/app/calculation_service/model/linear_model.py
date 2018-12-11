@@ -62,7 +62,17 @@ class LinearModel(object):
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
 
-    def from_study_design(self, study_design: StudyDesign):
+    def from_study_design(self, study_design: StudyDesign,
+                          alpha: float,
+                          target_power: float):
+        """
+        Populate a LinearModel with Values from a study design.
+
+        :param study_design: A StudyDesign defined by the user
+        :param alpha: The Type one error to be used
+        :param target_power: The power for which minimum samplesize should be calculated
+        :return: LinearModel
+        """
         self.full_beta = study_design.full_beta
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
         self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
@@ -71,7 +81,7 @@ class LinearModel(object):
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = study_design.isu_factors.theta0
-        self.alpha = study_design.alpha
+        self.alpha = alpha
         self.total_n = self.calculate_total_n(study_design.isu_factors)
         self.calc_metadata()
 
