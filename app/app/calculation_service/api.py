@@ -10,6 +10,7 @@ from app.calculation_service.model.study_design import StudyDesign
 import numpy as np
 
 #from app.main import db
+from app.calculation_service.model.scenario_inputs import ScenarioInputs
 
 bp = Blueprint('pyglimmpse', __name__, url_prefix='/api')
 
@@ -44,6 +45,7 @@ def client_side_log():
 def calculate():
     """Calculate power/samplesize from a study design"""
     data = request.data
+    inputs = ScenarioInputs().load_from_json(data)
     scenario = StudyDesign().load_from_json(data)
     models = _generate_models(scenario)
 
