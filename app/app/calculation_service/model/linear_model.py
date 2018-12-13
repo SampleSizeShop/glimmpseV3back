@@ -4,10 +4,11 @@ from json import JSONEncoder
 
 import numpy as np
 from app.calculation_service import utilities
-from app.calculation_service.model.enums import PolynomialMatrices, HypothesisType
+from app.calculation_service.model.enums import PolynomialMatrices, HypothesisType, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.study_design import StudyDesign
 from app.calculation_service.utilities import kronecker_list
+from app.calculation_service.model.scenario_inputs import ScenarioInputs
 
 
 class LinearModel(object):
@@ -23,6 +24,7 @@ class LinearModel(object):
                  sigma_star: np.matrix = None,
                  theta_zero: np.matrix = None,
                  alpha: float = None,
+                 test: Tests = None,
                  total_n: float = None,
                  **kwargs):
         """
@@ -58,13 +60,12 @@ class LinearModel(object):
         self.nu_e = None
         self.calc_metadata()
         self.errors = []
+        self.test = test
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
 
-    def from_study_design(self, study_design: StudyDesign,
-                          alpha: float,
-                          target_power: float):
+    def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs):
         """
         Populate a LinearModel with Values from a study design.
 
@@ -75,20 +76,20 @@ class LinearModel(object):
         """
         self.full_beta = study_design.full_beta
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
-        self.repeated_rows_in_design_matrix = self.get_rep_n_from_study_design(study_design)
+        self.repeated_rows_in_design_matrix = inputs.smallest_group_size
         self.hypothesis_beta = self.get_beta(study_design.isu_factors)
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
         self.theta_zero = study_design.isu_factors.theta0
-        self.alpha = alpha
-        self.total_n = self.calculate_total_n(study_design.isu_factors)
+        self.alpha = inputs.alpha
+        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
+        self.test = inputs.test
 
-    def calculate_total_n(self, isu_factors):
-        smallest_group = isu_factors.smallest_group_size
+    def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
         groups = self.get_groups(isu_factors)
-        total_n = sum([smallest_group * g for g in groups])
+        total_n = sum([inputs.smallest_group_size * g for g in groups])
         return total_n
 
     def get_groups(self, isu_factors):
