@@ -26,6 +26,10 @@ class LinearModel(object):
                  alpha: float = None,
                  test: Tests = None,
                  total_n: float = None,
+                 target_power: float = None,
+                 smallest_group_size: float = None,
+                 scale_factor: float = None,
+                 variance_scale_factor: float = None,
                  **kwargs):
         """
         Parameters
@@ -61,6 +65,10 @@ class LinearModel(object):
         self.calc_metadata()
         self.errors = []
         self.test = test
+        self.target_power = target_power
+        self.smallest_group_size = smallest_group_size
+        self.scale_factor = scale_factor
+        self.variance_scale_factor = variance_scale_factor
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -85,6 +93,12 @@ class LinearModel(object):
         self.alpha = inputs.alpha
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
+        self.test = inputs.test
+        self.alpha = inputs.alpha
+        self.target_power = inputs.target_power
+        self.smallest_group_size = inputs.smallest_group_size
+        self.scale_factor = inputs.scale_factor
+        self.variance_scale_factor = inputs.variance_scale_factor
         self.test = inputs.test
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):

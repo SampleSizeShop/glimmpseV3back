@@ -1,7 +1,7 @@
 import json
 from json import JSONDecoder
 
-from app.calculation_service.model.enums import Tests
+from app.calculation_service.model.enums import Tests, SolveFor
 from app.calculation_service.model.isu_factors import IsuFactors
 
 
@@ -44,8 +44,11 @@ class ScenarioInputsDecoder(JSONDecoder):
         smallest_group_size = [],
         scale_factor = [],
         variance_scale_factor = []
+        solve_for = SolveFor.POWER
 
         d = json.loads(s)
+        if d.get('_solveFor'):
+            solve_for = SolveFor(d['_solveFor'])
         if d.get('_isuFactors'):
             isu_factors = IsuFactors(source=d['_isuFactors'])
             smallest_group_size = isu_factors.smallest_group_size
@@ -60,13 +63,22 @@ class ScenarioInputsDecoder(JSONDecoder):
         if d.get('_varianceScaleFactors'):
             variance_scale_factor = [val for val in d['_varianceScaleFactors']]
 
-        for a in alpha:
-            for p in target_power:
-                for g in smallest_group_size:
-                    for s in scale_factor:
-                        for t in tests:
-                            for v in variance_scale_factor:
-                                i = ScenarioInputs(a, p, g, s, t, v)
-                                inputs.append(i)
+        if solve_for == SolveFor.POWER:
+            for a in alpha:
+                    for g in smallest_group_size:
+                        for s in scale_factor:
+                            for t in tests:
+                                for v in variance_scale_factor:
+                                    i = ScenarioInputs(a, None, g, s, t, v)
+                                    inputs.append(i)
+        else:
+            for a in alpha:
+                for p in target_power:
+                    for g in smallest_group_size:
+                        for s in scale_factor:
+                            for t in tests:
+                                for v in variance_scale_factor:
+                                    i = ScenarioInputs(a, p, g, s, t, v)
+                                    inputs.append(i)
 
         return inputs
