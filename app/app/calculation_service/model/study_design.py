@@ -14,14 +14,9 @@ class StudyDesign:
                  isu_factors: IsuFactors = None,
                  target_event: TargetEvent = None,
                  solve_for: SolveFor = None,
-                 alpha: float = 0.05,
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
-                 target_power: float = None,
-                 selected_tests: [] = None,
                  gaussian_covariate: float = None,
-                 scale_factor: float = None,
-                 variance_scale_factor: [] = None,
                  power_curve: int = None,
                  full_beta: bool = False):
 
@@ -29,14 +24,9 @@ class StudyDesign:
         self.isu_factors = isu_factors
         self.target_event = target_event
         self.solve_for = solve_for
-        self.alpha = alpha
         self.confidence_interval_width = confidence_interval_width
-        self.target_power = target_power
         self.sample_size = sample_size
-        self.selected_tests = selected_tests
         self.gaussian_covariate = gaussian_covariate
-        self.scale_factor = scale_factor
-        self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
         self.full_beta = full_beta
 
@@ -107,20 +97,10 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.target_event = TargetEvent(d['_targetEvent'])
         if d.get('_solveFor'):
             study_design.solve_for = SolveFor(d['_solveFor'])
-        if d.get('_typeOneErrorRate'):
-            study_design.alpha = d['_typeOneErrorRate']
-        if d.get('_power'):
-            study_design.target_power = d['_power']
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
-        if d.get('_selectedTests'):
-            study_design.selected_tests = [Tests(t) for t in d['_selectedTests']]
         if d.get('_gaussianCovariate'):
             study_design.gaussian_covariate = d['_gaussianCovariate']
-        if d.get('_scaleFactor'):
-            study_design.scale_factor = d['_scaleFactor']
-        if d.get('_varianceScaleFactors'):
-            study_design.variance_scale_factor = d['_varianceScaleFactors']
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
         if d.get('_define_full_beta'):
