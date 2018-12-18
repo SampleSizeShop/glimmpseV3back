@@ -51,10 +51,19 @@ def calculate():
 
     results = []
     for model in models:
-        if scenario.solve_for == SolveFor.POWER:
-            result = calculate_power(model, scenario)
-        else:
-            result = calculate_sample_size(model, scenario)
+        try:
+            if scenario.solve_for == SolveFor.POWER:
+                result = calculate_power(model, scenario)
+            else:
+                result = calculate_sample_size(model, scenario)
+        except Exception as e:
+            result = [dict(test=Tests.WILKS_LIKLIEHOOD.value,
+                            error=e.args[0],
+                            alpha=model.alpha,
+                            target_power=model.target_power,
+                            means_scale_factor = model.scale_factor,
+                            variance_scale_factor = model.variance_scale_factor,
+                            total_n=model.total_n)]
         results.append(result[0])
 
         if model.errors:
