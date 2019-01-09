@@ -57,12 +57,12 @@ def calculate():
             else:
                 result = calculate_sample_size(model, scenario)
         except Exception as e:
-            result = [dict(test=Tests.WILKS_LIKLIEHOOD.value,
+            result = [dict(test=model.test.value,
                             error=e.args[0],
                             alpha=model.alpha,
                             target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
+                            means_scale_factor=model.scale_factor,
+                            variance_scale_factor=model.variance_scale_factor,
                             total_n=model.total_n)]
         results.append(result[0])
 
