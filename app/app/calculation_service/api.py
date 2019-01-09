@@ -95,7 +95,7 @@ def calculate_sample_size(model, scenario):
     if model.test == Tests.HOTELLING_LAWLEY:
         size = samplesize.samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -116,7 +116,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.PILLAI_BARTLET:
         size = samplesize.samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -137,7 +137,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.WILKS_LIKLIEHOOD:
         size = samplesize.samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -158,7 +158,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.BOX_CORRECTION:
         size = samplesize.samplesize(test=unirep.box,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -179,7 +179,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.GEISSER_GREENHOUSE:
         size = samplesize.samplesize(test=unirep.geisser_greenhouse,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -200,7 +200,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.HUYNH_FELDT:
         size = samplesize.samplesize(test=unirep.hyuhn_feldt,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
@@ -221,7 +221,7 @@ def calculate_sample_size(model, scenario):
     elif model.test == Tests.UNCORRECTED:
         size = samplesize.samplesize(test=unirep.uncorrected,
                                      rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.c_matrix),
+                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
                                      alpha=model.alpha,
                                      sigmaScale=1,
                                      sigma=model.sigma_star,
