@@ -85,10 +85,10 @@ class LinearModel(object):
         self.full_beta = study_design.full_beta
         self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
         self.repeated_rows_in_design_matrix = inputs.smallest_group_size
-        self.hypothesis_beta = self.get_beta(study_design.isu_factors)
+        self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors)
+        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, inputs)
         self.theta_zero = study_design.isu_factors.theta0
         self.alpha = inputs.alpha
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
@@ -118,9 +118,9 @@ class LinearModel(object):
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
 
-    def get_beta(self, isu_factors):
+    def get_beta(self, isu_factors, inputs: ScenarioInputs):
         components = [self.get_combination_table_matrix(t) for t in isu_factors.marginal_means]
-        beta = np.concatenate(tuple(components), axis=1)
+        beta = np.concatenate(tuple(components), axis=1) * inputs.scale_factor
         return beta
 
     def get_combination_table_matrix(self, table):
@@ -255,8 +255,8 @@ class LinearModel(object):
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
 
-    def calculate_sigma_star(self, isu_factors: IsuFactors):
-        outcome_component = self.calculate_outcome_sigma_star(isu_factors)
+    def calculate_sigma_star(self, isu_factors: IsuFactors, inputs):
+        outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
         if len(isu_factors.get_repeated_measures()) > 0:
             repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
         else:
@@ -267,9 +267,9 @@ class LinearModel(object):
             cluster_component = np.matrix([[1]])
         return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
 
-    def calculate_outcome_sigma_star(self, isu_factors):
+    def calculate_outcome_sigma_star(self, isu_factors, inputs):
         outcomes = isu_factors.get_outcomes()
-        standard_deviations = np.identity(len(outcomes)) * [o.standard_deviation for o in outcomes]
+        standard_deviations = np.identity(len(outcomes)) * [o.standard_deviation for o in outcomes] * np.sqrt(inputs.variance_scale_factor)
         sigma_star_outcomes = standard_deviations * isu_factors.outcome_correlation_matrix * standard_deviations
         return sigma_star_outcomes
 

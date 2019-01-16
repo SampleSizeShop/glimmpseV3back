@@ -105,6 +105,11 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
         if d.get('_define_full_beta'):
             study_design.full_beta = d['_define_full_beta']
+        if d.get('_scaleFactor'):
+            study_design.beta_scalar = d['_scaleFactor']
+        if d.get('_varianceScaleFactors'):
+            study_design.sigma_scalar = d['_varianceScaleFactors']
+
         study_design.optional_args = self.default_optional_args()
 
         return study_design
