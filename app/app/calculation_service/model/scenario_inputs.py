@@ -38,12 +38,12 @@ class ScenarioInputs:
 class ScenarioInputsDecoder(JSONDecoder):
     def decode(self, s: str) -> []:
         inputs = []
-        alpha = [],
-        target_power = [],
+        alpha = []
+        target_power = []
         tests = []
-        smallest_group_size = [],
-        scale_factor = [],
-        variance_scale_factor = []
+        smallest_group_size = [1]
+        scale_factor = [1]
+        variance_scale_factor = [1]
         solve_for = SolveFor.POWER
 
         d = json.loads(s)
@@ -51,7 +51,8 @@ class ScenarioInputsDecoder(JSONDecoder):
             solve_for = SolveFor(d['_solveFor'])
         if d.get('_isuFactors'):
             isu_factors = IsuFactors(source=d['_isuFactors'])
-            smallest_group_size = isu_factors.smallest_group_size
+            if solve_for == SolveFor.POWER and isu_factors.smallest_group_size and len(isu_factors.smallest_group_size) > 0:
+                smallest_group_size = isu_factors.smallest_group_size
         if d.get('_power'):
             target_power = [val for val in d['_power']]
         if d.get('_typeOneErrorRate'):
