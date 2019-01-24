@@ -39,12 +39,6 @@ class StudyDesignTestCase(unittest.TestCase):
         actual = StudyDesign()
         self.assertEqual(vars(expected), vars(actual))
 
-        # alpha = 0.05,
-        # target_power = None,
-        # selected_tests = None,
-        # scale_factor = None,
-        # variance_scale_factor = None,
-
     def test___str__(self):
         """Should print a statement containing name and values as a list"""
         expected = False
@@ -83,10 +77,6 @@ class StudyDesignTestCase(unittest.TestCase):
                  variance_scale_factor = 3
                  )
 
-        # target_power = 0.5,
-        # selected_tests = [Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
-        # scale_factor = 1,
-        # variance_scale_factor = [3, 4],
 
         json_data = open("model_2.json")
         data = json_data.read()
@@ -132,11 +122,6 @@ class StudyDesignTestCase(unittest.TestCase):
             variance_scale_factor=3
         )
 
-        # gaussian_covariate={'variance': 1}
-        # target_power = 0.5,
-        # selected_tests = [Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD],
-        # scale_factor = 1,
-        # variance_scale_factor = [3, 4],
 
         json_data = open("model_3.json")
         data = json_data.read()
