@@ -10,7 +10,7 @@ class ScenarioInputs:
     def __init__(self,
                  alpha: float = None,
                  target_power: float = None,
-                 smallest_group_size: float = None,
+                 smallest_group_size: list = [1],
                  scale_factor: float = 1,
                  test: Tests = None,
                  variance_scale_factor: float = 1
