@@ -23,3 +23,7 @@ def serialise_matrix(m):
         return ret
     else:
         return None
+
+def serialise_errors(errors):
+    output = [err.value for err in errors]
+    return output

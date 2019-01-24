@@ -11,6 +11,7 @@ import numpy as np
 
 #from app.main import db
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
+from app.constants import Constants
 
 bp = Blueprint('pyglimmpse', __name__, url_prefix='/api')
 
@@ -49,23 +50,23 @@ def calculate():
     scenario = StudyDesign().load_from_json(data)
     models = _generate_models(scenario, inputs)
 
+
     results = []
     for model in models:
         try:
             if scenario.solve_for == SolveFor.POWER:
-                result = calculate_power(model, scenario)
+                result = _calculate_power(model, scenario)
             else:
-                result = calculate_sample_size(model, scenario)
+                result = _calculate_sample_size(model, scenario)
         except Exception as e:
-            result = [dict(test=model.test.value,
-                            error=e.args[0],
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor=model.scale_factor,
-                            variance_scale_factor=model.variance_scale_factor,
-                            total_n=model.total_n)]
-        results.append(result[0])
+            print(e)
+            result = dict(test=model.test.value,
+                          samplesize=e.args[0],
+                          power=e.args[0],
+                          model=model.to_dict())
+        results.append(result)
 
+        # TODO: fix this and return all models
         if model.errors:
             message = 'Error!'
         else:
@@ -74,8 +75,7 @@ def calculate():
     json_response = json.dumps(dict(message=message,
                                     status=200,
                                     mimetype='application/json',
-                                    results=results,
-                                    model=model.to_dict()))
+                                    results=results))
 
     return json_response
 
@@ -90,275 +90,141 @@ def _generate_models(scenario: StudyDesign, inputs: []):
     return models
 
 
-def calculate_sample_size(model, scenario):
-    results = []
+def _calculate_sample_size(model, scenario):
+    size = None
     if model.test == Tests.HOTELLING_LAWLEY:
-        size = samplesize.samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     eval_HINVE=model.hypothesis_sum_square * model.nu_e,
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square)
-        results.append(dict(test=Tests.HOTELLING_LAWLEY.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _multirep_samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
+                                    model=model)
     elif model.test == Tests.PILLAI_BARTLET:
-        size = samplesize.samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     eval_HINVE=model.hypothesis_sum_square * model.nu_e,
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square)
-        results.append(dict(test=Tests.PILLAI_BARTLET.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _multirep_samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
+                                    model=model)
     elif model.test == Tests.WILKS_LIKLIEHOOD:
-        size = samplesize.samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     eval_HINVE=model.hypothesis_sum_square * model.nu_e,
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square)
-        results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _multirep_samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
+                                    model=model)
     elif model.test == Tests.BOX_CORRECTION:
-        size = samplesize.samplesize(test=unirep.box,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square,
-                                     optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.BOX_CORRECTION.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _unirep_samplesize(test=unirep.box,
+                                  model=model,
+                                  scenario=scenario)
     elif model.test == Tests.GEISSER_GREENHOUSE:
-        size = samplesize.samplesize(test=unirep.geisser_greenhouse,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square,
-                                     optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.GEISSER_GREENHOUSE.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _unirep_samplesize(test=unirep.geisser_greenhouse,
+                                  model=model,
+                                  scenario=scenario)
     elif model.test == Tests.HUYNH_FELDT:
-        size = samplesize.samplesize(test=unirep.hyuhn_feldt,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square,
-                                     optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.HUYNH_FELDT.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        size = _unirep_samplesize(test=unirep.hyuhn_feldt,
+                                  model=model,
+                                  scenario=scenario)
     elif model.test == Tests.UNCORRECTED:
-        size = samplesize.samplesize(test=unirep.uncorrected,
-                                     rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                     rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                     alpha=model.alpha,
-                                     sigmaScale=1,
-                                     sigma=model.sigma_star,
-                                     betaScale=1,
-                                     beta=model.hypothesis_beta,
-                                     targetPower=model.target_power,
-                                     rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                     error_sum_square=model.error_sum_square,
-                                     hypothesis_sum_square=model.hypothesis_sum_square,
-                                     optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.UNCORRECTED.value,
-                            samplesize=size,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
-    return results
+        size = _unirep_samplesize(test=unirep.uncorrected,
+                                  model=model,
+                                  scenario=scenario)
+    result = _samplesize_to_dict(model=model,
+                                 size=size)
+    return result
 
 
-def calculate_power(model, scenario):
-    results = []
-    if model.test == Tests.HOTELLING_LAWLEY:
-        power = multirep.hlt_two_moment_null_approximator_obrien_shieh(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                                                       rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                                                       total_N=model.total_n,
-                                                                       alpha=model.alpha,
-                                                                       error_sum_square=model.error_sum_square,
-                                                                       hypothesis_sum_square=model.hypothesis_sum_square)
-        results.append(dict(test=Tests.HOTELLING_LAWLEY.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+def _calculate_power(model, scenario):
+    power = None
+    if model.errors:
+        pass
+    elif model.test == Tests.HOTELLING_LAWLEY:
+        power = _multirep_power(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
+                                model=model)
     elif model.test == Tests.PILLAI_BARTLET:
-        power = multirep.pbt_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                                    rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                                    rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                                    total_N=model.total_n,
-                                                    alpha=model.alpha,
-                                                    error_sum_square=model.error_sum_square,
-                                                    hypothesis_sum_square=model.hypothesis_sum_square)
-        results.append(dict(test=Tests.PILLAI_BARTLET.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        power = _multirep_power(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
+                                model=model)
     elif model.test == Tests.WILKS_LIKLIEHOOD:
-        power = multirep.wlk_two_moment_null_approx(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                                    rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                                    rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                                    total_N=model.total_n,
-                                                    alpha=model.alpha,
-                                                    error_sum_square=model.error_sum_square,
-                                                    hypothesis_sum_square=model.hypothesis_sum_square)
-
-        if power.error_message:
-            model.errors.append(dict(errorname=test, errormessage=power.error_message))
-
-        results.append(dict(test=Tests.WILKS_LIKLIEHOOD.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        power = _multirep_power(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
+                                model=model)
     elif model.test == Tests.BOX_CORRECTION:
-        power = unirep.box(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                           rank_U=np.linalg.matrix_rank(model.u_matrix),
-                           total_N=model.total_n,
-                           rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                           error_sum_square=model.error_sum_square,
-                           hypo_sum_square=model.hypothesis_sum_square,
-                           sigma_star=model.sigma_star,
-                           alpha=model.alpha,
-                           optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.BOX_CORRECTION.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        power = _unirep_power(test=unirep.box,
+                              model=model,
+                              scenario=scenario)
     elif model.test == Tests.GEISSER_GREENHOUSE:
-        power = unirep.geisser_greenhouse(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                          rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                          total_N=model.total_n,
-                                          rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                          error_sum_square=model.error_sum_square,
-                                          hypo_sum_square=model.hypothesis_sum_square,
-                                          sigma_star=model.sigma_star,
-                                          alpha=model.alpha,
-                                          optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.GEISSER_GREENHOUSE.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        power = _unirep_power(test=unirep.geisser_greenhouse,
+                              model=model,
+                              scenario=scenario)
     elif model.test == Tests.HUYNH_FELDT:
-        power = unirep.hyuhn_feldt(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                   rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                   total_N=model.total_n,
-                                   rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                   error_sum_square=model.error_sum_square,
-                                   hypo_sum_square=model.hypothesis_sum_square,
-                                   sigma_star=model.sigma_star,
-                                   alpha=model.alpha,
-                                   optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.HUYNH_FELDT.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
+        power = _unirep_power(test=unirep.hyuhn_feldt,
+                              model=model,
+                              scenario=scenario)
     elif model.test == Tests.UNCORRECTED:
-        power = unirep.uncorrected(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                   rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                   total_N=model.total_n,
-                                   rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                   error_sum_square=model.error_sum_square,
-                                   hypo_sum_square=model.hypothesis_sum_square,
-                                   sigma_star=model.sigma_star,
-                                   alpha=model.alpha,
-                                   optional_args=scenario.optional_args)
-        results.append(dict(test=Tests.UNCORRECTED.value,
-                            power=power.power,
-                            alpha=model.alpha,
-                            target_power=model.target_power,
-                            means_scale_factor = model.scale_factor,
-                            variance_scale_factor = model.variance_scale_factor,
-                            total_n=model.total_n))
-    return results
+        power = _unirep_power(test=unirep.uncorrected,
+                              model=model,
+                              scenario=scenario)
+    result = _power_to_dict(model=model,
+                            power=power)
+    return result
+
+
+def _multirep_samplesize(test, model):
+    size = samplesize.samplesize(test=test,
+                                 rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                 rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                 alpha=model.alpha,
+                                 sigmaScale=1,
+                                 sigma=model.sigma_star,
+                                 betaScale=1,
+                                 beta=model.hypothesis_beta,
+                                 targetPower=model.target_power,
+                                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                 eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                 error_sum_square=model.error_sum_square,
+                                 hypothesis_sum_square=model.hypothesis_sum_square)
+    return size
+
+
+def _unirep_samplesize(test, model, scenario):
+    size = samplesize.samplesize(test=test,
+                                 rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                 rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                 alpha=model.alpha,
+                                 sigmaScale=1,
+                                 sigma=model.sigma_star,
+                                 betaScale=1,
+                                 beta=model.hypothesis_beta,
+                                 targetPower=model.target_power,
+                                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                 error_sum_square=model.error_sum_square,
+                                 hypothesis_sum_square=model.hypothesis_sum_square,
+                                 optional_args=scenario.optional_args)
+    return size
+
+
+def _samplesize_to_dict(model, size):
+    return dict(test=model.test.value,
+                samplesize=size,
+                model=model.to_dict())
+
+
+def _multirep_power(test, model):
+    power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
+                 rank_U=np.linalg.matrix_rank(model.u_matrix),
+                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                 total_N=model.total_n,
+                 alpha=model.alpha,
+                 error_sum_square=model.error_sum_square,
+                 hypothesis_sum_square=model.hypothesis_sum_square)
+    return power
+
+
+def _unirep_power(test, model, scenario):
+    power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
+                 rank_U=np.linalg.matrix_rank(model.u_matrix),
+                 total_N=model.total_n,
+                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                 error_sum_square=model.error_sum_square,
+                 hypo_sum_square=model.hypothesis_sum_square,
+                 sigma_star=model.sigma_star,
+                 alpha=model.alpha,
+                 optional_args=scenario.optional_args)
+    return power
+
+
+def _power_to_dict(model, power):
+    pow = 'Not Calculated.'
+    if power:
+        pow = power.power
+    result = dict(test=model.test.value,
+                  power=pow,
+                  model=model.to_dict())
+    return result

@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import re
-from app.models import Matrix
+from app.calculation_service.models import Matrix
 
 
 class ModelTestCase(unittest.TestCase):
