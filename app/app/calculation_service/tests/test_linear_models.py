@@ -44,6 +44,6 @@ class LinearModelsTestCase(unittest.TestCase):
         isufactors1 = IsuFactors()
         isufactors1.variables = [repeated_measure1, repeated_measure2, repeated_measure3]
 
-        actual = LinearModel._get_repeated_measures_u_matrix(isufactors1)
+        actual = LinearModel._get_repeated_measures_u_matrix(LinearModel(), isufactors1)
 
         np.testing.assert_array_almost_equal(expected, actual, decimal=6)

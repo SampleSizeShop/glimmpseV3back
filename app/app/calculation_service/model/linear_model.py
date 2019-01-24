@@ -3,12 +3,15 @@ import warnings
 from json import JSONEncoder
 
 import numpy as np
+
+from app.constants import Constants
 from app.calculation_service import utilities
-from app.calculation_service.model.enums import PolynomialMatrices, HypothesisType, Tests
+from app.calculation_service.model.enums import PolynomialMatrices, HypothesisType, Tests, SolveFor
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.study_design import StudyDesign
 from app.calculation_service.utilities import kronecker_list
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
+from app.calculation_service.model.predictor import Predictor
 
 
 class LinearModel(object):
@@ -30,6 +33,7 @@ class LinearModel(object):
                  smallest_group_size: float = None,
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
+                 smallest_realizable_design: float = None,
                  **kwargs):
         """
         Parameters
@@ -69,9 +73,37 @@ class LinearModel(object):
         self.smallest_group_size = smallest_group_size
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
+        self.smallest_realizable_design = smallest_realizable_design
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
+
+    def to_dict(self):
+        ret = dict(essence_design_matrix=utilities.serialise_matrix(self.essence_design_matrix),
+                   repeated_rows_in_design_matrix=self.repeated_rows_in_design_matrix,
+                   full_beta = self.full_beta,
+                   hypothesis_beta=utilities.serialise_matrix(self.hypothesis_beta),
+                   c_matrix=utilities.serialise_matrix(self.c_matrix),
+                   u_matrix=utilities.serialise_matrix(self.u_matrix),
+                   sigma_star=utilities.serialise_matrix(self.sigma_star),
+                   theta_zero=utilities.serialise_matrix(self.theta_zero),
+                   alpha=self.alpha,
+                   total_n=self.total_n,
+                   theta=utilities.serialise_matrix(self.theta),
+                   m=utilities.serialise_matrix(self.m),
+                   nu_e=self.nu_e,
+                   hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
+                   error_sum_square=utilities.serialise_matrix(self.error_sum_square),
+                   errors=utilities.serialise_errors(self.errors),
+                   test=self.test.value,
+                   target_power = self.target_power,
+                   smallest_group_size = self.smallest_group_size,
+                   means_scale_factor = self.scale_factor,
+                   variance_scale_factor = self.variance_scale_factor,
+                   smallest_realizable_design=self.smallest_realizable_design,
+                   )
+        return ret
+
 
     def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs):
         """
@@ -91,24 +123,42 @@ class LinearModel(object):
         self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, inputs)
         self.theta_zero = study_design.isu_factors.theta0
         self.alpha = inputs.alpha
-        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
-        self.calc_metadata()
         self.test = inputs.test
         self.alpha = inputs.alpha
         self.target_power = inputs.target_power
-        self.smallest_group_size = inputs.smallest_group_size
         self.scale_factor = inputs.scale_factor
         self.variance_scale_factor = inputs.variance_scale_factor
         self.test = inputs.test
+        self.smallest_group_size = inputs.smallest_group_size
+        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
+        self.calc_metadata()
+        if study_design.solve_for == SolveFor.SAMPLESIZE:
+            self.calculate_smallest_realizable_design(study_design.isu_factors, inputs)
+
+    def calculate_smallest_realizable_design(self, isu_factors, inputs):
+        if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
+            while self.nu_e <= 0:
+                self.smallest_group_size = self.smallest_group_size + 1
+                self.total_n = self.calculate_total_n(isu_factors, inputs)
+                self.calc_metadata()
+            err = set(self.errors)
+            err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
+            self.errors = list(err)
+        else:
+            self.smallest_realizable_design = self.total_n
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
         groups = self.get_groups(isu_factors)
-        total_n = sum([inputs.smallest_group_size * g for g in groups])
+        total_n = sum([self.smallest_group_size * g for g in groups])
         return total_n
 
     def get_groups(self, isu_factors):
-        tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
-        groups = [c.get('value') for t in tables for r in t for c in r]
+        groups = [1]
+        hypothesis = isu_factors.get_hypothesis()
+        predictors_in_hypothesis = [f for f in hypothesis if type(f) == Predictor]
+        if len(predictors_in_hypothesis) > 0:
+            tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
+            groups = [c.get('value') for t in tables for r in t for c in r]
         return groups
 
     def calc_metadata(self):
@@ -117,6 +167,15 @@ class LinearModel(object):
         self.nu_e = self.calc_nu_e()
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
+
+    def calc_nu_e(self):
+        if self.total_n is None or self.essence_design_matrix is None:
+            return None
+        nu_e = self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
+        if int(nu_e) <= 0:
+            self.errors.append(Constants.ERR_ERROR_DEG_FREEDOM)
+        return int(nu_e)
+
 
     def get_beta(self, isu_factors, inputs: ScenarioInputs):
         components = [self.get_combination_table_matrix(t) for t in isu_factors.marginal_means]
@@ -316,12 +375,6 @@ class LinearModel(object):
                 np.linalg.inv((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
                 * np.transpose(self.c_matrix))
 
-    def calc_nu_e(self):
-        if self.total_n is None or self.essence_design_matrix is None:
-            return None
-        nu_e = self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
-        return int(nu_e)
-
     def calc_error_sum_square(self):
         if self.nu_e is None or self.sigma_star is None:
             return None
@@ -333,23 +386,6 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
-    def to_dict(self):
-        ret = dict(essence_design_matrix=utilities.serialise_matrix(self.essence_design_matrix),
-                   repeated_rows_in_design_matrix=self.repeated_rows_in_design_matrix,
-                   hypothesis_beta=utilities.serialise_matrix(self.hypothesis_beta),
-                   c_matrix=utilities.serialise_matrix(self.c_matrix),
-                   u_matrix=utilities.serialise_matrix(self.u_matrix),
-                   sigma_star=utilities.serialise_matrix(self.sigma_star),
-                   theta_zero=utilities.serialise_matrix(self.theta_zero),
-                   alpha=self.alpha,
-                   total_n=self.total_n,
-                   theta=utilities.serialise_matrix(self.theta),
-                   m=utilities.serialise_matrix(self.m),
-                   nu_e=self.nu_e,
-                   hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
-                   error_sum_square=utilities.serialise_matrix(self.error_sum_square),
-                   errors=self.errors)
-        return ret
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
