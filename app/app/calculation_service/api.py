@@ -66,14 +66,7 @@ def calculate():
                           model=model.to_dict())
         results.append(result)
 
-        # TODO: fix this and return all models
-        if model.errors:
-            message = 'Error!'
-        else:
-            message = 'OK'
-
-    json_response = json.dumps(dict(message=message,
-                                    status=200,
+    json_response = json.dumps(dict(status=200,
                                     mimetype='application/json',
                                     results=results))
 
@@ -93,32 +86,33 @@ def _generate_models(scenario: StudyDesign, inputs: []):
 def _calculate_sample_size(model, scenario):
     size = None
     if model.test == Tests.HOTELLING_LAWLEY:
-        size = _multirep_samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
+        size, power = _multirep_samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
                                     model=model)
     elif model.test == Tests.PILLAI_BARTLET:
-        size = _multirep_samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
+        size, power = _multirep_samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
                                     model=model)
     elif model.test == Tests.WILKS_LIKLIEHOOD:
-        size = _multirep_samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
+        size, power = _multirep_samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
                                     model=model)
     elif model.test == Tests.BOX_CORRECTION:
-        size = _unirep_samplesize(test=unirep.box,
+        size, power = _unirep_samplesize(test=unirep.box,
                                   model=model,
                                   scenario=scenario)
     elif model.test == Tests.GEISSER_GREENHOUSE:
-        size = _unirep_samplesize(test=unirep.geisser_greenhouse,
+        size, power = _unirep_samplesize(test=unirep.geisser_greenhouse,
                                   model=model,
                                   scenario=scenario)
     elif model.test == Tests.HUYNH_FELDT:
-        size = _unirep_samplesize(test=unirep.hyuhn_feldt,
+        size, power = _unirep_samplesize(test=unirep.hyuhn_feldt,
                                   model=model,
                                   scenario=scenario)
     elif model.test == Tests.UNCORRECTED:
-        size = _unirep_samplesize(test=unirep.uncorrected,
+        size, power = _unirep_samplesize(test=unirep.uncorrected,
                                   model=model,
                                   scenario=scenario)
     result = _samplesize_to_dict(model=model,
-                                 size=size)
+                                 size=size,
+                                 power=power)
     return result
 
 
@@ -157,42 +151,43 @@ def _calculate_power(model, scenario):
 
 
 def _multirep_samplesize(test, model):
-    size = samplesize.samplesize(test=test,
-                                 rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                 alpha=model.alpha,
-                                 sigmaScale=1,
-                                 sigma=model.sigma_star,
-                                 betaScale=1,
-                                 beta=model.hypothesis_beta,
-                                 targetPower=model.target_power,
-                                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                 eval_HINVE=model.hypothesis_sum_square * model.nu_e,
-                                 error_sum_square=model.error_sum_square,
-                                 hypothesis_sum_square=model.hypothesis_sum_square)
-    return size
+    size, power = samplesize.samplesize(test=test,
+                                        rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                        alpha=model.alpha,
+                                        sigmaScale=1,
+                                        sigma=model.sigma_star,
+                                        betaScale=1,
+                                        beta=model.hypothesis_beta,
+                                        targetPower=model.target_power,
+                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                        eval_HINVE=model.hypothesis_sum_square * model.nu_e,
+                                        error_sum_square=model.error_sum_square,
+                                        hypothesis_sum_square=model.hypothesis_sum_square)
+    return size, power
 
 
 def _unirep_samplesize(test, model, scenario):
-    size = samplesize.samplesize(test=test,
-                                 rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                 alpha=model.alpha,
-                                 sigmaScale=1,
-                                 sigma=model.sigma_star,
-                                 betaScale=1,
-                                 beta=model.hypothesis_beta,
-                                 targetPower=model.target_power,
-                                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                 error_sum_square=model.error_sum_square,
-                                 hypothesis_sum_square=model.hypothesis_sum_square,
-                                 optional_args=scenario.optional_args)
-    return size
+    size, power = samplesize.samplesize(test=test,
+                                        rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                        alpha=model.alpha,
+                                        sigmaScale=1,
+                                        sigma=model.sigma_star,
+                                        betaScale=1,
+                                        beta=model.hypothesis_beta,
+                                        targetPower=model.target_power,
+                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                        error_sum_square=model.error_sum_square,
+                                        hypothesis_sum_square=model.hypothesis_sum_square,
+                                        optional_args=scenario.optional_args)
+    return size, power
 
 
-def _samplesize_to_dict(model, size):
+def _samplesize_to_dict(model, size, power):
     return dict(test=model.test.value,
                 samplesize=size,
+                power=power,
                 model=model.to_dict())
 
 
