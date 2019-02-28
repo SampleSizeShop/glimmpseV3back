@@ -34,6 +34,7 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
+                 groups = None,
                  **kwargs):
         """
         Parameters
@@ -132,6 +133,7 @@ class LinearModel(object):
         self.smallest_group_size = inputs.smallest_group_size
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
+        self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
             self.calculate_smallest_realizable_design(study_design.isu_factors, inputs)
 
