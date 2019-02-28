@@ -74,7 +74,7 @@ class LinearModel(object):
         self.smallest_group_size = smallest_group_size
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
-        self.smallest_realizable_design = smallest_realizable_design
+        self.minimum_smallest_group_size = smallest_realizable_design
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -101,7 +101,7 @@ class LinearModel(object):
                    smallest_group_size = self.smallest_group_size,
                    means_scale_factor = self.scale_factor,
                    variance_scale_factor = self.variance_scale_factor,
-                   smallest_realizable_design=self.smallest_realizable_design,
+                   smallest_realizable_design=self.minimum_smallest_group_size,
                    )
         return ret
 
@@ -135,9 +135,9 @@ class LinearModel(object):
         self.calc_metadata()
         self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
-            self.calculate_smallest_realizable_design(study_design.isu_factors, inputs)
+            self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
 
-    def calculate_smallest_realizable_design(self, isu_factors, inputs):
+    def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
             while self.nu_e <= 0:
                 self.smallest_group_size = self.smallest_group_size + 1
@@ -147,7 +147,7 @@ class LinearModel(object):
             err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
             self.errors = list(err)
         else:
-            self.smallest_realizable_design = self.total_n
+            self.minimum_smallest_group_size = self.total_n
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
         groups = self.get_groups(isu_factors)
