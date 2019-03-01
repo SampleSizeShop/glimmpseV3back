@@ -8,7 +8,7 @@ WORKDIR /app
 RUN pip install -U pip
 RUN pip install -r /tmp/requirements.txt
 RUN python3 -m pip install --no-cache-dir scipy==1.1.0
-RUN python3 -m pip install --no-cache-dir --index-url https://test.pypi.org/simple/ pyglimmpse==0.0.17
+RUN python3 -m pip install --no-cache-dir --index-url https://test.pypi.org/simple/ pyglimmpse==0.0.18
 
 
 ENV LISTEN_PORT 5000
