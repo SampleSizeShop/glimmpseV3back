@@ -158,9 +158,8 @@ def _multirep_samplesize(test, model):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        m=model.m,
-                                        t=(model.theta - model.theta_zero),
-                                        groups=model.groups,
+                                        delta=model.delta(),
+                                        relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size)
     return size, power
 
@@ -173,9 +172,8 @@ def _unirep_samplesize(test, model, scenario):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        m=model.m,
-                                        t=(model.theta - model.theta_zero),
-                                        groups = model.groups,
+                                        delta=model.delta(),
+                                        relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size,
                                         optional_args=scenario.optional_args)
     return size, power

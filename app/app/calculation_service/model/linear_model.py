@@ -388,6 +388,9 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
+    def delta(self):
+        return np.transpose(self.theta - self.theta_zero) * np.linalg.inv(self.m) * (self.theta-self.theta_zero)
+
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
