@@ -155,15 +155,12 @@ def _multirep_samplesize(test, model):
                                         rank_C=np.linalg.matrix_rank(model.c_matrix),
                                         rank_U=np.linalg.matrix_rank(model.u_matrix),
                                         alpha=model.alpha,
-                                        sigmaScale=1,
-                                        sigma=model.sigma_star,
-                                        betaScale=1,
-                                        beta=model.hypothesis_beta,
+                                        sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        eval_HINVE=model.hypothesis_sum_square * model.nu_e,
-                                        error_sum_square=model.error_sum_square,
-                                        hypothesis_sum_square=model.hypothesis_sum_square)
+                                        delta=model.delta(),
+                                        relative_group_sizes=model.groups,
+                                        starting_smallest_group_size=model.minimum_smallest_group_size)
     return size, power
 
 
@@ -172,14 +169,12 @@ def _unirep_samplesize(test, model, scenario):
                                         rank_C=np.linalg.matrix_rank(model.c_matrix),
                                         rank_U=np.linalg.matrix_rank(model.u_matrix),
                                         alpha=model.alpha,
-                                        sigmaScale=1,
-                                        sigma=model.sigma_star,
-                                        betaScale=1,
-                                        beta=model.hypothesis_beta,
+                                        sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        error_sum_square=model.error_sum_square,
-                                        hypothesis_sum_square=model.hypothesis_sum_square,
+                                        delta=model.delta(),
+                                        relative_group_sizes=model.groups,
+                                        starting_smallest_group_size=model.minimum_smallest_group_size,
                                         optional_args=scenario.optional_args)
     return size, power
 
