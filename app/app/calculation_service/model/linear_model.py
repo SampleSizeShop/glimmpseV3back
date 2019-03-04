@@ -150,7 +150,12 @@ class LinearModel(object):
             self.minimum_smallest_group_size = self.total_n
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
-        groups = self.get_groups(isu_factors)
+        groups = [1]
+        predictors = isu_factors.get_predictors()
+        predictors_in_hypothesis = [f for f in predictors if type(f) == Predictor]
+        if len(predictors_in_hypothesis) > 0:
+            tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
+            groups = [c.get('value') for t in tables for r in t for c in r]
         total_n = sum([self.smallest_group_size * g for g in groups])
         return total_n
 
