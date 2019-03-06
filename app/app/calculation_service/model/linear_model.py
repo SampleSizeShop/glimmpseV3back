@@ -12,6 +12,9 @@ from app.calculation_service.model.study_design import StudyDesign
 from app.calculation_service.utilities import kronecker_list
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
 from app.calculation_service.model.predictor import Predictor
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
+
+from pyglimmpse import NonCentralityDistribution
 
 
 class LinearModel(object):
@@ -34,7 +37,6 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
-                 groups = None,
                  **kwargs):
         """
         Parameters
@@ -121,7 +123,7 @@ class LinearModel(object):
         self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
         self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
         self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, inputs)
+        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate, inputs)
         self.theta_zero = study_design.isu_factors.theta0
         self.alpha = inputs.alpha
         self.test = inputs.test
@@ -133,9 +135,21 @@ class LinearModel(object):
         self.smallest_group_size = inputs.smallest_group_size
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
-        self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
             self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+        if study_design.gaussian_covariate:
+            self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
+
+    def calculate_noncentrality_distribution(self, study_design: StudyDesign):
+        return NonCentralityDistribution(test=self.test,
+                                             FEssence=self.essence_design_matrix,
+                                             perGroupN=self.smallest_group_size,
+                                             CFixed=self.c_matrix,
+                                             CRand=1,
+                                             thetaDiff=self.theta-self.theta_zero,
+                                             sigmaStar=self.sigma_star,
+                                             stddevG=study_design.gaussian_covariate.standard_deviation,
+                                             exact=study_design.gaussian_covariate.exact)
 
     def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
@@ -321,7 +335,7 @@ class LinearModel(object):
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
 
-    def calculate_sigma_star(self, isu_factors: IsuFactors, inputs):
+    def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
         outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
         if len(isu_factors.get_repeated_measures()) > 0:
             repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
@@ -331,7 +345,12 @@ class LinearModel(object):
             cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
         else:
             cluster_component = np.matrix([[1]])
-        return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+        sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+        if gaussian_covariate:
+            t = self.u_matrix.T*gaussian_covariate.correlations
+            adj = t * np.power(gaussian_covariate.standard_deviation, 2) * t.T
+            sigma_star = sigma_star - adj
+        return  sigma_star
 
     def calculate_outcome_sigma_star(self, isu_factors, inputs):
         outcomes = isu_factors.get_outcomes()

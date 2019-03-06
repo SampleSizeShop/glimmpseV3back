@@ -66,7 +66,7 @@ class StudyDesignTestCase(unittest.TestCase):
                                solve_for=SolveFor.POWER,
                                confidence_interval_width=1,
                                sample_size=10,
-                               gaussian_covariate={'variance': 1})
+                               gaussian_covariate=None)
 
         inputs = ScenarioInputs(
                  alpha = 0.05,

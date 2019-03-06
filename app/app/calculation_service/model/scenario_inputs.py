@@ -13,7 +13,8 @@ class ScenarioInputs:
                  smallest_group_size: list = [1],
                  scale_factor: float = 1,
                  test: Tests = None,
-                 variance_scale_factor: float = 1
+                 variance_scale_factor: float = 1,
+                 quantile: float = 0.5
                  ):
         self.alpha = alpha
         if target_power:
@@ -29,6 +30,10 @@ class ScenarioInputs:
             self.variance_scale_factor = variance_scale_factor
         else:
             self.variance_scale_factor = 1
+        if quantile:
+            self.quantile = quantile
+        else:
+            self.quantile = 0.5
         self.test = test
 
     def load_from_json(self, json_str: str):
@@ -45,6 +50,7 @@ class ScenarioInputsDecoder(JSONDecoder):
         scale_factor = [1]
         variance_scale_factor = [1]
         solve_for = SolveFor.POWER
+        quantiles = [0.5]
 
         d = json.loads(s)
         if d.get('_solveFor'):
@@ -63,6 +69,8 @@ class ScenarioInputsDecoder(JSONDecoder):
             scale_factor = [val for val in d['_scaleFactor']]
         if d.get('_varianceScaleFactors'):
             variance_scale_factor = [val for val in d['_varianceScaleFactors']]
+        if d.get('_quantiles'):
+            quantiles = [val for val in d['_quantiles']]
 
         if solve_for == SolveFor.POWER:
             for a in alpha:
@@ -70,8 +78,9 @@ class ScenarioInputsDecoder(JSONDecoder):
                         for s in scale_factor:
                             for t in tests:
                                 for v in variance_scale_factor:
-                                    i = ScenarioInputs(a, None, g, s, t, v)
-                                    inputs.append(i)
+                                    for q in quantiles:
+                                        i = ScenarioInputs(a, None, g, s, t, v, q)
+                                        inputs.append(i)
         else:
             for a in alpha:
                 for p in target_power:
@@ -79,7 +88,8 @@ class ScenarioInputsDecoder(JSONDecoder):
                         for s in scale_factor:
                             for t in tests:
                                 for v in variance_scale_factor:
-                                    i = ScenarioInputs(a, p, g, s, t, v)
-                                    inputs.append(i)
+                                    for q in quantiles:
+                                        i = ScenarioInputs(a, p, g, s, t, v, q)
+                                        inputs.append(i)
 
         return inputs

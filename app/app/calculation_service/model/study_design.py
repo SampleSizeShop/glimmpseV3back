@@ -6,6 +6,7 @@ from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, O
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.power_curve import PowerCurve
 from app.calculation_service.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
 
 class StudyDesign:
@@ -16,7 +17,7 @@ class StudyDesign:
                  solve_for: SolveFor = None,
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
-                 gaussian_covariate: float = None,
+                 gaussian_covariate: GaussianCovariate = None,
                  power_curve: int = None,
                  full_beta: bool = False):
 
@@ -100,7 +101,7 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_gaussianCovariate'):
-            study_design.gaussian_covariate = d['_gaussianCovariate']
+            study_design.gaussian_covariate = GaussianCovariate(source=['_gaussianCovariate'])
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
         if d.get('_define_full_beta'):
