@@ -85,7 +85,9 @@ def _generate_models(scenario: StudyDesign, inputs: []):
 
 def _calculate_sample_size(model, scenario):
     size = None
-    if model.test == Tests.HOTELLING_LAWLEY:
+    if model.errors:
+        pass
+    elif model.test == Tests.HOTELLING_LAWLEY:
         size, power = _multirep_samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
                                     model=model)
     elif model.test == Tests.PILLAI_BARTLET:
