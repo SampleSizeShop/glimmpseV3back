@@ -146,8 +146,7 @@ class LinearModel(object):
             err = set(self.errors)
             err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
             self.errors = list(err)
-        else:
-            self.minimum_smallest_group_size = self.total_n
+        self.minimum_smallest_group_size = self.total_n
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
         groups = self.get_groups(isu_factors)
