@@ -37,6 +37,7 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
+                 groups = None,
                  **kwargs):
         """
         Parameters
@@ -135,8 +136,11 @@ class LinearModel(object):
         self.smallest_group_size = inputs.smallest_group_size
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
+        self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
             self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+        if np.linalg.matrix_rank(self.delta()) == 0:
+            self.errors.append("""Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
         if study_design.gaussian_covariate:
             self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
 
@@ -160,8 +164,7 @@ class LinearModel(object):
             err = set(self.errors)
             err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
             self.errors = list(err)
-        else:
-            self.minimum_smallest_group_size = self.total_n
+        self.minimum_smallest_group_size = self.total_n
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
         groups = [1]
