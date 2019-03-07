@@ -136,6 +136,8 @@ class LinearModel(object):
         self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
             self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+        if np.linalg.matrix_rank(self.delta()) == 0:
+            self.errors.append("""Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
 
     def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
