@@ -188,24 +188,23 @@ def _samplesize_to_dict(model, size, power):
 
 def _multirep_power(test, model):
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 total_N=model.total_n,
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
                  alpha=model.alpha,
-                 error_sum_square=model.error_sum_square,
-                 hypothesis_sum_square=model.hypothesis_sum_square)
+                 sigma_star=model.sigma_star,
+                 delta_es=model.delta())
     return power
 
 
 def _unirep_power(test, model, scenario):
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                 total_N=model.total_n,
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 error_sum_square=model.error_sum_square,
-                 hypo_sum_square=model.hypothesis_sum_square,
-                 sigma_star=model.sigma_star,
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
                  alpha=model.alpha,
+                 sigma_star=model.sigma_star,
+                 delta_es=model.delta(),
                  optional_args=scenario.optional_args)
     return power
 
