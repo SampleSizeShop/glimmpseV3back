@@ -101,7 +101,7 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_gaussianCovariate'):
-            study_design.gaussian_covariate = GaussianCovariate(source=['_gaussianCovariate'])
+            study_design.gaussian_covariate = GaussianCovariate(source=d['_gaussianCovariate'])
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
         if d.get('_define_full_beta'):

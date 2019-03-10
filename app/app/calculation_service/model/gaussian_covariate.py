@@ -1,16 +1,16 @@
 import numpy as np
 
 
-class GaussianCovariate():
+class GaussianCovariate(object):
     """
     Class describing a Gaussian Covariate
     """
 
     def __init__(self,
-                 standard_deviation: float,
-                 correlations: np.matrix,
-                 quantiles: [],
-                 exact: False,
+                 standard_deviation: float = None,
+                 correlations: np.matrix = None,
+                 quantiles: [] = None,
+                 exact: bool = False,
                  **kwargs):
         """
         Class describing a Gaussian Covariate
@@ -22,6 +22,7 @@ class GaussianCovariate():
         self.standard_deviation = standard_deviation
         self.correlations = correlations
         self.quantiles = quantiles
+        self.exact = exact
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
 
