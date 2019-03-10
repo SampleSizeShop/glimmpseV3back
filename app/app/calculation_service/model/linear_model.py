@@ -37,6 +37,7 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
+                 delta=None,
                  groups = None,
                  **kwargs):
         """
@@ -78,6 +79,8 @@ class LinearModel(object):
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
         self.minimum_smallest_group_size = smallest_realizable_design
+        self.delta = delta
+        self.groups = groups
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -105,6 +108,8 @@ class LinearModel(object):
                    means_scale_factor = self.scale_factor,
                    variance_scale_factor = self.variance_scale_factor,
                    smallest_realizable_design=self.minimum_smallest_group_size,
+                   delta=utilities.serialise_matrix(self.delta),
+                   groups=self.groups
                    )
         return ret
 
@@ -136,10 +141,11 @@ class LinearModel(object):
         self.smallest_group_size = inputs.smallest_group_size
         self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
         self.calc_metadata()
+        np.set_printoptions(precision=18)
         self.groups = self.get_groups(study_design.isu_factors)
         if study_design.solve_for == SolveFor.SAMPLESIZE:
             self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
-        if np.linalg.matrix_rank(self.delta()) == 0:
+        if np.linalg.matrix_rank(self.delta) == 0:
             self.errors.append("""Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
         if study_design.gaussian_covariate:
             self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
@@ -191,6 +197,7 @@ class LinearModel(object):
         self.nu_e = self.calc_nu_e()
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
+        self.delta = self.calc_delta()
 
     def calc_nu_e(self):
         if self.total_n is None or self.essence_design_matrix is None:
@@ -415,8 +422,12 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
-    def delta(self):
-        return np.transpose(self.theta - self.theta_zero) * np.linalg.inv(self.m) * (self.theta-self.theta_zero)
+    def calc_delta(self):
+        if self.theta_zero is None or self.theta is None or self.m is None:
+            return None
+        else:
+            t = (self.theta - self.theta_zero)
+            return t.T * np.linalg.inv(self.m) * t
 
 
     def serialize(self):

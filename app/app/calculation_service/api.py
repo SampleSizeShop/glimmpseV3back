@@ -193,7 +193,7 @@ def _multirep_power(test, model):
                  relative_group_sizes=model.groups,
                  alpha=model.alpha,
                  sigma_star=model.sigma_star,
-                 delta_es=model.delta())
+                 delta_es=model.delta)
     return power
 
 
@@ -204,7 +204,7 @@ def _unirep_power(test, model, scenario):
                  relative_group_sizes=model.groups,
                  alpha=model.alpha,
                  sigma_star=model.sigma_star,
-                 delta_es=model.delta(),
+                 delta_es=model.delta,
                  optional_args=scenario.optional_args)
     return power
 
