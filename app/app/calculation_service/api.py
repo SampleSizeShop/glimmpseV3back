@@ -54,7 +54,13 @@ def calculate():
     results = []
     for model in models:
         try:
-            if scenario.solve_for == SolveFor.POWER:
+            if model.errors:
+                print(model.errors)
+                result = dict(test=model.test.value,
+                              samplesize=model.errors[0].value,
+                              power=model.errors[0].value,
+                              model=model.to_dict())
+            elif scenario.solve_for == SolveFor.POWER:
                 result = _calculate_power(model, scenario)
             else:
                 result = _calculate_sample_size(model, scenario)

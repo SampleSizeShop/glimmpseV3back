@@ -14,7 +14,7 @@ from app.calculation_service.model.scenario_inputs import ScenarioInputs
 from app.calculation_service.model.predictor import Predictor
 from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
-from pyglimmpse import NonCentralityDistribution
+from pyglimmpse.NonCentralityDistribution import NonCentralityDistribution
 
 
 class LinearModel(object):
@@ -71,7 +71,6 @@ class LinearModel(object):
         self.error_sum_square = None
         self.hypothesis_sum_square = None
         self.nu_e = None
-        self.calc_metadata()
         self.errors = []
         self.test = test
         self.target_power = target_power
@@ -81,6 +80,7 @@ class LinearModel(object):
         self.minimum_smallest_group_size = smallest_realizable_design
         self.delta = delta
         self.groups = groups
+        self.calc_metadata()
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -123,43 +123,59 @@ class LinearModel(object):
         :param target_power: The power for which minimum samplesize should be calculated
         :return: LinearModel
         """
-        self.full_beta = study_design.full_beta
-        self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
-        self.repeated_rows_in_design_matrix = inputs.smallest_group_size
-        self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
-        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
-        self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate, inputs)
-        self.theta_zero = study_design.isu_factors.theta0
-        self.alpha = inputs.alpha
-        self.test = inputs.test
-        self.alpha = inputs.alpha
-        self.target_power = inputs.target_power
-        self.scale_factor = inputs.scale_factor
-        self.variance_scale_factor = inputs.variance_scale_factor
-        self.test = inputs.test
-        self.smallest_group_size = inputs.smallest_group_size
-        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
-        self.calc_metadata()
-        np.set_printoptions(precision=18)
-        self.groups = self.get_groups(study_design.isu_factors)
-        if study_design.solve_for == SolveFor.SAMPLESIZE:
-            self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
-        if np.linalg.matrix_rank(self.delta) == 0:
-            self.errors.append("""Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
-        if study_design.gaussian_covariate:
-            self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
+
+        try:
+            self.full_beta = study_design.full_beta
+            self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
+            self.repeated_rows_in_design_matrix = inputs.smallest_group_size
+            self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
+            self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
+            self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
+
+            # TODO: hack for debigging gaussian. remove
+            # study_design.gaussian_covariate.correlations = np.matrix([0.1])
+            # study_design.gaussian_covariate.standard_deviation = 10
+            self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate,
+                                                        inputs)
+            self.theta_zero = study_design.isu_factors.theta0
+            self.alpha = inputs.alpha
+            self.test = inputs.test
+            self.alpha = inputs.alpha
+            self.target_power = inputs.target_power
+            self.scale_factor = inputs.scale_factor
+            self.variance_scale_factor = inputs.variance_scale_factor
+            self.test = inputs.test
+            self.smallest_group_size = inputs.smallest_group_size
+            self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
+            self.calc_metadata()
+            np.set_printoptions(precision=18)
+            self.groups = self.get_groups(study_design.isu_factors)
+            if study_design.solve_for == SolveFor.SAMPLESIZE:
+                self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+            if np.linalg.matrix_rank(self.delta) == 0:
+                self.errors.append(
+                    """Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
+            if study_design.gaussian_covariate:
+                self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
+                if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
+                    self.errors.append(self.noncentrality_distribution.errors[0])
+        except Exception as e:
+            self.errors.append(e)
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):
-        return NonCentralityDistribution(test=self.test,
-                                             FEssence=self.essence_design_matrix,
-                                             perGroupN=self.smallest_group_size,
-                                             CFixed=self.c_matrix,
-                                             CRand=1,
-                                             thetaDiff=self.theta-self.theta_zero,
-                                             sigmaStar=self.sigma_star,
-                                             stddevG=study_design.gaussian_covariate.standard_deviation,
-                                             exact=study_design.gaussian_covariate.exact)
+        ftfinv = self.essence_design_matrix.T * self.essence_design_matrix
+        dist = NonCentralityDistribution(test=self.test,
+                                         FEssence=self.essence_design_matrix,
+                                         FtFinverse=ftfinv,
+                                         perGroupN=self.smallest_group_size,
+                                         CFixed=self.c_matrix,
+                                         CRand=1,
+                                         thetaDiff=self.theta-self.theta_zero,
+                                         sigmaStar=self.sigma_star,
+                                         stddevG=study_design.gaussian_covariate.standard_deviation,
+                                         exact=study_design.gaussian_covariate.exact)
+        return dist
+
 
     def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
