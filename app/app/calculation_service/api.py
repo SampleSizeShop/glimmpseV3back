@@ -192,18 +192,9 @@ def _samplesize_to_dict(model, size, power):
                 model=model.to_dict())
 
 
-def _multirep_power(test, model):
-    power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 rep_N=model.smallest_group_size,
-                 relative_group_sizes=model.groups,
-                 alpha=model.alpha,
-                 sigma_star=model.sigma_star,
-                 delta_es=model.delta)
-    return power
-
-
-def _unirep_power(test, model, scenario):
+def _multirep_power(test, model, **kwargs):
+    if model.noncentrality_distribution:
+        kwargs['noncentrality_distribution'] = model.noncentrality_distribution
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
                  rep_N=model.smallest_group_size,
@@ -211,7 +202,20 @@ def _unirep_power(test, model, scenario):
                  alpha=model.alpha,
                  sigma_star=model.sigma_star,
                  delta_es=model.delta,
-                 optional_args=scenario.optional_args)
+                 **kwargs)
+    return power
+
+
+def _unirep_power(test, model, scenario, **kwargs):
+    power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
+                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
+                 alpha=model.alpha,
+                 sigma_star=model.sigma_star,
+                 delta_es=model.delta,
+                 optional_args=scenario.optional_args,
+                 **kwargs)
     return power
 
 

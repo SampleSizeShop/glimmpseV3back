@@ -10,11 +10,11 @@ class ScenarioInputs:
     def __init__(self,
                  alpha: float = None,
                  target_power: float = None,
-                 smallest_group_size: list = [1],
+                 smallest_group_size: float = 1,
                  scale_factor: float = 1,
                  test: Tests = None,
                  variance_scale_factor: float = 1,
-                 quantile: float = 0.5
+                 quantile: float = None
                  ):
         self.alpha = alpha
         if target_power:
@@ -30,10 +30,10 @@ class ScenarioInputs:
             self.variance_scale_factor = variance_scale_factor
         else:
             self.variance_scale_factor = 1
-        if quantile:
+        if quantile and quantile is not -1:
             self.quantile = quantile
         else:
-            self.quantile = 0.5
+            self.quantile = None
         self.test = test
 
     def load_from_json(self, json_str: str):
@@ -50,7 +50,7 @@ class ScenarioInputsDecoder(JSONDecoder):
         scale_factor = [1]
         variance_scale_factor = [1]
         solve_for = SolveFor.POWER
-        quantiles = [0.5]
+        quantiles = [-1]
 
         d = json.loads(s)
         if d.get('_solveFor'):

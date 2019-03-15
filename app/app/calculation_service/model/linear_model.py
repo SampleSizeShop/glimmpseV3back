@@ -131,10 +131,6 @@ class LinearModel(object):
             self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
             self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
             self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-
-            # TODO: hack for debigging gaussian. remove
-            # study_design.gaussian_covariate.correlations = np.matrix([0.1])
-            # study_design.gaussian_covariate.standard_deviation = 10
             self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate,
                                                         inputs)
             self.theta_zero = study_design.isu_factors.theta0
@@ -159,17 +155,17 @@ class LinearModel(object):
                 self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
                 if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
                     self.errors.append(self.noncentrality_distribution.errors[0])
+            else:
+                self.noncentrality_distribution = None
         except Exception as e:
             self.errors.append(e)
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):
-        ftfinv = self.essence_design_matrix.T * self.essence_design_matrix
         dist = NonCentralityDistribution(test=self.test,
                                          FEssence=self.essence_design_matrix,
-                                         FtFinverse=ftfinv,
                                          perGroupN=self.smallest_group_size,
                                          CFixed=self.c_matrix,
-                                         CRand=1,
+                                         CGaussian=1,
                                          thetaDiff=self.theta-self.theta_zero,
                                          sigmaStar=self.sigma_star,
                                          stddevG=study_design.gaussian_covariate.standard_deviation,
@@ -373,10 +369,22 @@ class LinearModel(object):
             cluster_component = np.matrix([[1]])
         sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
         if gaussian_covariate:
-            t = self.u_matrix.T*gaussian_covariate.correlations
-            adj = t * np.power(gaussian_covariate.standard_deviation, 2) * t.T
+            # TODO: hack for debigging gaussian. remove
+            # gaussian_covariate.correlations = np.matrix([0.1])
+            # gaussian_covariate.standard_deviation = 10
+            adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
             sigma_star = sigma_star - adj
         return  sigma_star
+
+    def calculate_gaussian_adjustment(self, gaussian_covariate, isu_factors):
+        corellations = np.matrix([o.gaussian_corellation for o in isu_factors.get_outcomes()])
+        t = self.u_matrix.T * corellations.T
+        adj = t * (1 / np.power(gaussian_covariate.standard_deviation, 2)) * t.T
+        return adj
+
+    def calculate_gaussian_adjustment_new(self, gaussian_covariate, isu_factors):
+        adj = isu_factors.re * gaussian_covariate.correlations * isu_factors * isu_factors.outcome_correlation_matrix
+        return adj
 
     def calculate_outcome_sigma_star(self, isu_factors, inputs):
         outcomes = isu_factors.get_outcomes()
