@@ -146,6 +146,7 @@ class LinearModel(object):
             err = set(self.errors)
             err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
             self.errors = list(err)
+            self.minimum_smallest_group_size = self.total_n
         else:
             self.minimum_smallest_group_size = self.total_n
 
