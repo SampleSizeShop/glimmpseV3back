@@ -39,6 +39,7 @@ class LinearModel(object):
                  smallest_realizable_design: float = None,
                  delta=None,
                  groups = None,
+                 quantile = None,
                  **kwargs):
         """
         Parameters
@@ -81,6 +82,7 @@ class LinearModel(object):
         self.delta = delta
         self.groups = groups
         self.calc_metadata()
+        self.quantile = quantile
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -146,6 +148,7 @@ class LinearModel(object):
             self.calc_metadata()
             np.set_printoptions(precision=18)
             self.groups = self.get_groups(study_design.isu_factors)
+            self.quantile = inputs.quantile
             if study_design.solve_for == SolveFor.SAMPLESIZE:
                 self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
             if np.linalg.matrix_rank(self.delta) == 0:
@@ -155,7 +158,6 @@ class LinearModel(object):
                 self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
                 if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
                     self.errors.append(self.noncentrality_distribution.errors[0])
-                self.quantile = inputs.quantile
             else:
                 self.noncentrality_distribution = None
         except Exception as e:

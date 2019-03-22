@@ -150,13 +150,13 @@ class StudyDesignTestCase(unittest.TestCase):
         alpha = 0.05
         deliberately_fail_tolerance = 100
 
-        actual = multirep.wlk_two_moment_null_approx(rank_C,
-                                                     rank_U,
-                                                     rank_X,
-                                                     total_N,
-                                                     alpha,
-                                                     error_sum_square,
-                                                     hypothesis_sum_square,
+        actual = multirep.wlk_two_moment_null_approx(rank_C=rank_C,
+                                                     rank_X=rank_X,
+                                                     relative_group_sizes=[1],
+                                                     rep_N=20,
+                                                     alpha=alpha,
+                                                     sigma_star=error_sum_square,
+                                                     delta_es=hypothesis_sum_square,
                                                      tolerance=deliberately_fail_tolerance)
 
         self.assertEqual(np.isnan(actual.power), True)
@@ -170,21 +170,21 @@ class StudyDesignTestCase(unittest.TestCase):
         rank_C = 3
         rank_U = 2
         rank_X = 4
-        total_N = 20
+        rep_N = 20
         error_sum_square = np.matrix([[9.59999999999999000000000000, 0.000000000000000444089209850],
                                       [0.000000000000000444089209850, 9.59999999999999000000000000]])
         hypothesis_sum_square = np.matrix([[1.875, 1.08253175473054], [1.08253175473054, 0.625]])
         alpha = 0.05
         deliberately_fail_tolerance = 100
 
-        actual = multirep.pbt_two_moment_null_approx_obrien_shieh(rank_C,
-                                                     rank_U,
-                                                     rank_X,
-                                                     total_N,
-                                                     alpha,
-                                                     error_sum_square,
-                                                     hypothesis_sum_square,
-                                                     tolerance=deliberately_fail_tolerance)
+        actual = multirep.pbt_two_moment_null_approx_obrien_shieh(rank_C=rank_C,
+                                                                  rank_X=rank_X,
+                                                                  relative_group_sizes=[1],
+                                                                  rep_N=20,
+                                                                  alpha=alpha,
+                                                                  sigma_star=error_sum_square,
+                                                                  delta_es=hypothesis_sum_square,
+                                                                  tolerance=deliberately_fail_tolerance)
         self.assertEqual(np.isnan(actual.power), True)
         self.assertEqual(np.isnan(actual.noncentrality_parameter), True)
         self.assertEqual(actual.fmethod, Constants.FMETHOD_MISSING)
