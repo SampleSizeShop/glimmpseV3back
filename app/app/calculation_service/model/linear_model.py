@@ -155,6 +155,7 @@ class LinearModel(object):
                 self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
                 if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
                     self.errors.append(self.noncentrality_distribution.errors[0])
+                self.quantile = inputs.quantile
             else:
                 self.noncentrality_distribution = None
         except Exception as e:

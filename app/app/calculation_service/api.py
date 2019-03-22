@@ -195,6 +195,8 @@ def _samplesize_to_dict(model, size, power):
 def _multirep_power(test, model, **kwargs):
     if model.noncentrality_distribution:
         kwargs['noncentrality_distribution'] = model.noncentrality_distribution
+    if model.quantile:
+        kwargs['quantile'] = model.quantile
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
                  rep_N=model.smallest_group_size,
