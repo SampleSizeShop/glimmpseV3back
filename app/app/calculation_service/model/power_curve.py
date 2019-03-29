@@ -1,36 +1,4 @@
-
-
-class ConfidenceInterval(object):
-    """
-    Class describing a power curve confidence interval
-    """
-    def __init__(self,
-                 assumptions = None,
-                 lower_tail_probability: float=0,
-                 upper_tail_probability: float=1,
-                 beta_sample_size: int=2,
-                 beta_sigma_rank: float=1,
-                 **kwargs):
-        self.assumptions = assumptions
-        self.lower_tail_probability = lower_tail_probability
-        self.upper_tail_probability = upper_tail_probability
-        self.beta_sample_size = beta_sample_size
-        self.beta_sigma_rank = beta_sigma_rank
-
-        if kwargs.get('source'):
-            self.from_dict(kwargs['source'])
-
-    def from_dict(self, source):
-        if source.get('assumptions'):
-            self.assumptions = source['assumptions']
-        if source.get('lowerTailProbability'):
-            self.lower_tail_probability = source['lowerTailProbability']
-        if source.get('upperTailProbability'):
-            self.upper_tail_probability = source['upperTailProbability']
-        if source.get('betaSamplesize'):
-            self.beta_sample_size = source['betaSamplesize']
-        if source.get('betasigmaRank'):
-            self.beta_sigma_rank = source['betasigmaRank']
+from app.calculation_service.model.confidence_interval import ConfidenceInterval
 
 
 class DataSeries(object):

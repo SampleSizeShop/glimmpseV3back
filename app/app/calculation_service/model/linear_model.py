@@ -40,6 +40,7 @@ class LinearModel(object):
                  delta=None,
                  groups = None,
                  quantile = None,
+                 confidence_interval = None,
                  **kwargs):
         """
         Parameters
@@ -83,6 +84,7 @@ class LinearModel(object):
         self.groups = groups
         self.calc_metadata()
         self.quantile = quantile
+        self.confidence_interval = confidence_interval
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -111,7 +113,9 @@ class LinearModel(object):
                    variance_scale_factor = self.variance_scale_factor,
                    smallest_realizable_design=self.minimum_smallest_group_size,
                    delta=utilities.serialise_matrix(self.delta),
-                   groups=self.groups
+                   groups=self.groups,
+                   quantile=self.quantile,
+                   confidence_interval=self.serializeCI()
                    )
         return ret
 
@@ -149,6 +153,7 @@ class LinearModel(object):
             np.set_printoptions(precision=18)
             self.groups = self.get_groups(study_design.isu_factors)
             self.quantile = inputs.quantile
+            self.confidence_interval = inputs.confidence_interval
             if study_design.solve_for == SolveFor.SAMPLESIZE:
                 self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
             if np.linalg.matrix_rank(self.delta) == 0:
@@ -459,6 +464,12 @@ class LinearModel(object):
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
+
+    def serializeCI(self):
+        if self.confidence_interval:
+            return self.confidence_interval.to_dict()
+        else:
+            return None
 
 
 class LinearModelEncoder(JSONEncoder):

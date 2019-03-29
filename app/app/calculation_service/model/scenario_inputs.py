@@ -3,6 +3,7 @@ from json import JSONDecoder
 
 from app.calculation_service.model.enums import Tests, SolveFor
 from app.calculation_service.model.isu_factors import IsuFactors
+from app.calculation_service.model.confidence_interval import ConfidenceInterval
 
 
 class ScenarioInputs:
@@ -14,7 +15,8 @@ class ScenarioInputs:
                  scale_factor: float = 1,
                  test: Tests = None,
                  variance_scale_factor: float = 1,
-                 quantile: float = None
+                 quantile: float = None,
+                 confidence_interval: ConfidenceInterval = None
                  ):
         self.alpha = alpha
         if target_power:
@@ -34,6 +36,7 @@ class ScenarioInputs:
             self.quantile = quantile
         else:
             self.quantile = None
+        self.confidence_interval = confidence_interval
         self.test = test
 
     def load_from_json(self, json_str: str):
@@ -51,6 +54,7 @@ class ScenarioInputsDecoder(JSONDecoder):
         variance_scale_factor = [1]
         solve_for = SolveFor.POWER
         quantiles = [-1]
+        confidence_interval = None
 
         d = json.loads(s)
         if d.get('_solveFor'):
@@ -71,6 +75,8 @@ class ScenarioInputsDecoder(JSONDecoder):
             variance_scale_factor = [val for val in d['_varianceScaleFactors']]
         if d.get('_quantiles'):
             quantiles = [val for val in d['_quantiles']]
+        if d.get('_confidence_interval'):
+            confidence_interval = ConfidenceInterval(source=d['_confidence_interval'])
 
         if solve_for == SolveFor.POWER:
             for a in alpha:
@@ -79,7 +85,7 @@ class ScenarioInputsDecoder(JSONDecoder):
                             for t in tests:
                                 for v in variance_scale_factor:
                                     for q in quantiles:
-                                        i = ScenarioInputs(a, None, g, s, t, v, q)
+                                        i = ScenarioInputs(a, None, g, s, t, v, q, confidence_interval)
                                         inputs.append(i)
         else:
             for a in alpha:
@@ -89,7 +95,7 @@ class ScenarioInputsDecoder(JSONDecoder):
                             for t in tests:
                                 for v in variance_scale_factor:
                                     for q in quantiles:
-                                        i = ScenarioInputs(a, p, g, s, t, v, q)
+                                        i = ScenarioInputs(a, p, g, s, t, v, q, confidence_interval)
                                         inputs.append(i)
 
         return inputs

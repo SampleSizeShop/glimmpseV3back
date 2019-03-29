@@ -5,6 +5,7 @@ from pyglimmpse.constants import Constants
 from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.power_curve import PowerCurve
+from app.calculation_service.model.confidence_interval import ConfidenceInterval
 from app.calculation_service.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
 from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
@@ -18,6 +19,7 @@ class StudyDesign:
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
                  gaussian_covariate: GaussianCovariate = None,
+                 confidence_interval: ConfidenceInterval = None,
                  power_curve: int = None,
                  full_beta: bool = False):
 
@@ -26,6 +28,7 @@ class StudyDesign:
         self.target_event = target_event
         self.solve_for = solve_for
         self.confidence_interval_width = confidence_interval_width
+        self.confidence_interval = confidence_interval
         self.sample_size = sample_size
         self.gaussian_covariate = gaussian_covariate
         self.power_curve = power_curve

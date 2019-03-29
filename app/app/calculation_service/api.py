@@ -197,6 +197,8 @@ def _multirep_power(test, model, **kwargs):
         kwargs['noncentrality_distribution'] = model.noncentrality_distribution
     if model.quantile:
         kwargs['quantile'] = model.quantile
+    if model.confidence_interval:
+        kwargs['confidence_interval'] = model.confidence_interval
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
                  rep_N=model.smallest_group_size,
