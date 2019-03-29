@@ -225,9 +225,17 @@ def _unirep_power(test, model, scenario, **kwargs):
 
 def _power_to_dict(model, power):
     pow = 'Not Calculated.'
+    lower = None
+    upper = None
     if power:
         pow = power.power
+        if power.lower_bound and power.lower_bound.power:
+            lower = power.lower_bound.power
+        if power.upper_bound and power.upper_bound.power:
+            upper = power.upper_bound.power
     result = dict(test=model.test.value,
                   power=pow,
+                  lower_bound=lower,
+                  upper_bound=upper,
                   model=model.to_dict())
     return result
