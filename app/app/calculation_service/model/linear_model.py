@@ -1,4 +1,5 @@
 import json
+import traceback
 import warnings
 from json import JSONEncoder
 
@@ -12,6 +13,9 @@ from app.calculation_service.model.study_design import StudyDesign
 from app.calculation_service.utilities import kronecker_list
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
 from app.calculation_service.model.predictor import Predictor
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
+
+from pyglimmpse.NonCentralityDistribution import NonCentralityDistribution
 
 
 class LinearModel(object):
@@ -34,7 +38,10 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
+                 delta=None,
                  groups = None,
+                 quantile = None,
+                 confidence_interval = None,
                  **kwargs):
         """
         Parameters
@@ -67,7 +74,6 @@ class LinearModel(object):
         self.error_sum_square = None
         self.hypothesis_sum_square = None
         self.nu_e = None
-        self.calc_metadata()
         self.errors = []
         self.test = test
         self.target_power = target_power
@@ -75,6 +81,11 @@ class LinearModel(object):
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
         self.minimum_smallest_group_size = smallest_realizable_design
+        self.delta = delta
+        self.groups = groups
+        self.calc_metadata()
+        self.quantile = quantile
+        self.confidence_interval = confidence_interval
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -102,6 +113,10 @@ class LinearModel(object):
                    means_scale_factor = self.scale_factor,
                    variance_scale_factor = self.variance_scale_factor,
                    smallest_realizable_design=self.minimum_smallest_group_size,
+                   delta=utilities.serialise_matrix(self.delta),
+                   groups=self.groups,
+                   quantile=self.quantile,
+                   confidence_interval=self.serializeCI()
                    )
         return ret
 
@@ -115,29 +130,57 @@ class LinearModel(object):
         :param target_power: The power for which minimum samplesize should be calculated
         :return: LinearModel
         """
-        self.full_beta = study_design.full_beta
-        self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
-        self.repeated_rows_in_design_matrix = inputs.smallest_group_size
-        self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
-        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
-        self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, inputs)
-        self.theta_zero = study_design.isu_factors.theta0
-        self.alpha = inputs.alpha
-        self.test = inputs.test
-        self.alpha = inputs.alpha
-        self.target_power = inputs.target_power
-        self.scale_factor = inputs.scale_factor
-        self.variance_scale_factor = inputs.variance_scale_factor
-        self.test = inputs.test
-        self.smallest_group_size = inputs.smallest_group_size
-        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
-        self.calc_metadata()
-        self.groups = self.get_groups(study_design.isu_factors)
-        if study_design.solve_for == SolveFor.SAMPLESIZE:
-            self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
-        if np.linalg.matrix_rank(self.delta()) == 0:
-            self.errors.append(Constants.ERR_NO_DIFFERENCE)
+
+        try:
+            self.full_beta = study_design.full_beta
+            self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
+            self.repeated_rows_in_design_matrix = inputs.smallest_group_size
+            self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
+            self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
+            self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
+            self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate,
+                                                        inputs)
+            self.theta_zero = study_design.isu_factors.theta0
+            self.alpha = inputs.alpha
+            self.test = inputs.test
+            self.alpha = inputs.alpha
+            self.target_power = inputs.target_power
+            self.scale_factor = inputs.scale_factor
+            self.variance_scale_factor = inputs.variance_scale_factor
+            self.test = inputs.test
+            self.smallest_group_size = inputs.smallest_group_size
+            self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
+            self.calc_metadata()
+            np.set_printoptions(precision=18)
+            self.groups = self.get_groups(study_design.isu_factors)
+            self.quantile = inputs.quantile
+            self.confidence_interval = inputs.confidence_interval
+            if study_design.solve_for == SolveFor.SAMPLESIZE:
+                self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+            if np.linalg.matrix_rank(self.delta) == 0:
+                self.errors.append(Constants.ERR_NO_DIFFERENCE)
+            if study_design.gaussian_covariate:
+                self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
+                if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
+                    self.errors.append(self.noncentrality_distribution.errors[0])
+            else:
+                self.noncentrality_distribution = None
+        except Exception as e:
+            traceback.print_exc()
+            self.errors.append(e)
+
+    def calculate_noncentrality_distribution(self, study_design: StudyDesign):
+        dist = NonCentralityDistribution(test=self.test,
+                                         FEssence=self.essence_design_matrix,
+                                         perGroupN=self.smallest_group_size,
+                                         CFixed=self.c_matrix,
+                                         CGaussian=1,
+                                         thetaDiff=self.theta-self.theta_zero,
+                                         sigmaStar=self.sigma_star,
+                                         stddevG=study_design.gaussian_covariate.standard_deviation,
+                                         exact=study_design.gaussian_covariate.exact)
+        return dist
+
 
     def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
@@ -151,7 +194,12 @@ class LinearModel(object):
         self.minimum_smallest_group_size = self.smallest_group_size
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
-        groups = self.get_groups(isu_factors)
+        groups = [1]
+        predictors = isu_factors.get_predictors()
+        predictors_in_hypothesis = [f for f in predictors if type(f) == Predictor]
+        if len(predictors_in_hypothesis) > 0:
+            tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
+            groups = [c.get('value') for t in tables for r in t for c in r]
         total_n = sum([self.smallest_group_size * g for g in groups])
         return total_n
 
@@ -170,6 +218,7 @@ class LinearModel(object):
         self.nu_e = self.calc_nu_e()
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
+        self.delta = self.calc_delta()
 
     def calc_nu_e(self):
         if self.total_n is None or self.essence_design_matrix is None:
@@ -317,7 +366,7 @@ class LinearModel(object):
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
 
-    def calculate_sigma_star(self, isu_factors: IsuFactors, inputs):
+    def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
         outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
         if len(isu_factors.get_repeated_measures()) > 0:
             repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
@@ -327,7 +376,24 @@ class LinearModel(object):
             cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
         else:
             cluster_component = np.matrix([[1]])
-        return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+        sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+        if gaussian_covariate:
+            # TODO: hack for debigging gaussian. remove
+            # gaussian_covariate.correlations = np.matrix([0.1])
+            # gaussian_covariate.standard_deviation = 10
+            adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+            sigma_star = sigma_star - adj
+        return  sigma_star
+
+    def calculate_gaussian_adjustment(self, gaussian_covariate, isu_factors):
+        corellations = np.matrix([o.gaussian_corellation for o in isu_factors.get_outcomes()])
+        t = self.u_matrix.T * corellations.T
+        adj = t * (1 / np.power(gaussian_covariate.standard_deviation, 2)) * t.T
+        return adj
+
+    def calculate_gaussian_adjustment_new(self, gaussian_covariate, isu_factors):
+        adj = isu_factors.re * gaussian_covariate.correlations * isu_factors * isu_factors.outcome_correlation_matrix
+        return adj
 
     def calculate_outcome_sigma_star(self, isu_factors, inputs):
         outcomes = isu_factors.get_outcomes()
@@ -389,12 +455,22 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
-    def delta(self):
-        return np.transpose(self.theta - self.theta_zero) * np.linalg.inv(self.m) * (self.theta-self.theta_zero)
+    def calc_delta(self):
+        if self.theta_zero is None or self.theta is None or self.m is None:
+            return None
+        else:
+            t = (self.theta - self.theta_zero)
+            return t.T * np.linalg.inv(self.m) * t
 
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
+
+    def serializeCI(self):
+        if self.confidence_interval:
+            return self.confidence_interval.to_dict()
+        else:
+            return None
 
 
 class LinearModelEncoder(JSONEncoder):

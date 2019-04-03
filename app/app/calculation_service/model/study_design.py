@@ -1,11 +1,14 @@
 import json
+import traceback
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
 
 from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.power_curve import PowerCurve
+from app.calculation_service.model.confidence_interval import ConfidenceInterval
 from app.calculation_service.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
 
 class StudyDesign:
@@ -16,7 +19,8 @@ class StudyDesign:
                  solve_for: SolveFor = None,
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
-                 gaussian_covariate: float = None,
+                 gaussian_covariate: GaussianCovariate = None,
+                 confidence_interval: ConfidenceInterval = None,
                  power_curve: int = None,
                  full_beta: bool = False):
 
@@ -25,6 +29,7 @@ class StudyDesign:
         self.target_event = target_event
         self.solve_for = solve_for
         self.confidence_interval_width = confidence_interval_width
+        self.confidence_interval = confidence_interval
         self.sample_size = sample_size
         self.gaussian_covariate = gaussian_covariate
         self.power_curve = power_curve
@@ -58,6 +63,7 @@ class StudyDesign:
         try:
             self.__pre_calc_validation()
         except Exception:
+            traceback.print_exc()
             self.exceptions.push(Exception)
         if len(self.exceptions) > 0:
             return False
@@ -82,7 +88,7 @@ class StudyDesignDecoder(JSONDecoder):
             OptionalArgs.N_EST.value: 33,
             OptionalArgs.RANK_EST.value: 1,
             OptionalArgs.ALPHA_CL.value: 0.025,
-            OptionalArgs.ALPHA_CU.value: 0.025,
+            OptionalArgs.ALPHA_CU.value: 0.0,
             OptionalArgs.N_IP.value: 33,
             OptionalArgs.RANK_IP.value: 1,
             OptionalArgs.TOLERANCE.value: 1e-10}
@@ -100,7 +106,7 @@ class StudyDesignDecoder(JSONDecoder):
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
         if d.get('_gaussianCovariate'):
-            study_design.gaussian_covariate = d['_gaussianCovariate']
+            study_design.gaussian_covariate = GaussianCovariate(source=d['_gaussianCovariate'])
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
         if d.get('_define_full_beta'):
@@ -109,7 +115,17 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.beta_scalar = d['_scaleFactor']
         if d.get('_varianceScaleFactors'):
             study_design.sigma_scalar = d['_varianceScaleFactors']
-
         study_design.optional_args = self.default_optional_args()
-
+        if d.get('_confidence_interval'):
+            study_design.optional_args['unirepmethod'] = Constants.SIGMA_ESTIMATED
+            if d['_confidence_interval']['beta_known']:
+                study_design.optional_args['unirepmethod'] = Constants.SIGMA_KNOWN
+            if d['_confidence_interval']['lower_tail']:
+                study_design.optional_args['alpha_cl'] =  d['_confidence_interval']['lower_tail']
+            if d['_confidence_interval']['upper_tail']:
+                study_design.optional_args['alpha_cu'] =  d['_confidence_interval']['upper_tail']
+            if d['_confidence_interval']['rank_est']:
+                study_design.optional_args['rank_est'] =  d['_confidence_interval']['rank_est']
+            if d['_confidence_interval']['n_est']:
+                study_design.optional_args['n_est'] =  d['_confidence_interval']['n_est']
         return study_design

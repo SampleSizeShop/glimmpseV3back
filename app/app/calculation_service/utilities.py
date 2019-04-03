@@ -25,5 +25,13 @@ def serialise_matrix(m):
         return None
 
 def serialise_errors(errors):
-    output = [err.value for err in errors]
+    output = [print_err(err) for err in errors]
     return output
+
+def print_err(err):
+    e = err
+    if hasattr(err, 'value'):
+        e = err.value
+    if hasattr(err, 'args'):
+        e = [arg for arg in err.args]
+    return e

@@ -1,3 +1,5 @@
+import traceback
+
 from pyglimmpse import unirep, multirep, samplesize
 
 import json, random
@@ -54,12 +56,19 @@ def calculate():
     results = []
     for model in models:
         try:
-            if scenario.solve_for == SolveFor.POWER:
+            if model.errors:
+                print(model.errors)
+                result = dict(test=model.test.value,
+                              samplesize=model.errors[0].value,
+                              power=model.errors[0].value,
+                              model=model.to_dict())
+            elif scenario.solve_for == SolveFor.POWER:
                 result = _calculate_power(model, scenario)
             else:
                 result = _calculate_sample_size(model, scenario)
         except Exception as e:
             print(e)
+            traceback.print_exc()
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -160,7 +169,7 @@ def _multirep_samplesize(test, model):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
+                                        delta_es=model.delta,
                                         relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size)
     return size, power
@@ -174,7 +183,7 @@ def _unirep_samplesize(test, model, scenario):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
+                                        delta_es=model.delta,
                                         relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size,
                                         optional_args=scenario.optional_args)
@@ -188,35 +197,50 @@ def _samplesize_to_dict(model, size, power):
                 model=model.to_dict())
 
 
-def _multirep_power(test, model):
+def _multirep_power(test, model, **kwargs):
+    if model.noncentrality_distribution:
+        kwargs['noncentrality_distribution'] = model.noncentrality_distribution
+    if model.quantile:
+        kwargs['quantile'] = model.quantile
+    if model.confidence_interval:
+        kwargs['confidence_interval'] = model.confidence_interval
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 total_N=model.total_n,
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
                  alpha=model.alpha,
-                 error_sum_square=model.error_sum_square,
-                 hypothesis_sum_square=model.hypothesis_sum_square)
+                 sigma_star=model.sigma_star,
+                 delta_es=model.delta,
+                 **kwargs)
     return power
 
 
-def _unirep_power(test, model, scenario):
+def _unirep_power(test, model, scenario, **kwargs):
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                 total_N=model.total_n,
                  rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 error_sum_square=model.error_sum_square,
-                 hypo_sum_square=model.hypothesis_sum_square,
-                 sigma_star=model.sigma_star,
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
                  alpha=model.alpha,
-                 optional_args=scenario.optional_args)
+                 sigma_star=model.sigma_star,
+                 delta_es=model.delta,
+                 optional_args=scenario.optional_args,
+                 **kwargs)
     return power
 
 
 def _power_to_dict(model, power):
     pow = 'Not Calculated.'
+    lower = None
+    upper = None
     if power:
         pow = power.power
+        if power.lower_bound and power.lower_bound.power:
+            lower = power.lower_bound.power
+        if power.upper_bound and power.upper_bound.power:
+            upper = power.upper_bound.power
     result = dict(test=model.test.value,
                   power=pow,
+                  lower_bound=lower,
+                  upper_bound=upper,
                   model=model.to_dict())
     return result
