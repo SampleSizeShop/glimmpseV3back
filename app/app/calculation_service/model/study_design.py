@@ -1,4 +1,5 @@
 import json
+import traceback
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
 
@@ -62,6 +63,7 @@ class StudyDesign:
         try:
             self.__pre_calc_validation()
         except Exception:
+            traceback.print_exc()
             self.exceptions.push(Exception)
         if len(self.exceptions) > 0:
             return False

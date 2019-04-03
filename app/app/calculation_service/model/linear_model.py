@@ -1,4 +1,5 @@
 import json
+import traceback
 import warnings
 from json import JSONEncoder
 
@@ -157,9 +158,6 @@ class LinearModel(object):
             if study_design.solve_for == SolveFor.SAMPLESIZE:
                 self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
             if np.linalg.matrix_rank(self.delta) == 0:
-                self.errors.append(
-                    """Your hypothesis and means have been chosen such that there is no difference. As such power can be no greater than your type one error rate. Please change either your hypothesis or your means.""")
-            if np.linalg.matrix_rank(self.delta()) == 0:
                 self.errors.append(Constants.ERR_NO_DIFFERENCE)
             if study_design.gaussian_covariate:
                 self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
@@ -168,6 +166,7 @@ class LinearModel(object):
             else:
                 self.noncentrality_distribution = None
         except Exception as e:
+            traceback.print_exc()
             self.errors.append(e)
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):

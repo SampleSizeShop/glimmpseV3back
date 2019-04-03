@@ -1,3 +1,5 @@
+import traceback
+
 from pyglimmpse import unirep, multirep, samplesize
 
 import json, random
@@ -66,6 +68,7 @@ def calculate():
                 result = _calculate_sample_size(model, scenario)
         except Exception as e:
             print(e)
+            traceback.print_exc()
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -166,7 +169,7 @@ def _multirep_samplesize(test, model):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
+                                        delta_es=model.delta,
                                         relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size)
     return size, power
@@ -180,7 +183,7 @@ def _unirep_samplesize(test, model, scenario):
                                         sigma_star=model.sigma_star,
                                         targetPower=model.target_power,
                                         rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
+                                        delta_es=model.delta,
                                         relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size,
                                         optional_args=scenario.optional_args)
