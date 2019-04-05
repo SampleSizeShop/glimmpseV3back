@@ -206,6 +206,7 @@ def _power_to_dict(model, power):
         pow = power.power
         if math.isnan(pow):
             pow = -1
+            model.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
         if power.lower_bound and power.lower_bound.power:
             lower = power.lower_bound.power
             if math.isnan(lower):
