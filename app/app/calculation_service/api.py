@@ -1,3 +1,4 @@
+import math
 import traceback
 
 from pyglimmpse import unirep, multirep, samplesize
@@ -5,6 +6,7 @@ from pyglimmpse import unirep, multirep, samplesize
 import json, random
 from flask import Blueprint, Response, request
 from flask_cors import cross_origin
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
 from app.calculation_service.model.enums import SolveFor, Tests
 from app.calculation_service.model.linear_model import LinearModel
@@ -59,16 +61,14 @@ def calculate():
             if model.errors:
                 print(model.errors)
                 result = dict(test=model.test.value,
-                              samplesize=model.errors[0].value,
-                              power=model.errors[0].value,
+                              samplesize=model.print_errors(),
+                              power=model.print_errors(),
                               model=model.to_dict())
             elif scenario.solve_for == SolveFor.POWER:
                 result = _calculate_power(model)
             else:
                 result = _calculate_sample_size(model)
-        except Exception as e:
-            print(e)
-            traceback.print_exc()
+        except GlimmpseValidationException as e:
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -204,10 +204,16 @@ def _power_to_dict(model, power):
     upper = None
     if power:
         pow = power.power
+        if math.isnan(pow):
+            pow = -1
         if power.lower_bound and power.lower_bound.power:
             lower = power.lower_bound.power
+            if math.isnan(lower):
+                lower = -1
         if power.upper_bound and power.upper_bound.power:
             upper = power.upper_bound.power
+            if math.isnan(upper):
+                upper = -1
     result = dict(test=model.test.value,
                   power=pow,
                   lower_bound=lower,

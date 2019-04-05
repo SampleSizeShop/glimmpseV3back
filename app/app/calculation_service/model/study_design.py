@@ -2,6 +2,7 @@ import json
 import traceback
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
 from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
@@ -62,9 +63,11 @@ class StudyDesign:
         self.exceptions = []
         try:
             self.__pre_calc_validation()
+        except GlimmpseValidationException as e:
+            self.exceptions.push(e)
         except Exception:
             traceback.print_exc()
-            self.exceptions.push(Exception)
+            self.exceptions.push(GlimmpseValidationException("Sorry, something seems to have gone wron with out calculations. Please contact us."))
         if len(self.exceptions) > 0:
             return False
         else:

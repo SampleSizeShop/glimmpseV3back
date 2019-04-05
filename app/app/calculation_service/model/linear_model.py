@@ -4,6 +4,7 @@ import warnings
 from json import JSONEncoder
 
 import numpy as np
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException, GlimmpseCalculationException
 
 from app.constants import Constants
 from app.calculation_service import utilities
@@ -74,7 +75,7 @@ class LinearModel(object):
         self.error_sum_square = None
         self.hypothesis_sum_square = None
         self.nu_e = None
-        self.errors = []
+        self.errors = set([])
         self.test = test
         self.target_power = target_power
         self.smallest_group_size = smallest_group_size
@@ -158,16 +159,18 @@ class LinearModel(object):
             if study_design.solve_for == SolveFor.SAMPLESIZE:
                 self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
             if np.linalg.matrix_rank(self.delta) == 0:
-                self.errors.append(Constants.ERR_NO_DIFFERENCE)
+                self.errors.add(Constants.ERR_NO_DIFFERENCE)
             if study_design.gaussian_covariate:
                 self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
                 if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
-                    self.errors.append(self.noncentrality_distribution.errors[0])
+                    self.errors.update(self.noncentrality_distribution.errors)
             else:
                 self.noncentrality_distribution = None
+        except (GlimmpseValidationException, GlimmpseCalculationException) as e:
+            self.errors.add(e)
         except Exception as e:
             traceback.print_exc()
-            self.errors.append(e)
+            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wron with out calculations. Please contact us."))
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):
         dist = NonCentralityDistribution(test=self.test,
@@ -188,9 +191,7 @@ class LinearModel(object):
                 self.smallest_group_size = self.smallest_group_size + 1
                 self.total_n = self.calculate_total_n(isu_factors, inputs)
                 self.calc_metadata()
-            err = set(self.errors)
-            err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
-            self.errors = list(err)
+            self.errors.remove(Constants.ERR_ERROR_DEG_FREEDOM)
         self.minimum_smallest_group_size = self.smallest_group_size
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
@@ -225,7 +226,7 @@ class LinearModel(object):
             return None
         nu_e = self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
         if int(nu_e) <= 0:
-            self.errors.append(Constants.ERR_ERROR_DEG_FREEDOM)
+            self.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
         return int(nu_e)
 
 
@@ -462,6 +463,14 @@ class LinearModel(object):
             t = (self.theta - self.theta_zero)
             return t.T * np.linalg.inv(self.m) * t
 
+    def print_errors(self):
+        out = ""
+        for err in self.errors:
+            if err.value:
+                out = out + err.value + " "
+            else:
+                out = out + err
+        return out
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)

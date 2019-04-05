@@ -1,6 +1,6 @@
 class ConfidenceInterval(object):
     """
-    Class describing a Gaussian Covariate
+    Class holding required information to calculate confidence intervals.
     """
 
     def __init__(self,
