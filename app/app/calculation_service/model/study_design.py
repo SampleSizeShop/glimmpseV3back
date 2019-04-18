@@ -2,6 +2,7 @@ import json
 import traceback
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
 from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
@@ -62,9 +63,11 @@ class StudyDesign:
         self.exceptions = []
         try:
             self.__pre_calc_validation()
+        except GlimmpseValidationException as e:
+            self.exceptions.push(e)
         except Exception:
             traceback.print_exc()
-            self.exceptions.push(Exception)
+            self.exceptions.push(GlimmpseValidationException("Sorry, something seems to have gone wron with out calculations. Please contact us."))
         if len(self.exceptions) > 0:
             return False
         else:
@@ -80,19 +83,6 @@ class StudyDesign:
 
 
 class StudyDesignDecoder(JSONDecoder):
-    def default_optional_args(self):
-        args = {
-            OptionalArgs.APPROXIMATION.value: Constants.UN,
-            OptionalArgs.EPSILON_ESTIMATOR.value: Constants.UCDF_MULLER2004_APPROXIMATION,
-            OptionalArgs.UNIREPMETHOD.value: Constants.SIGMA_KNOWN,
-            OptionalArgs.N_EST.value: 33,
-            OptionalArgs.RANK_EST.value: 1,
-            OptionalArgs.ALPHA_CL.value: 0.025,
-            OptionalArgs.ALPHA_CU.value: 0.0,
-            OptionalArgs.N_IP.value: 33,
-            OptionalArgs.RANK_IP.value: 1,
-            OptionalArgs.TOLERANCE.value: 1e-10}
-        return args
 
     def decode(self, s: str) -> StudyDesign:
         study_design = StudyDesign()
@@ -115,17 +105,8 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.beta_scalar = d['_scaleFactor']
         if d.get('_varianceScaleFactors'):
             study_design.sigma_scalar = d['_varianceScaleFactors']
-        study_design.optional_args = self.default_optional_args()
         if d.get('_confidence_interval'):
-            study_design.optional_args['unirepmethod'] = Constants.SIGMA_ESTIMATED
+            study_design.unirepmethod = Constants.SIGMA_ESTIMATED
             if d['_confidence_interval']['beta_known']:
-                study_design.optional_args['unirepmethod'] = Constants.SIGMA_KNOWN
-            if d['_confidence_interval']['lower_tail']:
-                study_design.optional_args['alpha_cl'] =  d['_confidence_interval']['lower_tail']
-            if d['_confidence_interval']['upper_tail']:
-                study_design.optional_args['alpha_cu'] =  d['_confidence_interval']['upper_tail']
-            if d['_confidence_interval']['rank_est']:
-                study_design.optional_args['rank_est'] =  d['_confidence_interval']['rank_est']
-            if d['_confidence_interval']['n_est']:
-                study_design.optional_args['n_est'] =  d['_confidence_interval']['n_est']
+                study_design.unirepmethod = Constants.SIGMA_KNOWN
         return study_design

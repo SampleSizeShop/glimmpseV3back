@@ -1,6 +1,6 @@
 class ConfidenceInterval(object):
     """
-    Class describing a Gaussian Covariate
+    Class holding required information to calculate confidence intervals.
     """
 
     def __init__(self,
@@ -28,16 +28,17 @@ class ConfidenceInterval(object):
             self.from_dict(kwargs['source'])
 
     def from_dict(self, source):
-        if source.get('beta_known'):
-            self.beta_known = source['beta_known']
-        if source.get('lower_tail'):
-            self.lower_tail = source['lower_tail']
-        if source.get('upper_tail'):
-            self.upper_tail = source['upper_tail']
-        if source.get('rank_est'):
-            self.rank_est = source['rank_est']
-        if source.get('n_est'):
-            self.n_est = source['n_est']
+        for key, value in source.items():
+            if key == 'beta_known':
+                self.beta_known = value
+            if key == 'lower_tail':
+                self.lower_tail = value
+            if key == 'upper_tail':
+                self.upper_tail = value
+            if key == 'rank_est':
+                self.rank_est = value
+            if key == 'n_est':
+                self.n_est = value
 
     def to_dict(self):
         ret = dict(beta_known=self.beta_known,
