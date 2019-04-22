@@ -246,10 +246,11 @@ class LinearModel(object):
 
     def calculate_design_matrix(self, isu_factors):
         predictors = isu_factors.get_predictors()
-        components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
-                                                    p.in_hypothesis]
         if self.full_beta:
             components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
+        else:
+            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
+                                                        p.in_hypothesis]
         kron_components = kronecker_list(components)
         groups = self.get_groups(isu_factors)
         return np.repeat(kron_components, groups, axis=0)
