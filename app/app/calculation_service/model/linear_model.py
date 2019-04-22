@@ -170,7 +170,7 @@ class LinearModel(object):
             self.errors.add(e)
         except Exception as e:
             traceback.print_exc()
-            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wron with out calculations. Please contact us."))
+            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wrong with our calculations. Please contact us."))
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):
         dist = NonCentralityDistribution(test=self.test,
@@ -248,6 +248,8 @@ class LinearModel(object):
         predictors = isu_factors.get_predictors()
         components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
                                                     p.in_hypothesis]
+        if self.full_beta:
+            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
         kron_components = kronecker_list(components)
         groups = self.get_groups(isu_factors)
         return np.repeat(kron_components, groups, axis=0)
@@ -466,8 +468,11 @@ class LinearModel(object):
     def print_errors(self):
         out = ""
         for err in self.errors:
-            if err.value:
+            if hasattr(err, 'value'):
                 out = out + err.value + " "
+            elif hasattr(err, 'args'):
+                for arg in err.args:
+                    out =  out + ' ' +  arg
             else:
                 out = out + err
         return out
