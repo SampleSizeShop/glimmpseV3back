@@ -14,7 +14,7 @@ class Outcome(IsuFactor):
                  child=None,
                  partial_matrix=None,
                  standard_deviation: float=1,
-                 gaussian_corellation: float=1,
+                 gaussian_corellation: float=None,
                  **kwargs):
         super().__init__(name=name,
                          nature=Nature.WITHIN,
@@ -33,5 +33,5 @@ class Outcome(IsuFactor):
         super().from_dict(source)
         if source.get('standardDeviation'):
             self.standard_deviation = source['standardDeviation']
-        if source.get('gaussian_corellation'):
+        if source.get('gaussian_corellation') or source.get('gaussian_corellation') == 0:
             self.gaussian_corellation = source['gaussian_corellation']
