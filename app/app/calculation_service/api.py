@@ -156,7 +156,7 @@ def _samplesize(test, model, **kwargs):
     kwargs['tolerance'] = 1e-12
     size, power = samplesize.samplesize(test=test,
                                         rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                                        rank_X=model.get_rank_x(),
                                         relative_group_sizes=model.groups,
                                         alpha=model.alpha,
                                         sigma_star=model.sigma_star,
@@ -193,8 +193,9 @@ def _power(test, model, **kwargs):
         kwargs['quantile'] = model.quantile
     if model.confidence_interval:
         kwargs['confidence_interval'] = model.confidence_interval
+
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
+                 rank_X=model.get_rank_x(),
                  rep_N=model.smallest_group_size,
                  relative_group_sizes=model.groups,
                  alpha=model.alpha,

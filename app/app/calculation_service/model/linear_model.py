@@ -181,7 +181,7 @@ class LinearModel(object):
                                          FEssence=self.essence_design_matrix,
                                          perGroupN=self.smallest_group_size,
                                          CFixed=self.c_matrix,
-                                         CGaussian=1,
+                                         CGaussian=np.zeros([self.get_rank_c(), 1]),
                                          thetaDiff=self.theta-self.theta_zero,
                                          sigmaStar=self.sigma_star,
                                          stddevG=study_design.gaussian_covariate.standard_deviation,
@@ -490,6 +490,16 @@ class LinearModel(object):
             return self.confidence_interval.to_dict()
         else:
             return None
+
+    def get_rank_x(self):
+        rank_x = np.linalg.matrix_rank(self.essence_design_matrix)
+        if self.noncentrality_distribution:
+            rank_x = rank_x + 1
+        return rank_x
+
+    def get_rank_c(self):
+        rank_c = np.linalg.matrix_rank(self.c_matrix)
+        return rank_c
 
 
 class LinearModelEncoder(JSONEncoder):
