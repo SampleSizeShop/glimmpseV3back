@@ -41,6 +41,7 @@ class LinearModel(object):
                  smallest_realizable_design: float = None,
                  delta=None,
                  groups = None,
+                 power_method = None,
                  quantile = None,
                  confidence_interval = None,
                  **kwargs):
@@ -85,6 +86,7 @@ class LinearModel(object):
         self.delta = delta
         self.groups = groups
         self.calc_metadata()
+        self.power_method = power_method
         self.quantile = quantile
         self.confidence_interval = confidence_interval
 
@@ -116,6 +118,7 @@ class LinearModel(object):
                    smallest_realizable_design=self.minimum_smallest_group_size,
                    delta=utilities.serialise_matrix(self.delta),
                    groups=self.groups,
+                   power_method=self.power_method,
                    quantile=self.quantile,
                    confidence_interval=self.serializeCI()
                    )
@@ -154,6 +157,7 @@ class LinearModel(object):
             self.calc_metadata()
             np.set_printoptions(precision=18)
             self.groups = self.get_groups(study_design.isu_factors)
+            self.power_method = inputs.power_method
             self.quantile = inputs.quantile
             self.confidence_interval = inputs.confidence_interval
             if study_design.solve_for == SolveFor.SAMPLESIZE:

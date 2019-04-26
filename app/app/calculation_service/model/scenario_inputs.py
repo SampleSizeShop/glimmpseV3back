@@ -15,7 +15,7 @@ class ScenarioInputs:
                  scale_factor: float = 1,
                  test: Tests = None,
                  variance_scale_factor: float = 1,
-                 power_method = None,
+                 power_method=None,
                  quantile: float = None,
                  confidence_interval: ConfidenceInterval = None
                  ):
@@ -37,6 +37,8 @@ class ScenarioInputs:
             self.power_method = power_method
             if power_method == 'unconditional':
                 quantile = None
+        else:
+            self.power_method = 'conditional'
         if quantile and quantile is not -1:
             self.quantile = quantile
         else:
