@@ -87,7 +87,7 @@ class StudyDesignTestCase(unittest.TestCase):
         expected_epsilon = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                       total_N=model.total_n,
-                                                      rank_X=np.linalg.matrix_rank(model.essence_design_matrix))
+                                                      rank_X=model.get_rank_x())
 
         self.assertEqual(1.075938008286021, expected_epsilon)
 
@@ -132,7 +132,7 @@ class StudyDesignTestCase(unittest.TestCase):
         expected_epsilon = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                       total_N=model.total_n,
-                                                      rank_X=np.linalg.matrix_rank(model.essence_design_matrix))
+                                                      rank_X=model.get_rank_x())
 
         self.assertEqual(1.1024872940866097, expected_epsilon)
 

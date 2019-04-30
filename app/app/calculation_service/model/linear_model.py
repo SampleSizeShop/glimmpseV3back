@@ -41,6 +41,7 @@ class LinearModel(object):
                  smallest_realizable_design: float = None,
                  delta=None,
                  groups = None,
+                 power_method = None,
                  quantile = None,
                  confidence_interval = None,
                  **kwargs):
@@ -85,6 +86,7 @@ class LinearModel(object):
         self.delta = delta
         self.groups = groups
         self.calc_metadata()
+        self.power_method = power_method
         self.quantile = quantile
         self.confidence_interval = confidence_interval
 
@@ -116,6 +118,7 @@ class LinearModel(object):
                    smallest_realizable_design=self.minimum_smallest_group_size,
                    delta=utilities.serialise_matrix(self.delta),
                    groups=self.groups,
+                   power_method=self.power_method,
                    quantile=self.quantile,
                    confidence_interval=self.serializeCI()
                    )
@@ -154,6 +157,7 @@ class LinearModel(object):
             self.calc_metadata()
             np.set_printoptions(precision=18)
             self.groups = self.get_groups(study_design.isu_factors)
+            self.power_method = inputs.power_method
             self.quantile = inputs.quantile
             self.confidence_interval = inputs.confidence_interval
             if study_design.solve_for == SolveFor.SAMPLESIZE:
@@ -177,7 +181,7 @@ class LinearModel(object):
                                          FEssence=self.essence_design_matrix,
                                          perGroupN=self.smallest_group_size,
                                          CFixed=self.c_matrix,
-                                         CGaussian=1,
+                                         CGaussian=np.zeros([self.get_rank_c(), 1]),
                                          thetaDiff=self.theta-self.theta_zero,
                                          sigmaStar=self.sigma_star,
                                          stddevG=study_design.gaussian_covariate.standard_deviation,
@@ -486,6 +490,16 @@ class LinearModel(object):
             return self.confidence_interval.to_dict()
         else:
             return None
+
+    def get_rank_x(self):
+        rank_x = np.linalg.matrix_rank(self.essence_design_matrix)
+        if self.noncentrality_distribution:
+            rank_x = rank_x + 1
+        return rank_x
+
+    def get_rank_c(self):
+        rank_c = np.linalg.matrix_rank(self.c_matrix)
+        return rank_c
 
 
 class LinearModelEncoder(JSONEncoder):

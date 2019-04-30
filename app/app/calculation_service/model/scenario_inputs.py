@@ -15,6 +15,7 @@ class ScenarioInputs:
                  scale_factor: float = 1,
                  test: Tests = None,
                  variance_scale_factor: float = 1,
+                 power_method=None,
                  quantile: float = None,
                  confidence_interval: ConfidenceInterval = None
                  ):
@@ -32,6 +33,12 @@ class ScenarioInputs:
             self.variance_scale_factor = variance_scale_factor
         else:
             self.variance_scale_factor = 1
+        if power_method and power_method is not -1:
+            self.power_method = power_method
+            if power_method == 'unconditional':
+                quantile = None
+        else:
+            self.power_method = 'conditional'
         if quantile and quantile is not -1:
             self.quantile = quantile
         else:
@@ -53,6 +60,7 @@ class ScenarioInputsDecoder(JSONDecoder):
         scale_factor = [1]
         variance_scale_factor = [1]
         solve_for = SolveFor.POWER
+        power_method = [-1]
         quantiles = [-1]
         confidence_interval = None
 
@@ -73,6 +81,8 @@ class ScenarioInputsDecoder(JSONDecoder):
             scale_factor = [val for val in d['_scaleFactor']]
         if d.get('_varianceScaleFactors'):
             variance_scale_factor = [val for val in d['_varianceScaleFactors']]
+        if d.get('_gaussianCovariate'):
+            power_method = d.get('_gaussianCovariate').get('power_method')
         if d.get('_quantiles'):
             quantiles = [val for val in d['_quantiles']]
         if d.get('_confidence_interval'):
@@ -84,9 +94,10 @@ class ScenarioInputsDecoder(JSONDecoder):
                         for s in scale_factor:
                             for t in tests:
                                 for v in variance_scale_factor:
-                                    for q in quantiles:
-                                        i = ScenarioInputs(a, None, g, s, t, v, q, confidence_interval)
-                                        inputs.append(i)
+                                    for m in power_method:
+                                        for q in quantiles:
+                                            i = ScenarioInputs(a, None, g, s, t, v, m, q, confidence_interval)
+                                            inputs.append(i)
         else:
             for a in alpha:
                 for p in target_power:
