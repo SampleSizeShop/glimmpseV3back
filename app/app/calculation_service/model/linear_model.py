@@ -389,22 +389,40 @@ class LinearModel(object):
         return np.identity(len(repeated_measure.values))
 
     def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
-        outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
-        if len(isu_factors.get_repeated_measures()) > 0:
-            repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+        if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
+            if len(isu_factors.get_repeated_measures()) > 0:
+                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+            else:
+                repeated_measure_component = np.matrix([[1]])
+            if len(isu_factors.get_clusters()) > 0:
+                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+            else:
+                cluster_component = np.matrix([[1]])
+            sigma_star = isu_factors.uMatrix.values.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * isu_factors.uMatrix.values
+            if gaussian_covariate:
+                # TODO: hack for debigging gaussian. remove
+                # gaussian_covariate.correlations = np.matrix([0.1])
+                # gaussian_covariate.standard_deviation = 10
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                sigma_star = sigma_star - adj
         else:
-            repeated_measure_component = np.matrix([[1]])
-        if len(isu_factors.get_clusters()) > 0:
-            cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
-        else:
-            cluster_component = np.matrix([[1]])
-        sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
-        if gaussian_covariate:
-            # TODO: hack for debigging gaussian. remove
-            # gaussian_covariate.correlations = np.matrix([0.1])
-            # gaussian_covariate.standard_deviation = 10
-            adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
-            sigma_star = sigma_star - adj
+            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
+            if len(isu_factors.get_repeated_measures()) > 0:
+                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+            else:
+                repeated_measure_component = np.matrix([[1]])
+            if len(isu_factors.get_clusters()) > 0:
+                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+            else:
+                cluster_component = np.matrix([[1]])
+            sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+            if gaussian_covariate:
+                # TODO: hack for debigging gaussian. remove
+                # gaussian_covariate.correlations = np.matrix([0.1])
+                # gaussian_covariate.standard_deviation = 10
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                sigma_star = sigma_star - adj
         return  sigma_star
 
     def calculate_gaussian_adjustment(self, gaussian_covariate, isu_factors):
@@ -431,9 +449,14 @@ class LinearModel(object):
         if len(repeated_measures) == 0:
             return np.matrix([[1]])
         else:
-            sigma_star_rep_measure_components = [
-                self.calculate_rep_measure_component(measure) for measure in repeated_measures
-            ]
+            if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+                sigma_star_rep_measure_components = [
+                    self.calculate_rep_measure_sigma(measure) for measure in repeated_measures
+                ]
+            else:
+                sigma_star_rep_measure_components = [
+                    self.calculate_rep_measure_component(measure) for measure in repeated_measures
+                ]
             sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
             return sigma_star_rep_measures
 
@@ -443,6 +466,11 @@ class LinearModel(object):
         u_orth = LinearModel._get_orthonormal_u_matrix(self.calculate_partial_u_matrix(repeated_measure))
         component = np.transpose(u_orth) * sigma_r * u_orth
         return component
+
+    def calculate_rep_measure_sigma(self, repeated_measure):
+        st = np.diag(repeated_measure.standard_deviations)
+        sigma_r = st * repeated_measure.correlation_matrix * st
+        return sigma_r
 
     def calculate_cluster_sigma_star(self, cluster):
         components = [
