@@ -290,21 +290,24 @@ class LinearModel(object):
 
     def _get_repeated_measures_u_matrix(self, isu_factors):
         if self.full_beta:
-            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
         else:
-            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if
                               r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
-        orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
+        orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
         orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
         return orth_u_repeated_measures
 
-    @staticmethod
-    def calculate_partial_u_matrix(repeated_measure):
+    def calculate_partial_u_matrix(self, repeated_measure):
         if repeated_measure.in_hypothesis:
             if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
                 partial = repeated_measure.partial_matrix
+            elif repeated_measure.hypothesis_type == HypothesisType.GLOBAL_TRENDS:
+                partial = self.calculate_main_effect_partial_u_matrix(repeated_measure)
+            elif repeated_measure.hypothesis_type == HypothesisType.IDENTITY:
+                partial = self.calculate_identity_partial_u_matrix(repeated_measure)
             else:
                 partial = repeated_measure.partial_u_matrix
         else:
@@ -351,6 +354,13 @@ class LinearModel(object):
         return main_effect
 
     @staticmethod
+    def calculate_main_effect_partial_u_matrix(repeated_mesaure):
+        i = np.identity(len(repeated_mesaure.values) - 1) * -1
+        v = np.matrix([np.ones(len(repeated_mesaure.values) - 1)])
+        main_effect = np.concatenate((v, i), axis=0)
+        return main_effect
+
+    @staticmethod
     def calculate_polynomial_partial_c_matrix(predictor):
         values = None
         no_groups = len(predictor.values)
@@ -373,6 +383,10 @@ class LinearModel(object):
     @staticmethod
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
+
+    @staticmethod
+    def calculate_identity_partial_u_matrix(repeated_measure):
+        return np.identity(len(repeated_measure.values))
 
     def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
         outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
@@ -426,7 +440,7 @@ class LinearModel(object):
     def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        u_orth = LinearModel._get_orthonormal_u_matrix(LinearModel.calculate_partial_u_matrix(repeated_measure))
+        u_orth = LinearModel._get_orthonormal_u_matrix(self.calculate_partial_u_matrix(repeated_measure))
         component = np.transpose(u_orth) * sigma_r * u_orth
         return component
 
