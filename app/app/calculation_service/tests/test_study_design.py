@@ -4,7 +4,7 @@ from pyglimmpse import unirep, multirep
 
 
 from app.calculation_service.model.cluster import Cluster, ClusterLevel
-from app.calculation_service.model.enums import TargetEvent, SolveFor, Tests
+from app.calculation_service.model.enums import TargetEvent, SolveFor, Tests, HypothesisType
 from app.calculation_service.model.isu_factors import IsuFactors, OutcomeRepeatedMeasureStDev
 from app.calculation_service.model.linear_model import LinearModel
 from app.calculation_service.model.outcome import Outcome
@@ -15,6 +15,7 @@ from app.calculation_service.models import Matrix
 from pyglimmpse.constants import Constants
 
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
+from app.calculation_service.model.contrast_matrix import ContrastMatrix
 
 
 class StudyDesignTestCase(unittest.TestCase):
@@ -49,8 +50,13 @@ class StudyDesignTestCase(unittest.TestCase):
     def test_load_from_json(self):
         """Should read the study design correctly from the model on model_2.json"""
         outcome_1 = Outcome(name='one')
+        outcome_1.hypothesis_type = HypothesisType.CUSTOM_U_MATRIX
         outcome_2 = Outcome(name='teo')
+        outcome_2.hypothesis_type = HypothesisType.CUSTOM_U_MATRIX
+
         rep_meas_1 = RepeatedMeasure(name='repMeas', values=[0, 1], units='time', type='Numeric', partial_u_matrix=np.matrix([[1],[-1]]), correlation_matrix=np.matrix([[1, 0],[0, 1]]))
+        rep_meas_1.hypothesis_type = HypothesisType.CUSTOM_U_MATRIX
+
         cluster_1 = Cluster(name='clstr', levels=[ClusterLevel(level_name='1'), ClusterLevel(level_name='2', no_elements=2)])
         predictor_1 = Predictor(name='prdctr', values=['grp1', 'grp2'])
 
@@ -83,6 +89,11 @@ class StudyDesignTestCase(unittest.TestCase):
         json_data.close()
         actual = StudyDesign().load_from_json(data)
         model = LinearModel()
+        model.c_matrix = ContrastMatrix()
+        model.c_matrix.hypothesis_type = HypothesisType.GLOBAL_TRENDS
+        model.u_matrix = ContrastMatrix()
+        model.u_matrix.hypothesis_type = HypothesisType.GLOBAL_TRENDS
+
         model.from_study_design(actual, inputs)
         expected_epsilon = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),

@@ -60,7 +60,7 @@ def calculate():
         try:
             if model.errors:
                 print(model.errors)
-                result = dict(test=getTest(model),
+                result = dict(test=model.getTest(),
                               samplesize=model.print_errors(),
                               power=model.print_errors(),
                               model=model.to_dict())
@@ -80,12 +80,6 @@ def calculate():
                                     results=results))
 
     return json_response
-
-def getTest(model):
-    if model and hasattr(model, 'test'):
-        return model.test.value
-    else:
-        return None
 
 
 def _generate_models(scenario: StudyDesign, inputs: []):
