@@ -110,7 +110,7 @@ class LinearModel(object):
                    hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
                    error_sum_square=utilities.serialise_matrix(self.error_sum_square),
                    errors=utilities.serialise_errors(self.errors),
-                   test=self.test.value,
+                   test=self.getTest(),
                    target_power = self.target_power,
                    smallest_group_size = self.smallest_group_size,
                    means_scale_factor = self.scale_factor,
@@ -500,6 +500,14 @@ class LinearModel(object):
     def get_rank_c(self):
         rank_c = np.linalg.matrix_rank(self.c_matrix)
         return rank_c
+
+    def getTest(self):
+        if self and hasattr(self, 'test') and hasattr(self.test, 'value'):
+            return self.test.value
+        if self and hasattr(self, 'test'):
+            return self.test
+        else:
+            return None
 
 
 class LinearModelEncoder(JSONEncoder):
