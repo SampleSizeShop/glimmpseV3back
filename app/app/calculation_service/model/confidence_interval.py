@@ -5,8 +5,8 @@ class ConfidenceInterval(object):
 
     def __init__(self,
                  beta_known: bool = True,
-                 lower_tail: float =0.05,
-                 upper_tail: float =0.0,
+                 lower_tail: float =0.025,
+                 upper_tail: float =0.025,
                  rank_est: int =1,
                  n_est:int = 1,
                  **kwargs):
