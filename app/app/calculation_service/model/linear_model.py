@@ -1,8 +1,10 @@
 import json
+import traceback
 import warnings
 from json import JSONEncoder
 
 import numpy as np
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException, GlimmpseCalculationException
 
 from app.constants import Constants
 from app.calculation_service import utilities
@@ -12,6 +14,9 @@ from app.calculation_service.model.study_design import StudyDesign
 from app.calculation_service.utilities import kronecker_list
 from app.calculation_service.model.scenario_inputs import ScenarioInputs
 from app.calculation_service.model.predictor import Predictor
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
+
+from pyglimmpse.NonCentralityDistribution import NonCentralityDistribution
 
 
 class LinearModel(object):
@@ -34,7 +39,11 @@ class LinearModel(object):
                  scale_factor: float = None,
                  variance_scale_factor: float = None,
                  smallest_realizable_design: float = None,
+                 delta=None,
                  groups = None,
+                 power_method = None,
+                 quantile = None,
+                 confidence_interval = None,
                  **kwargs):
         """
         Parameters
@@ -67,14 +76,19 @@ class LinearModel(object):
         self.error_sum_square = None
         self.hypothesis_sum_square = None
         self.nu_e = None
-        self.calc_metadata()
-        self.errors = []
+        self.errors = set([])
         self.test = test
         self.target_power = target_power
         self.smallest_group_size = smallest_group_size
         self.scale_factor = scale_factor
         self.variance_scale_factor = variance_scale_factor
         self.minimum_smallest_group_size = smallest_realizable_design
+        self.delta = delta
+        self.groups = groups
+        self.calc_metadata()
+        self.power_method = power_method
+        self.quantile = quantile
+        self.confidence_interval = confidence_interval
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -96,12 +110,17 @@ class LinearModel(object):
                    hypothesis_sum_square=utilities.serialise_matrix(self.hypothesis_sum_square),
                    error_sum_square=utilities.serialise_matrix(self.error_sum_square),
                    errors=utilities.serialise_errors(self.errors),
-                   test=self.test.value,
+                   test=self.getTest(),
                    target_power = self.target_power,
                    smallest_group_size = self.smallest_group_size,
                    means_scale_factor = self.scale_factor,
                    variance_scale_factor = self.variance_scale_factor,
                    smallest_realizable_design=self.minimum_smallest_group_size,
+                   delta=utilities.serialise_matrix(self.delta),
+                   groups=self.groups,
+                   power_method=self.power_method,
+                   quantile=self.quantile,
+                   confidence_interval=self.serializeCI()
                    )
         return ret
 
@@ -115,27 +134,60 @@ class LinearModel(object):
         :param target_power: The power for which minimum samplesize should be calculated
         :return: LinearModel
         """
-        self.full_beta = study_design.full_beta
-        self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
-        self.repeated_rows_in_design_matrix = inputs.smallest_group_size
-        self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
-        self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
-        self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-        self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, inputs)
-        self.theta_zero = study_design.isu_factors.theta0
-        self.alpha = inputs.alpha
-        self.test = inputs.test
-        self.alpha = inputs.alpha
-        self.target_power = inputs.target_power
-        self.scale_factor = inputs.scale_factor
-        self.variance_scale_factor = inputs.variance_scale_factor
-        self.test = inputs.test
-        self.smallest_group_size = inputs.smallest_group_size
-        self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
-        self.calc_metadata()
-        self.groups = self.get_groups(study_design.isu_factors)
-        if study_design.solve_for == SolveFor.SAMPLESIZE:
-            self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+
+        try:
+            self.full_beta = study_design.full_beta
+            self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
+            self.repeated_rows_in_design_matrix = inputs.smallest_group_size
+            self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
+            self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
+            self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
+            self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate,
+                                                        inputs)
+            self.theta_zero = study_design.isu_factors.theta0
+            self.alpha = inputs.alpha
+            self.test = inputs.test
+            self.alpha = inputs.alpha
+            self.target_power = inputs.target_power
+            self.scale_factor = inputs.scale_factor
+            self.variance_scale_factor = inputs.variance_scale_factor
+            self.test = inputs.test
+            self.smallest_group_size = inputs.smallest_group_size
+            self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
+            self.calc_metadata()
+            np.set_printoptions(precision=18)
+            self.groups = self.get_groups(study_design.isu_factors)
+            self.power_method = inputs.power_method
+            self.quantile = inputs.quantile
+            self.confidence_interval = inputs.confidence_interval
+            if study_design.solve_for == SolveFor.SAMPLESIZE:
+                self.calculate_min_smallest_group_size(study_design.isu_factors, inputs)
+            if np.linalg.matrix_rank(self.delta) == 0:
+                self.errors.add(Constants.ERR_NO_DIFFERENCE)
+            if study_design.gaussian_covariate:
+                self.noncentrality_distribution = self.calculate_noncentrality_distribution(study_design)
+                if self.noncentrality_distribution.errors and len(self.noncentrality_distribution.errors) > 0:
+                    self.errors.update(self.noncentrality_distribution.errors)
+            else:
+                self.noncentrality_distribution = None
+        except (GlimmpseValidationException, GlimmpseCalculationException) as e:
+            self.errors.add(e)
+        except Exception as e:
+            traceback.print_exc()
+            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wrong with our calculations. Please contact us."))
+
+    def calculate_noncentrality_distribution(self, study_design: StudyDesign):
+        dist = NonCentralityDistribution(test=self.test,
+                                         FEssence=self.essence_design_matrix,
+                                         perGroupN=self.smallest_group_size,
+                                         CFixed=self.c_matrix,
+                                         CGaussian=np.zeros([self.get_rank_c(), 1]),
+                                         thetaDiff=self.theta-self.theta_zero,
+                                         sigmaStar=self.sigma_star,
+                                         stddevG=study_design.gaussian_covariate.standard_deviation,
+                                         exact=study_design.gaussian_covariate.exact)
+        return dist
+
 
     def calculate_min_smallest_group_size(self, isu_factors, inputs):
         if self.errors and Constants.ERR_ERROR_DEG_FREEDOM in self.errors:
@@ -143,15 +195,16 @@ class LinearModel(object):
                 self.smallest_group_size = self.smallest_group_size + 1
                 self.total_n = self.calculate_total_n(isu_factors, inputs)
                 self.calc_metadata()
-            err = set(self.errors)
-            err.remove(Constants.ERR_ERROR_DEG_FREEDOM)
-            self.errors = list(err)
-            self.minimum_smallest_group_size = self.total_n
-        else:
-            self.minimum_smallest_group_size = self.total_n
+            self.errors.remove(Constants.ERR_ERROR_DEG_FREEDOM)
+        self.minimum_smallest_group_size = self.smallest_group_size
 
     def calculate_total_n(self, isu_factors, inputs: ScenarioInputs):
-        groups = self.get_groups(isu_factors)
+        groups = [1]
+        predictors = isu_factors.get_predictors()
+        predictors_in_hypothesis = [f for f in predictors if type(f) == Predictor]
+        if len(predictors_in_hypothesis) > 0:
+            tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
+            groups = [c.get('value') for t in tables for r in t for c in r]
         total_n = sum([self.smallest_group_size * g for g in groups])
         return total_n
 
@@ -170,13 +223,14 @@ class LinearModel(object):
         self.nu_e = self.calc_nu_e()
         self.hypothesis_sum_square = self.calc_hypothesis_sum_square()
         self.error_sum_square = self.calc_error_sum_square()
+        self.delta = self.calc_delta()
 
     def calc_nu_e(self):
         if self.total_n is None or self.essence_design_matrix is None:
             return None
         nu_e = self.total_n - np.linalg.matrix_rank(self.essence_design_matrix)
         if int(nu_e) <= 0:
-            self.errors.append(Constants.ERR_ERROR_DEG_FREEDOM)
+            self.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
         return int(nu_e)
 
 
@@ -196,8 +250,11 @@ class LinearModel(object):
 
     def calculate_design_matrix(self, isu_factors):
         predictors = isu_factors.get_predictors()
-        components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
-                                                    p.in_hypothesis]
+        if self.full_beta:
+            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
+        else:
+            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
+                                                        p.in_hypothesis]
         kron_components = kronecker_list(components)
         groups = self.get_groups(isu_factors)
         return np.repeat(kron_components, groups, axis=0)
@@ -233,21 +290,24 @@ class LinearModel(object):
 
     def _get_repeated_measures_u_matrix(self, isu_factors):
         if self.full_beta:
-            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
         else:
-            partial_u_list = [LinearModel.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if
                               r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
-        orth_partial_u_list = [LinearModel._get_orthonormal_u_matrix(x) for x in partial_u_list]
+        orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
         orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
         return orth_u_repeated_measures
 
-    @staticmethod
-    def calculate_partial_u_matrix(repeated_measure):
+    def calculate_partial_u_matrix(self, repeated_measure):
         if repeated_measure.in_hypothesis:
             if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
                 partial = repeated_measure.partial_matrix
+            elif repeated_measure.hypothesis_type == HypothesisType.GLOBAL_TRENDS:
+                partial = self.calculate_main_effect_partial_u_matrix(repeated_measure)
+            elif repeated_measure.hypothesis_type == HypothesisType.IDENTITY:
+                partial = self.calculate_identity_partial_u_matrix(repeated_measure)
             else:
                 partial = repeated_measure.partial_u_matrix
         else:
@@ -294,6 +354,13 @@ class LinearModel(object):
         return main_effect
 
     @staticmethod
+    def calculate_main_effect_partial_u_matrix(repeated_mesaure):
+        i = np.identity(len(repeated_mesaure.values) - 1) * -1
+        v = np.matrix([np.ones(len(repeated_mesaure.values) - 1)])
+        main_effect = np.concatenate((v, i), axis=0)
+        return main_effect
+
+    @staticmethod
     def calculate_polynomial_partial_c_matrix(predictor):
         values = None
         no_groups = len(predictor.values)
@@ -317,17 +384,56 @@ class LinearModel(object):
     def calculate_identity_partial_c_matrix(predictor):
         return np.identity(len(predictor.values))
 
-    def calculate_sigma_star(self, isu_factors: IsuFactors, inputs):
-        outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
-        if len(isu_factors.get_repeated_measures()) > 0:
-            repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+    @staticmethod
+    def calculate_identity_partial_u_matrix(repeated_measure):
+        return np.identity(len(repeated_measure.values))
+
+    def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
+        if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
+            if len(isu_factors.get_repeated_measures()) > 0:
+                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+            else:
+                repeated_measure_component = np.matrix([[1]])
+            if len(isu_factors.get_clusters()) > 0:
+                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+            else:
+                cluster_component = np.matrix([[1]])
+            sigma_star = isu_factors.uMatrix.values.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * isu_factors.uMatrix.values
+            if gaussian_covariate:
+                # TODO: hack for debigging gaussian. remove
+                # gaussian_covariate.correlations = np.matrix([0.1])
+                # gaussian_covariate.standard_deviation = 10
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                sigma_star = sigma_star - adj
         else:
-            repeated_measure_component = np.matrix([[1]])
-        if len(isu_factors.get_clusters()) > 0:
-            cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
-        else:
-            cluster_component = np.matrix([[1]])
-        return kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
+            if len(isu_factors.get_repeated_measures()) > 0:
+                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+            else:
+                repeated_measure_component = np.matrix([[1]])
+            if len(isu_factors.get_clusters()) > 0:
+                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+            else:
+                cluster_component = np.matrix([[1]])
+            sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
+            if gaussian_covariate:
+                # TODO: hack for debigging gaussian. remove
+                # gaussian_covariate.correlations = np.matrix([0.1])
+                # gaussian_covariate.standard_deviation = 10
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                sigma_star = sigma_star - adj
+        return  sigma_star
+
+    def calculate_gaussian_adjustment(self, gaussian_covariate, isu_factors):
+        corellations = np.matrix([o.gaussian_corellation for o in isu_factors.get_outcomes()])
+        t = self.u_matrix.T * corellations.T
+        adj = t * (1 / np.power(gaussian_covariate.standard_deviation, 2)) * t.T
+        return adj
+
+    def calculate_gaussian_adjustment_new(self, gaussian_covariate, isu_factors):
+        adj = isu_factors.re * gaussian_covariate.correlations * isu_factors * isu_factors.outcome_correlation_matrix
+        return adj
 
     def calculate_outcome_sigma_star(self, isu_factors, inputs):
         outcomes = isu_factors.get_outcomes()
@@ -343,18 +449,28 @@ class LinearModel(object):
         if len(repeated_measures) == 0:
             return np.matrix([[1]])
         else:
-            sigma_star_rep_measure_components = [
-                self.calculate_rep_measure_component(measure) for measure in repeated_measures
-            ]
+            if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+                sigma_star_rep_measure_components = [
+                    self.calculate_rep_measure_sigma(measure) for measure in repeated_measures
+                ]
+            else:
+                sigma_star_rep_measure_components = [
+                    self.calculate_rep_measure_component(measure) for measure in repeated_measures
+                ]
             sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
             return sigma_star_rep_measures
 
     def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        u_orth = LinearModel._get_orthonormal_u_matrix(LinearModel.calculate_partial_u_matrix(repeated_measure))
+        u_orth = LinearModel._get_orthonormal_u_matrix(self.calculate_partial_u_matrix(repeated_measure))
         component = np.transpose(u_orth) * sigma_r * u_orth
         return component
+
+    def calculate_rep_measure_sigma(self, repeated_measure):
+        st = np.diag(repeated_measure.standard_deviations)
+        sigma_r = st * repeated_measure.correlation_matrix * st
+        return sigma_r
 
     def calculate_cluster_sigma_star(self, cluster):
         components = [
@@ -389,12 +505,51 @@ class LinearModel(object):
         t = (self.theta - self.theta_zero)
         return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
 
-    def delta(self):
-        return np.transpose(self.theta - self.theta_zero) * np.linalg.inv(self.m) * (self.theta-self.theta_zero)
+    def calc_delta(self):
+        if self.theta_zero is None or self.theta is None or self.m is None:
+            return None
+        else:
+            t = (self.theta - self.theta_zero)
+            return t.T * np.linalg.inv(self.m) * t
 
+    def print_errors(self):
+        out = ""
+        for err in self.errors:
+            if hasattr(err, 'value'):
+                out = out + err.value + " "
+            elif hasattr(err, 'args'):
+                for arg in err.args:
+                    out =  out + ' ' +  arg
+            else:
+                out = out + err
+        return out
 
     def serialize(self):
         return json.dumps(self, cls=LinearModelEncoder)
+
+    def serializeCI(self):
+        if self.confidence_interval:
+            return self.confidence_interval.to_dict()
+        else:
+            return None
+
+    def get_rank_x(self):
+        rank_x = np.linalg.matrix_rank(self.essence_design_matrix)
+        if self.noncentrality_distribution:
+            rank_x = rank_x + 1
+        return rank_x
+
+    def get_rank_c(self):
+        rank_c = np.linalg.matrix_rank(self.c_matrix)
+        return rank_c
+
+    def getTest(self):
+        if self and hasattr(self, 'test') and hasattr(self.test, 'value'):
+            return self.test.value
+        if self and hasattr(self, 'test'):
+            return self.test
+        else:
+            return None
 
 
 class LinearModelEncoder(JSONEncoder):

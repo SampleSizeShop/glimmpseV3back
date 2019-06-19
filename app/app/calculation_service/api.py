@@ -1,8 +1,12 @@
+import math
+import traceback
+
 from pyglimmpse import unirep, multirep, samplesize
 
 import json, random
 from flask import Blueprint, Response, request
 from flask_cors import cross_origin
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
 from app.calculation_service.model.enums import SolveFor, Tests
 from app.calculation_service.model.linear_model import LinearModel
@@ -54,12 +58,17 @@ def calculate():
     results = []
     for model in models:
         try:
-            if scenario.solve_for == SolveFor.POWER:
-                result = _calculate_power(model, scenario)
+            if model.errors:
+                print(model.errors)
+                result = dict(test=model.getTest(),
+                              samplesize=model.print_errors(),
+                              power=model.print_errors(),
+                              model=model.to_dict())
+            elif scenario.solve_for == SolveFor.POWER:
+                result = _calculate_power(model)
             else:
-                result = _calculate_sample_size(model, scenario)
-        except Exception as e:
-            print(e)
+                result = _calculate_sample_size(model)
+        except GlimmpseValidationException as e:
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -83,138 +92,133 @@ def _generate_models(scenario: StudyDesign, inputs: []):
     return models
 
 
-def _calculate_sample_size(model, scenario):
+def _calculate_sample_size(model):
     size = None
-    if model.test == Tests.HOTELLING_LAWLEY:
-        size, power = _multirep_samplesize(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
-                                    model=model)
+    if model.errors:
+        pass
+    elif model.test == Tests.HOTELLING_LAWLEY:
+        test = multirep.hlt_two_moment_null_approximator_obrien_shieh
     elif model.test == Tests.PILLAI_BARTLET:
-        size, power = _multirep_samplesize(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
-                                    model=model)
+        test = multirep.pbt_two_moment_null_approx_obrien_shieh
     elif model.test == Tests.WILKS_LIKLIEHOOD:
-        size, power = _multirep_samplesize(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
-                                    model=model)
+        test = multirep.wlk_two_moment_null_approx_obrien_shieh
     elif model.test == Tests.BOX_CORRECTION:
-        size, power = _unirep_samplesize(test=unirep.box,
-                                  model=model,
-                                  scenario=scenario)
+        test = unirep.box
     elif model.test == Tests.GEISSER_GREENHOUSE:
-        size, power = _unirep_samplesize(test=unirep.geisser_greenhouse,
-                                  model=model,
-                                  scenario=scenario)
+        test = unirep.geisser_greenhouse
     elif model.test == Tests.HUYNH_FELDT:
-        size, power = _unirep_samplesize(test=unirep.hyuhn_feldt,
-                                  model=model,
-                                  scenario=scenario)
+        test = unirep.hyuhn_feldt
     elif model.test == Tests.UNCORRECTED:
-        size, power = _unirep_samplesize(test=unirep.uncorrected,
-                                  model=model,
-                                  scenario=scenario)
+        test = unirep.uncorrected
+    size, power = _samplesize(test=test, model=model)
     result = _samplesize_to_dict(model=model,
                                  size=size,
                                  power=power)
     return result
 
 
-def _calculate_power(model, scenario):
+def _calculate_power(model):
     power = None
     if model.errors:
         pass
     elif model.test == Tests.HOTELLING_LAWLEY:
-        power = _multirep_power(test=multirep.hlt_two_moment_null_approximator_obrien_shieh,
-                                model=model)
+        test = multirep.hlt_two_moment_null_approximator_obrien_shieh
     elif model.test == Tests.PILLAI_BARTLET:
-        power = _multirep_power(test=multirep.pbt_two_moment_null_approx_obrien_shieh,
-                                model=model)
+        test = multirep.pbt_two_moment_null_approx_obrien_shieh
     elif model.test == Tests.WILKS_LIKLIEHOOD:
-        power = _multirep_power(test=multirep.wlk_two_moment_null_approx_obrien_shieh,
-                                model=model)
+        test = multirep.wlk_two_moment_null_approx_obrien_shieh
     elif model.test == Tests.BOX_CORRECTION:
-        power = _unirep_power(test=unirep.box,
-                              model=model,
-                              scenario=scenario)
+        test = unirep.box
     elif model.test == Tests.GEISSER_GREENHOUSE:
-        power = _unirep_power(test=unirep.geisser_greenhouse,
-                              model=model,
-                              scenario=scenario)
+        test = unirep.geisser_greenhouse
     elif model.test == Tests.HUYNH_FELDT:
-        power = _unirep_power(test=unirep.hyuhn_feldt,
-                              model=model,
-                              scenario=scenario)
+        test = unirep.hyuhn_feldt
     elif model.test == Tests.UNCORRECTED:
-        power = _unirep_power(test=unirep.uncorrected,
-                              model=model,
-                              scenario=scenario)
-    result = _power_to_dict(model=model,
-                            power=power)
+        test = unirep.uncorrected
+    power = _power(test=test, model=model)
+    result = _power_to_dict(model=model, power=power)
     return result
 
 
-def _multirep_samplesize(test, model):
+def _samplesize(test, model, **kwargs):
+    if model.noncentrality_distribution:
+        kwargs['noncentrality_distribution'] = model.noncentrality_distribution
+    if model.quantile:
+        kwargs['quantile'] = model.quantile
+    if model.confidence_interval:
+        kwargs['confidence_interval'] = model.confidence_interval
+    kwargs['tolerance'] = 1e-12
     size, power = samplesize.samplesize(test=test,
                                         rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
+                                        rank_X=model.get_rank_x(),
+                                        relative_group_sizes=model.groups,
                                         alpha=model.alpha,
                                         sigma_star=model.sigma_star,
+                                        delta_es=model.delta,
                                         targetPower=model.target_power,
-                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
-                                        relative_group_sizes=model.groups,
-                                        starting_smallest_group_size=model.minimum_smallest_group_size)
-    return size, power
-
-
-def _unirep_samplesize(test, model, scenario):
-    size, power = samplesize.samplesize(test=test,
-                                        rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                        rank_U=np.linalg.matrix_rank(model.u_matrix),
-                                        alpha=model.alpha,
-                                        sigma_star=model.sigma_star,
-                                        targetPower=model.target_power,
-                                        rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                                        delta=model.delta(),
-                                        relative_group_sizes=model.groups,
                                         starting_smallest_group_size=model.minimum_smallest_group_size,
-                                        optional_args=scenario.optional_args)
+                                        **kwargs)
+
     return size, power
 
 
 def _samplesize_to_dict(model, size, power):
+    pow = 'Not Calculated.'
+    lower = None
+    upper = None
+    if power:
+        pow = power.power
+        if power.lower_bound and power.lower_bound.power:
+            lower = power.lower_bound.power
+        if power.upper_bound and power.upper_bound.power:
+            upper = power.upper_bound.power
     return dict(test=model.test.value,
                 samplesize=size,
-                power=power,
+                power=pow,
+                lower_bound=lower,
+                upper_bound=upper,
                 model=model.to_dict())
 
 
-def _multirep_power(test, model):
+def _power(test, model, **kwargs):
+    if model.noncentrality_distribution:
+        kwargs['noncentrality_distribution'] = model.noncentrality_distribution
+    if model.quantile:
+        kwargs['quantile'] = model.quantile
+    if model.confidence_interval:
+        kwargs['confidence_interval'] = model.confidence_interval
+
     power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 total_N=model.total_n,
+                 rank_X=model.get_rank_x(),
+                 rep_N=model.smallest_group_size,
+                 relative_group_sizes=model.groups,
                  alpha=model.alpha,
-                 error_sum_square=model.error_sum_square,
-                 hypothesis_sum_square=model.hypothesis_sum_square)
-    return power
-
-
-def _unirep_power(test, model, scenario):
-    power = test(rank_C=np.linalg.matrix_rank(model.c_matrix),
-                 rank_U=np.linalg.matrix_rank(model.u_matrix),
-                 total_N=model.total_n,
-                 rank_X=np.linalg.matrix_rank(model.essence_design_matrix),
-                 error_sum_square=model.error_sum_square,
-                 hypo_sum_square=model.hypothesis_sum_square,
                  sigma_star=model.sigma_star,
-                 alpha=model.alpha,
-                 optional_args=scenario.optional_args)
+                 delta_es=model.delta,
+                 **kwargs)
     return power
 
 
 def _power_to_dict(model, power):
     pow = 'Not Calculated.'
+    lower = None
+    upper = None
     if power:
         pow = power.power
+        if math.isnan(pow):
+            pow = -1
+            model.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
+        if power.lower_bound and power.lower_bound.power:
+            lower = power.lower_bound.power
+            if math.isnan(lower):
+                lower = -1
+        if power.upper_bound and power.upper_bound.power:
+            upper = power.upper_bound.power
+            if math.isnan(upper):
+                upper = -1
     result = dict(test=model.test.value,
                   power=pow,
+                  lower_bound=lower,
+                  upper_bound=upper,
                   model=model.to_dict())
     return result
