@@ -62,6 +62,7 @@ class IsuFactors(object):
                  outcome_repeated_measure_st_devs=None,
                  cMatrix: ContrastMatrix = None,
                  uMatrix: ContrastMatrix = None,
+                 full_beta: bool = False,
                  **kwargs):
         self.variables = variables
         self.between_isu_relative_group_sizes = between_isu_relative_group_sizes
@@ -72,6 +73,7 @@ class IsuFactors(object):
         self.outcome_repeated_measure_st_devs = outcome_repeated_measure_st_devs
         self.cMatrix = cMatrix
         self.uMatrix = uMatrix
+        self.full_beta = full_beta
 
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])

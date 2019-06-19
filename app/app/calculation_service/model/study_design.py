@@ -1,11 +1,15 @@
 import json
+import traceback
 from json import JSONDecoder
 from pyglimmpse.constants import Constants
+from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
 from app.calculation_service.model.enums import TargetEvent, SolveFor, Nature, OptionalArgs, Tests
 from app.calculation_service.model.isu_factors import IsuFactors
 from app.calculation_service.model.power_curve import PowerCurve
+from app.calculation_service.model.confidence_interval import ConfidenceInterval
 from app.calculation_service.validators import check_options, repn_positive, parameters_positive, valid_approximations, valid_internal_pilot
+from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
 
 class StudyDesign:
@@ -14,31 +18,23 @@ class StudyDesign:
                  isu_factors: IsuFactors = None,
                  target_event: TargetEvent = None,
                  solve_for: SolveFor = None,
-                 alpha: float = 0.05,
                  confidence_interval_width: int = None,
                  sample_size: int = 2,
-                 target_power: float = None,
-                 selected_tests: [] = None,
-                 gaussian_covariate: float = None,
-                 scale_factor: float = None,
-                 variance_scale_factor: [] = None,
+                 gaussian_covariate: GaussianCovariate = None,
+                 confidence_interval: ConfidenceInterval = None,
                  power_curve: int = None,
-                 tolerance = 1e-10):
+                 full_beta: bool = False):
 
         # fed in
         self.isu_factors = isu_factors
         self.target_event = target_event
         self.solve_for = solve_for
-        self.alpha = alpha
         self.confidence_interval_width = confidence_interval_width
-        self.target_power = target_power
+        self.confidence_interval = confidence_interval
         self.sample_size = sample_size
-        self.selected_tests = selected_tests
         self.gaussian_covariate = gaussian_covariate
-        self.scale_factor = scale_factor
-        self.variance_scale_factor = variance_scale_factor
         self.power_curve = power_curve
-        self.tolerance = tolerance
+        self.full_beta = full_beta
 
     def __eq__(self, other):
         comp = []
@@ -67,8 +63,11 @@ class StudyDesign:
         self.exceptions = []
         try:
             self.__pre_calc_validation()
+        except GlimmpseValidationException as e:
+            self.exceptions.push(e)
         except Exception:
-            self.exceptions.push(Exception)
+            traceback.print_exc()
+            self.exceptions.push(GlimmpseValidationException("Sorry, something seems to have gone wron with out calculations. Please contact us."))
         if len(self.exceptions) > 0:
             return False
         else:
@@ -84,19 +83,6 @@ class StudyDesign:
 
 
 class StudyDesignDecoder(JSONDecoder):
-    def default_optional_args(self):
-        args = {
-            OptionalArgs.APPROXIMATION.value: Constants.UN,
-            OptionalArgs.EPSILON_ESTIMATOR.value: Constants.UCDF_MULLER2004_APPROXIMATION,
-            OptionalArgs.UNIREPMETHOD.value: Constants.SIGMA_KNOWN,
-            OptionalArgs.N_EST.value: 33,
-            OptionalArgs.RANK_EST.value: 1,
-            OptionalArgs.ALPHA_CL.value: 0.025,
-            OptionalArgs.ALPHA_CU.value: 0.025,
-            OptionalArgs.N_IP.value: 33,
-            OptionalArgs.RANK_IP.value: 1,
-            OptionalArgs.TOLERANCE.value: 1e-10}
-        return args
 
     def decode(self, s: str) -> StudyDesign:
         study_design = StudyDesign()
@@ -107,24 +93,20 @@ class StudyDesignDecoder(JSONDecoder):
             study_design.target_event = TargetEvent(d['_targetEvent'])
         if d.get('_solveFor'):
             study_design.solve_for = SolveFor(d['_solveFor'])
-        if d.get('_typeOneErrorRate'):
-            study_design.alpha = d['_typeOneErrorRate']
-        if d.get('_power'):
-            study_design.target_power = d['_power']
         if d.get('_ciwidth'):
             study_design.confidence_interval_width = d['_ciwidth']
-        if d.get('_selectedTests'):
-            study_design.selected_tests = [Tests(t) for t in d['_selectedTests']]
         if d.get('_gaussianCovariate'):
-            study_design.gaussian_covariate = d['_gaussianCovariate']
-        if d.get('_scaleFactor'):
-            study_design.scale_factor = d['_scaleFactor']
-        if d.get('_varianceScaleFactors'):
-            study_design.variance_scale_factor = d['_varianceScaleFactors']
+            study_design.gaussian_covariate = GaussianCovariate(source=d['_gaussianCovariate'])
         if d.get('_powerCurve'):
             study_design.power_curve = PowerCurve(source=d['_powerCurve'])
-        if d.get('tolerance'):
-            study_design.tolerance = d['tolerance']
-        study_design.optional_args = self.default_optional_args()
-
+        if d.get('_define_full_beta'):
+            study_design.full_beta = d['_define_full_beta']
+        if d.get('_scaleFactor'):
+            study_design.beta_scalar = d['_scaleFactor']
+        if d.get('_varianceScaleFactors'):
+            study_design.sigma_scalar = d['_varianceScaleFactors']
+        if d.get('_confidence_interval'):
+            study_design.unirepmethod = Constants.SIGMA_ESTIMATED
+            if d['_confidence_interval']['beta_known']:
+                study_design.unirepmethod = Constants.SIGMA_KNOWN
         return study_design
