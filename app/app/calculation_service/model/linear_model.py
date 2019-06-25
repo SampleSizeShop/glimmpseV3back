@@ -404,7 +404,7 @@ class LinearModel(object):
                 # TODO: hack for debigging gaussian. remove
                 # gaussian_covariate.correlations = np.matrix([0.1])
                 # gaussian_covariate.standard_deviation = 10
-                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate)
                 sigma_star = sigma_star - adj
         else:
             outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
@@ -418,15 +418,12 @@ class LinearModel(object):
                 cluster_component = np.matrix([[1]])
             sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
             if gaussian_covariate:
-                # TODO: hack for debigging gaussian. remove
-                # gaussian_covariate.correlations = np.matrix([0.1])
-                # gaussian_covariate.standard_deviation = 10
-                adj = self.calculate_gaussian_adjustment(gaussian_covariate, isu_factors)
+                adj = self.calculate_gaussian_adjustment(gaussian_covariate)
                 sigma_star = sigma_star - adj
         return  sigma_star
 
-    def calculate_gaussian_adjustment(self, gaussian_covariate, isu_factors):
-        corellations = np.matrix([o.gaussian_corellation for o in isu_factors.get_outcomes()])
+    def calculate_gaussian_adjustment(self, gaussian_covariate):
+        corellations = np.matrix(gaussian_covariate.corellations)
         t = self.u_matrix.T * corellations.T
         adj = t * (1 / np.power(gaussian_covariate.standard_deviation, 2)) * t.T
         return adj
