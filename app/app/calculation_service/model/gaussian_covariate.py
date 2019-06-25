@@ -6,6 +6,7 @@ class GaussianCovariate(object):
     def __init__(self,
                  standard_deviation: float = None,
                  exact: bool = False,
+                 corellations: [] = [],
                  **kwargs):
         """
         Class describing a Gaussian Covariate
@@ -16,9 +17,12 @@ class GaussianCovariate(object):
         """
         self.standard_deviation = standard_deviation
         self.exact = exact
+        self.corellations = corellations
         if kwargs.get('source'):
             self.from_dict(kwargs['source'])
 
     def from_dict(self, source):
         if source.get('standard_deviation'):
             self.standard_deviation = source['standard_deviation']
+        if source.get('corellations'):
+            self.corellations = source['corellations']
