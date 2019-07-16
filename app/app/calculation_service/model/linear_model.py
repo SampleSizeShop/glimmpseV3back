@@ -264,7 +264,10 @@ class LinearModel(object):
 
     def calculate_c_matrix(self, isu_factors):
         if isu_factors.cMatrix and isu_factors.cMatrix.hypothesis_type == HypothesisType.CUSTOM_C_MATRIX.value:
-            c_matrix = isu_factors.cMatrix.values
+            l = [p for p in isu_factors.get_predictors() if p.in_hypothesis]
+            c_matrix = 1
+            if len(l) > 0:
+                c_matrix = isu_factors.cMatrix.values
             return c_matrix
         else:
             predictors = isu_factors.get_predictors()
@@ -279,7 +282,10 @@ class LinearModel(object):
 
     def calculate_u_matrix(self, isu_factors):
         if isu_factors.uMatrix and isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
-            u_matrix = isu_factors.uMatrix.values
+            l = [m for m in isu_factors.get_repeated_measures() if m.in_hypothesis]
+            u_matrix = 1
+            if len(l) > 0:
+                u_matrix = isu_factors.uMatrix.values
             return u_matrix
         else:
             u_outcomes = np.identity(len(isu_factors.get_outcomes()))
@@ -367,15 +373,15 @@ class LinearModel(object):
         if no_groups < 2:
             warnings.warn('You have less than 2 valueNames in your main effect. This is not valid.')
         elif no_groups == 2:
-            values = np.matrix(PolynomialMatrices.LINEAR_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.LINEAR_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 3:
-            values = np.matrix(PolynomialMatrices.QUADRATIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.QUADRATIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 4:
-            values = np.matrix(PolynomialMatrices.CUBIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.CUBIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 5:
-            values = np.matrix(PolynomialMatrices.QUINTIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.QUINTIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 6:
-            values = np.matrix(PolynomialMatrices.SEXTIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.SEXTIC_POLYNOMIAL_CMATRIX.value)
         else:
             warnings.warn('You have more than 6 valueNames in your main effect. We don\'t currently handle this :(')
         return values
@@ -399,7 +405,10 @@ class LinearModel(object):
                 cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
             else:
                 cluster_component = np.matrix([[1]])
-            sigma_star = isu_factors.uMatrix.values.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * isu_factors.uMatrix.values
+            if isinstance(self.u_matrix, int):
+                sigma_star = kronecker_list( [outcome_component, repeated_measure_component, cluster_component])
+            else:
+                sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
             if gaussian_covariate:
                 # TODO: hack for debigging gaussian. remove
                 # gaussian_covariate.correlations = np.matrix([0.1])

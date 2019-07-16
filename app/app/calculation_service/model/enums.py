@@ -2,12 +2,12 @@ from enum import Enum
 
 
 class HypothesisType(Enum):
-    GLOBAL_TRENDS = 'Global Trends'
-    IDENTITY = 'Identity'
-    POLYNOMIAL = 'Polynomial'
-    USER_DEFINED = 'Define partial contrasts'
-    CUSTOM_C_MATRIX = 'Define hypothesis C Matrix'
-    CUSTOM_U_MATRIX = 'Define hypothesis U Matrix'
+    GLOBAL_TRENDS = 'All mean differences zero'
+    IDENTITY = 'All means zero'
+    POLYNOMIAL = 'Trends (Polynomial)'
+    USER_DEFINED = 'Custom'
+    CUSTOM_C_MATRIX = 'Custom between contrast (C) Matrix'
+    CUSTOM_U_MATRIX = 'Custom within contrast (U) Matrix'
 
 
 class IsuFactorType(Enum):
