@@ -264,7 +264,10 @@ class LinearModel(object):
 
     def calculate_c_matrix(self, isu_factors):
         if isu_factors.cMatrix and isu_factors.cMatrix.hypothesis_type == HypothesisType.CUSTOM_C_MATRIX.value:
-            c_matrix = isu_factors.cMatrix.values
+            l = [p for p in isu_factors.get_predictors() if p.in_hypothesis]
+            c_matrix = 1
+            if len(l) > 0:
+                c_matrix = isu_factors.cMatrix.values
             return c_matrix
         else:
             predictors = isu_factors.get_predictors()
@@ -279,7 +282,10 @@ class LinearModel(object):
 
     def calculate_u_matrix(self, isu_factors):
         if isu_factors.uMatrix and isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
-            u_matrix = isu_factors.uMatrix.values
+            l = [m for m in isu_factors.get_repeated_measures() if m.in_hypothesis]
+            u_matrix = 1
+            if len(l) > 0:
+                u_matrix = isu_factors.uMatrix.values
             return u_matrix
         else:
             u_outcomes = np.identity(len(isu_factors.get_outcomes()))
@@ -367,15 +373,15 @@ class LinearModel(object):
         if no_groups < 2:
             warnings.warn('You have less than 2 valueNames in your main effect. This is not valid.')
         elif no_groups == 2:
-            values = np.matrix(PolynomialMatrices.LINEAR_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.LINEAR_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 3:
-            values = np.matrix(PolynomialMatrices.QUADRATIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.QUADRATIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 4:
-            values = np.matrix(PolynomialMatrices.CUBIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.CUBIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 5:
-            values = np.matrix(PolynomialMatrices.QUINTIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.QUINTIC_POLYNOMIAL_CMATRIX.value)
         elif no_groups == 6:
-            values = np.matrix(PolynomialMatrices.SEXTIC_POLYNOMIAL_CMATRIX)
+            values = np.matrix(PolynomialMatrices.SEXTIC_POLYNOMIAL_CMATRIX.value)
         else:
             warnings.warn('You have more than 6 valueNames in your main effect. We don\'t currently handle this :(')
         return values
@@ -399,7 +405,10 @@ class LinearModel(object):
                 cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
             else:
                 cluster_component = np.matrix([[1]])
-            sigma_star = isu_factors.uMatrix.values.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * isu_factors.uMatrix.values
+            if isinstance(self.u_matrix, int):
+                sigma_star = kronecker_list( [outcome_component, repeated_measure_component, cluster_component])
+            else:
+                sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
             if gaussian_covariate:
                 # TODO: hack for debigging gaussian. remove
                 # gaussian_covariate.correlations = np.matrix([0.1])
@@ -488,7 +497,7 @@ class LinearModel(object):
         if self.c_matrix is None or self.essence_design_matrix is None:
             return None
         return (self.c_matrix *
-                np.linalg.inv((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
+                self.getMatrixInverse((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
                 * np.transpose(self.c_matrix))
 
     def calc_error_sum_square(self):
@@ -497,17 +506,17 @@ class LinearModel(object):
         return self.nu_e * self.sigma_star
 
     def calc_hypothesis_sum_square(self):
-        if self.theta is None or self.theta_zero is None or self.m is None or np.linalg.det(self.m) == 0:
+        if self.theta is None or self.theta_zero is None or self.m is None or self.getMatrixDeterminantIsZero(self.m):
             return None
         t = (self.theta - self.theta_zero)
-        return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
+        return self.repeated_rows_in_design_matrix * np.transpose(t) * self.getMatrixInverse(self.m) * t
 
     def calc_delta(self):
-        if self.theta_zero is None or self.theta is None or self.m is None:
+        if self.theta_zero is None or self.theta is None or self.m is None or self.getMatrixDeterminantIsZero(self.m):
             return None
         else:
             t = (self.theta - self.theta_zero)
-            return t.T * np.linalg.inv(self.m) * t
+            return t.T * self.getMatrixInverse(self.m) * t
 
     def print_errors(self):
         out = ""
@@ -547,6 +556,30 @@ class LinearModel(object):
             return self.test
         else:
             return None
+
+    def getMatrixInverse(self, matrix):
+        """Numpy doesnt habdle matrix multiplication of a 1x1 with matrices of larger dimensions well.
+            This convinience method returns the inverse of the matrix OR 1/the value of the 1x2 matrix"""
+        matrix = self.get1by1AsScalar(matrix)
+        if isinstance(matrix, float) or isinstance(matrix, int):
+            return 1 / matrix
+        else:
+            return np.linalg.inv(matrix)
+
+    def getMatrixDeterminantIsZero(self, matrix):
+        """Numpy doesnt habdle matrix multiplication of a 1x1 with matrices of larger dimensions well.
+            This convinience method returns whether the determinant of the matrix is zero
+            OR whether the value of the scalar is zero"""
+        matrix = self.get1by1AsScalar(matrix)
+        if isinstance(matrix, float) or isinstance(matrix, int):
+            return matrix == 0
+        else:
+            return np.linalg.det(matrix) == 0
+
+    def get1by1AsScalar(self, matrix):
+        if type(matrix) == np.matrixlib.defmatrix.matrix and matrix.shape == (1, 1):
+            matrix = matrix[0, 0]
+        return matrix
 
 
 class LinearModelEncoder(JSONEncoder):
