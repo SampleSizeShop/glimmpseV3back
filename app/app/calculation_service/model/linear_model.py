@@ -497,7 +497,7 @@ class LinearModel(object):
         if self.c_matrix is None or self.essence_design_matrix is None:
             return None
         return (self.c_matrix *
-                np.linalg.inv((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
+                self.getMatrixInverse((np.transpose(self.essence_design_matrix) * self.essence_design_matrix))
                 * np.transpose(self.c_matrix))
 
     def calc_error_sum_square(self):
@@ -506,17 +506,17 @@ class LinearModel(object):
         return self.nu_e * self.sigma_star
 
     def calc_hypothesis_sum_square(self):
-        if self.theta is None or self.theta_zero is None or self.m is None or np.linalg.det(self.m) == 0:
+        if self.theta is None or self.theta_zero is None or self.m is None or self.getMatrixDeterminantIsZero(self.m):
             return None
         t = (self.theta - self.theta_zero)
-        return self.repeated_rows_in_design_matrix * np.transpose(t) * np.linalg.inv(self.m) * t
+        return self.repeated_rows_in_design_matrix * np.transpose(t) * self.getMatrixInverse(self.m) * t
 
     def calc_delta(self):
-        if self.theta_zero is None or self.theta is None or self.m is None:
+        if self.theta_zero is None or self.theta is None or self.m is None or self.getMatrixDeterminantIsZero(self.m):
             return None
         else:
             t = (self.theta - self.theta_zero)
-            return t.T * np.linalg.inv(self.m) * t
+            return t.T * self.getMatrixInverse(self.m) * t
 
     def print_errors(self):
         out = ""
@@ -556,6 +556,30 @@ class LinearModel(object):
             return self.test
         else:
             return None
+
+    def getMatrixInverse(self, matrix):
+        """Numpy doesnt habdle matrix multiplication of a 1x1 with matrices of larger dimensions well.
+            This convinience method returns the inverse of the matrix OR 1/the value of the 1x2 matrix"""
+        matrix = self.get1by1AsScalar(matrix)
+        if isinstance(matrix, float) or isinstance(matrix, int):
+            return 1 / matrix
+        else:
+            return np.linalg.inv(matrix)
+
+    def getMatrixDeterminantIsZero(self, matrix):
+        """Numpy doesnt habdle matrix multiplication of a 1x1 with matrices of larger dimensions well.
+            This convinience method returns whether the determinant of the matrix is zero
+            OR whether the value of the scalar is zero"""
+        matrix = self.get1by1AsScalar(matrix)
+        if isinstance(matrix, float) or isinstance(matrix, int):
+            return matrix == 0
+        else:
+            return np.linalg.det(matrix) == 0
+
+    def get1by1AsScalar(self, matrix):
+        if type(matrix) == np.matrixlib.defmatrix.matrix and matrix.shape == (1, 1):
+            matrix = matrix[0, 0]
+        return matrix
 
 
 class LinearModelEncoder(JSONEncoder):
