@@ -268,7 +268,6 @@ class LinearModel(object):
             c_matrix = 1
             if len(l) > 0:
                 c_matrix = isu_factors.cMatrix.values
-            return c_matrix
         else:
             predictors = isu_factors.get_predictors()
             if self.full_beta:
@@ -277,7 +276,11 @@ class LinearModel(object):
                 partials = [self.calculate_partial_c_matrix(p) for p in predictors if p.in_hypothesis]
             partials.append(np.matrix(np.identity(1)))
             c_matrix = kronecker_list(partials)
-            return c_matrix
+        if not isinstance(c_matrix, int) and np.linalg.matrix_rank(c_matrix) != c_matrix.shape[0]:
+            raise GlimmpseValidationException("Your hypothesis is untestable because your between contrast matrix"
+                                              " contains redundant information (is less than full row rank). "
+                                              "Please change your custom contrast matrix.")
+        return c_matrix
 
 
     def calculate_u_matrix(self, isu_factors):
@@ -286,13 +289,17 @@ class LinearModel(object):
             u_matrix = 1
             if len(l) > 0:
                 u_matrix = isu_factors.uMatrix.values
-            return u_matrix
         else:
             u_outcomes = np.identity(len(isu_factors.get_outcomes()))
             u_cluster = np.matrix([[1]])
             u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(self, isu_factors)
-            u_orth = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
-            return u_orth
+            u_matrix = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
+
+        if not isinstance(u_matrix, int) and np.linalg.matrix_rank(u_matrix) != u_matrix.shape[1]:
+            raise GlimmpseValidationException("Your hypothesis is untestable because your within contrast matrix"
+                                              " contains redundant information (is less than full column rank). "
+                                              "Please change your custom contrast matrix.")
+        return u_matrix
 
     def _get_repeated_measures_u_matrix(self, isu_factors):
         if self.full_beta:
