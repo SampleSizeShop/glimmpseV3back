@@ -7,6 +7,7 @@ import json, random
 from flask import Blueprint, Response, request
 from flask_cors import cross_origin
 from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
+from pyglimmpse.model.power import Power
 
 from app.calculation_service.model.enums import SolveFor, Tests, HypothesisType
 from app.calculation_service.model.linear_model import LinearModel
@@ -149,17 +150,19 @@ def _samplesize(test, model, **kwargs):
     if model.confidence_interval:
         kwargs['confidence_interval'] = model.confidence_interval
     kwargs['tolerance'] = 1e-12
-    size, power = samplesize.samplesize(test=test,
-                                        rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                        rank_X=model.get_rank_x(),
-                                        relative_group_sizes=model.groups,
-                                        alpha=model.alpha,
-                                        sigma_star=model.sigma_star,
-                                        delta_es=model.delta,
-                                        targetPower=model.target_power,
-                                        starting_smallest_group_size=model.minimum_smallest_group_size,
-                                        **kwargs)
-
+    try:
+        size, power = samplesize.samplesize(test=test,
+                                            rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                            rank_X=model.get_rank_x(),
+                                            relative_group_sizes=model.groups,
+                                            alpha=model.alpha,
+                                            sigma_star=model.sigma_star,
+                                            delta_es=model.delta,
+                                            targetPower=model.target_power,
+                                            starting_smallest_group_size=model.minimum_smallest_group_size,
+                                            **kwargs)
+    except ValueError as e:
+        raise GlimmpseValidationException(e.args[0])
     return size, power
 
 
