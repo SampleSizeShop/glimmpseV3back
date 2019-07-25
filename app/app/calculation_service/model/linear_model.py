@@ -50,6 +50,7 @@ class LinearModel(object):
                  power_method = None,
                  quantile = None,
                  confidence_interval = None,
+                 orthonormalize_u_matrix = False,
                  **kwargs):
         """
         Parameters
@@ -95,6 +96,7 @@ class LinearModel(object):
         self.power_method = power_method
         self.quantile = quantile
         self.confidence_interval = confidence_interval
+        self.orthonormalize_u_matrix = orthonormalize_u_matrix
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -126,12 +128,13 @@ class LinearModel(object):
                    groups=self.groups,
                    power_method=self.power_method,
                    quantile=self.quantile,
-                   confidence_interval=self.serializeCI()
+                   confidence_interval=self.serializeCI(),
+                   orthonormalize_u_matrix = self.orthonormalize_u_matrix
                    )
         return ret
 
 
-    def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs):
+    def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs, orthonormalize_u_matrix):
         """
         Populate a LinearModel with Values from a study design.
 
@@ -142,6 +145,7 @@ class LinearModel(object):
         """
 
         try:
+            self.orthonormalize_u_matrix = orthonormalize_u_matrix
             self.full_beta = study_design.full_beta
             self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
             self.repeated_rows_in_design_matrix = inputs.smallest_group_size
@@ -341,9 +345,12 @@ class LinearModel(object):
                               r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
-        orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
-        orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
-        return orth_u_repeated_measures
+        if self.orthonormalize_u_matrix:
+            orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
+            u_repeated_measures = kronecker_list(orth_partial_u_list)
+        else:
+            u_repeated_measures = kronecker_list(partial_u_list)
+        return u_repeated_measures
 
     def calculate_partial_u_matrix(self, repeated_measure):
         if repeated_measure.in_hypothesis:
@@ -428,7 +435,8 @@ class LinearModel(object):
             warnings.warn('You have less than 2 valueNames in your main effect. This is not valid.')
         elif no_groups <= 10:
             x = [float(val) for val in repeated_measure.values]
-            values = orpol.orpol(x).T
+            values = orpol.orpol(x)
+            values = np.matrix(values[:, 1:])
         else:
             warnings.warn('You have more than 10 valueNames in your main effect. We don\'t currently handle this :(')
         return values
@@ -501,8 +509,10 @@ class LinearModel(object):
     def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        u_orth = LinearModel._get_orthonormal_u_matrix(self.calculate_partial_u_matrix(repeated_measure))
-        component = np.transpose(u_orth) * sigma_r * u_orth
+        u = self.calculate_partial_u_matrix(repeated_measure)
+        if self.orthonormalize_u_matrix:
+            u = LinearModel._get_orthonormal_u_matrix(u)
+        component = np.transpose(u) * sigma_r * u
         return component
 
     def calculate_rep_measure_sigma(self, repeated_measure):
@@ -612,7 +622,6 @@ class LinearModel(object):
         if type(matrix) == np.matrixlib.defmatrix.matrix and matrix.shape == (1, 1):
             matrix = matrix[0, 0]
         return matrix
-
 
 class LinearModelEncoder(JSONEncoder):
     def default(self, obj):

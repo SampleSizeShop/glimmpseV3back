@@ -8,7 +8,7 @@ from flask import Blueprint, Response, request
 from flask_cors import cross_origin
 from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
 
-from app.calculation_service.model.enums import SolveFor, Tests
+from app.calculation_service.model.enums import SolveFor, Tests, HypothesisType
 from app.calculation_service.model.linear_model import LinearModel
 from app.calculation_service.model.study_design import StudyDesign
 import numpy as np
@@ -85,9 +85,10 @@ def calculate():
 def _generate_models(scenario: StudyDesign, inputs: []):
     """ Create a LinearModel object for each distinct set of parameters defined in the scenario"""
     models = []
+    orthonormalize_contrasts = get_orthonormalize_u_matrix(scenario, inputs)
     for inputSet in inputs:
             model = LinearModel()
-            model.from_study_design(scenario, inputSet)
+            model.from_study_design(scenario, inputSet, orthonormalize_contrasts)
             models.append(model)
     return models
 
@@ -222,3 +223,11 @@ def _power_to_dict(model, power):
                   upper_bound=upper,
                   model=model.to_dict())
     return result
+
+def get_orthonormalize_u_matrix(study_design: StudyDesign, inputs):
+    orthonormalize_u_matrix = False
+    if study_design.isu_factors.uMatrix.hypothesis_type != HypothesisType.POLYNOMIAL.value:
+        for input in inputs:
+            if input.test in [Tests.BOX_CORRECTION, Tests.HUYNH_FELDT, Tests.GEISSER_GREENHOUSE, Tests.HUYNH_FELDT, Tests.UNCORRECTED]:
+                orthonormalize_u_matrix = True
+    return orthonormalize_u_matrix
