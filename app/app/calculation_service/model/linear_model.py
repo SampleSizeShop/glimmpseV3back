@@ -5,6 +5,7 @@ from json import JSONEncoder
 
 import numpy as np
 from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException, GlimmpseCalculationException
+from pyglimmpse import orpol
 
 from app.constants import Constants
 from app.calculation_service import utilities
@@ -16,7 +17,12 @@ from app.calculation_service.model.scenario_inputs import ScenarioInputs
 from app.calculation_service.model.predictor import Predictor
 from app.calculation_service.model.gaussian_covariate import GaussianCovariate
 
+from itertools import groupby
+from operator import itemgetter
+
 from pyglimmpse.NonCentralityDistribution import NonCentralityDistribution
+
+from app.calculation_service.model.group_id import GroupId
 
 
 class LinearModel(object):
@@ -44,6 +50,7 @@ class LinearModel(object):
                  power_method = None,
                  quantile = None,
                  confidence_interval = None,
+                 orthonormalize_u_matrix = False,
                  **kwargs):
         """
         Parameters
@@ -89,6 +96,7 @@ class LinearModel(object):
         self.power_method = power_method
         self.quantile = quantile
         self.confidence_interval = confidence_interval
+        self.orthonormalize_u_matrix = orthonormalize_u_matrix
 
         if kwargs.get('study_design'):
             self.from_study_design(kwargs['study_design'])
@@ -120,12 +128,13 @@ class LinearModel(object):
                    groups=self.groups,
                    power_method=self.power_method,
                    quantile=self.quantile,
-                   confidence_interval=self.serializeCI()
+                   confidence_interval=self.serializeCI(),
+                   orthonormalize_u_matrix = self.orthonormalize_u_matrix
                    )
         return ret
 
 
-    def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs):
+    def from_study_design(self, study_design: StudyDesign, inputs: ScenarioInputs, orthonormalize_u_matrix):
         """
         Populate a LinearModel with Values from a study design.
 
@@ -136,6 +145,7 @@ class LinearModel(object):
         """
 
         try:
+            self.orthonormalize_u_matrix = orthonormalize_u_matrix
             self.full_beta = study_design.full_beta
             self.essence_design_matrix = self.calculate_design_matrix(study_design.isu_factors)
             self.repeated_rows_in_design_matrix = inputs.smallest_group_size
@@ -211,11 +221,37 @@ class LinearModel(object):
     def get_groups(self, isu_factors):
         groups = [1]
         hypothesis = isu_factors.get_hypothesis()
+        predictors = isu_factors.get_predictors()
         predictors_in_hypothesis = [f for f in hypothesis if type(f) == Predictor]
         if len(predictors_in_hypothesis) > 0:
             tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
             groups = [c.get('value') for t in tables for r in t for c in r]
         return groups
+
+    def collapse_relative_group_sizes(self, predictors_in_hypothesis, predictors, tables):
+        """
+        Collapse table by adding across the omitted dimensions.
+
+        :param predictors_in_hypothesis:
+        :param predictors:
+        :param tables:
+        :return:
+        """
+        omitted_dimensions = [p.name for p in predictors if p not in predictors_in_hypothesis]
+        all_values = [c for t in tables for r in t for c in r]
+        reduced_list = [(self.get_reduced_id(val, omitted_dimensions), val.get('value')) for val in all_values]
+        x = [(k, list(list(zip(*g))[1])) for k, g in groupby(reduced_list, itemgetter(0))]
+
+        groups = dict.fromkeys(set([v[0] for v in x]), 0)
+
+        for val in x:
+            total = sum(val[1]) + groups.get(val[0])
+            groups.update({val[0]: total})
+
+        return list(groups.values())
+
+    def get_reduced_id(self, val, omitted_dimensions):
+        return GroupId([val for val in val.get('id') if val.get('factorName') not in omitted_dimensions])
 
     def calc_metadata(self):
         self.theta = self.calc_theta()
@@ -309,9 +345,12 @@ class LinearModel(object):
                               r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
-        orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
-        orth_u_repeated_measures = kronecker_list(orth_partial_u_list)
-        return orth_u_repeated_measures
+        if self.orthonormalize_u_matrix:
+            orth_partial_u_list = [self._get_orthonormal_u_matrix(x) for x in partial_u_list]
+            u_repeated_measures = kronecker_list(orth_partial_u_list)
+        else:
+            u_repeated_measures = kronecker_list(partial_u_list)
+        return u_repeated_measures
 
     def calculate_partial_u_matrix(self, repeated_measure):
         if repeated_measure.in_hypothesis:
@@ -319,6 +358,8 @@ class LinearModel(object):
                 partial = repeated_measure.partial_matrix
             elif repeated_measure.hypothesis_type == HypothesisType.GLOBAL_TRENDS:
                 partial = self.calculate_main_effect_partial_u_matrix(repeated_measure)
+            elif repeated_measure.hypothesis_type == HypothesisType.POLYNOMIAL:
+                    partial = self.calculate_polynomial_partial_u_matrix(repeated_measure)
             elif repeated_measure.hypothesis_type == HypothesisType.IDENTITY:
                 partial = self.calculate_identity_partial_u_matrix(repeated_measure)
             else:
@@ -379,18 +420,27 @@ class LinearModel(object):
         no_groups = len(predictor.values)
         if no_groups < 2:
             warnings.warn('You have less than 2 valueNames in your main effect. This is not valid.')
-        elif no_groups == 2:
-            values = np.matrix(PolynomialMatrices.LINEAR_POLYNOMIAL_CMATRIX.value)
-        elif no_groups == 3:
-            values = np.matrix(PolynomialMatrices.QUADRATIC_POLYNOMIAL_CMATRIX.value)
-        elif no_groups == 4:
-            values = np.matrix(PolynomialMatrices.CUBIC_POLYNOMIAL_CMATRIX.value)
-        elif no_groups == 5:
-            values = np.matrix(PolynomialMatrices.QUINTIC_POLYNOMIAL_CMATRIX.value)
-        elif no_groups == 6:
-            values = np.matrix(PolynomialMatrices.SEXTIC_POLYNOMIAL_CMATRIX.value)
+        elif no_groups <= 10:
+            x = [float(val) for val in predictor.values]
+            values = orpol.orpol(x)
+            values = np.matrix(values[:, 1:predictor.polynomial_order])
+            values = values.T
         else:
-            warnings.warn('You have more than 6 valueNames in your main effect. We don\'t currently handle this :(')
+            warnings.warn('You have more than 10 valueNames in your main effect. We don\'t currently handle this :(')
+        return values
+
+    @staticmethod
+    def calculate_polynomial_partial_u_matrix(repeated_measure):
+        values = None
+        no_groups = len(repeated_measure.values)
+        if no_groups < 2:
+            warnings.warn('You have less than 2 valueNames in your main effect. This is not valid.')
+        elif no_groups <= 10:
+            x = [float(val) for val in repeated_measure.values]
+            values = orpol.orpol(x)
+            values = np.matrix(values[:, 1:repeated_measure.polynomial_order])
+        else:
+            warnings.warn('You have more than 10 valueNames in your main effect. We don\'t currently handle this :(')
         return values
 
     @staticmethod
@@ -402,40 +452,24 @@ class LinearModel(object):
         return np.identity(len(repeated_measure.values))
 
     def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
-        if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
-            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
-            if len(isu_factors.get_repeated_measures()) > 0:
-                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
-            else:
-                repeated_measure_component = np.matrix([[1]])
-            if len(isu_factors.get_clusters()) > 0:
-                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
-            else:
-                cluster_component = np.matrix([[1]])
-            if isinstance(self.u_matrix, int):
-                sigma_star = kronecker_list( [outcome_component, repeated_measure_component, cluster_component])
-            else:
-                sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
-            if gaussian_covariate:
-                # TODO: hack for debigging gaussian. remove
-                # gaussian_covariate.correlations = np.matrix([0.1])
-                # gaussian_covariate.standard_deviation = 10
-                adj = self.calculate_gaussian_adjustment(gaussian_covariate)
-                sigma_star = sigma_star - adj
+        """Calculate sigma star from the factors included in the hypothesis, unless full beta has been selected,
+        in which case all factors should be used."""
+        outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
+        if len(isu_factors.get_repeated_measures()) > 0:
+            repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
         else:
-            outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
-            if len(isu_factors.get_repeated_measures()) > 0:
-                repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
-            else:
-                repeated_measure_component = np.matrix([[1]])
-            if len(isu_factors.get_clusters()) > 0:
-                cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
-            else:
-                cluster_component = np.matrix([[1]])
+            repeated_measure_component = np.matrix([[1]])
+        if len(isu_factors.get_clusters()) > 0:
+            cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
+        else:
+            cluster_component = np.matrix([[1]])
+        if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value and not isinstance(self.u_matrix, int):
+            sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
+        else:
             sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
-            if gaussian_covariate:
-                adj = self.calculate_gaussian_adjustment(gaussian_covariate)
-                sigma_star = sigma_star - adj
+        if gaussian_covariate:
+            adj = self.calculate_gaussian_adjustment(gaussian_covariate)
+            sigma_star = sigma_star - adj
         return  sigma_star
 
     def calculate_gaussian_adjustment(self, gaussian_covariate):
@@ -470,14 +504,17 @@ class LinearModel(object):
                 sigma_star_rep_measure_components = [
                     self.calculate_rep_measure_component(measure) for measure in repeated_measures
                 ]
+                sigma_star_rep_measure_components.append(np.identity(1))
             sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
             return sigma_star_rep_measures
 
     def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        u_orth = LinearModel._get_orthonormal_u_matrix(self.calculate_partial_u_matrix(repeated_measure))
-        component = np.transpose(u_orth) * sigma_r * u_orth
+        u = self.calculate_partial_u_matrix(repeated_measure)
+        if self.orthonormalize_u_matrix:
+            u = LinearModel._get_orthonormal_u_matrix(u)
+        component = np.transpose(u) * sigma_r * u
         return component
 
     def calculate_rep_measure_sigma(self, repeated_measure):
@@ -587,7 +624,6 @@ class LinearModel(object):
         if type(matrix) == np.matrixlib.defmatrix.matrix and matrix.shape == (1, 1):
             matrix = matrix[0, 0]
         return matrix
-
 
 class LinearModelEncoder(JSONEncoder):
     def default(self, obj):

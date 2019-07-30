@@ -7,8 +7,9 @@ import json, random
 from flask import Blueprint, Response, request
 from flask_cors import cross_origin
 from pyglimmpse.exceptions.glimmpse_exception import GlimmpseValidationException
+from pyglimmpse.model.power import Power
 
-from app.calculation_service.model.enums import SolveFor, Tests
+from app.calculation_service.model.enums import SolveFor, Tests, HypothesisType
 from app.calculation_service.model.linear_model import LinearModel
 from app.calculation_service.model.study_design import StudyDesign
 import numpy as np
@@ -85,9 +86,10 @@ def calculate():
 def _generate_models(scenario: StudyDesign, inputs: []):
     """ Create a LinearModel object for each distinct set of parameters defined in the scenario"""
     models = []
+    orthonormalize_contrasts = get_orthonormalize_u_matrix(scenario, inputs)
     for inputSet in inputs:
             model = LinearModel()
-            model.from_study_design(scenario, inputSet)
+            model.from_study_design(scenario, inputSet, orthonormalize_contrasts)
             models.append(model)
     return models
 
@@ -148,17 +150,19 @@ def _samplesize(test, model, **kwargs):
     if model.confidence_interval:
         kwargs['confidence_interval'] = model.confidence_interval
     kwargs['tolerance'] = 1e-12
-    size, power = samplesize.samplesize(test=test,
-                                        rank_C=np.linalg.matrix_rank(model.c_matrix),
-                                        rank_X=model.get_rank_x(),
-                                        relative_group_sizes=model.groups,
-                                        alpha=model.alpha,
-                                        sigma_star=model.sigma_star,
-                                        delta_es=model.delta,
-                                        targetPower=model.target_power,
-                                        starting_smallest_group_size=model.minimum_smallest_group_size,
-                                        **kwargs)
-
+    try:
+        size, power = samplesize.samplesize(test=test,
+                                            rank_C=np.linalg.matrix_rank(model.c_matrix),
+                                            rank_X=model.get_rank_x(),
+                                            relative_group_sizes=model.groups,
+                                            alpha=model.alpha,
+                                            sigma_star=model.sigma_star,
+                                            delta_es=model.delta,
+                                            targetPower=model.target_power,
+                                            starting_smallest_group_size=model.minimum_smallest_group_size,
+                                            **kwargs)
+    except ValueError as e:
+        raise GlimmpseValidationException(e.args[0])
     return size, power
 
 
@@ -222,3 +226,11 @@ def _power_to_dict(model, power):
                   upper_bound=upper,
                   model=model.to_dict())
     return result
+
+def get_orthonormalize_u_matrix(study_design: StudyDesign, inputs):
+    orthonormalize_u_matrix = False
+    if study_design.isu_factors.uMatrix.hypothesis_type != HypothesisType.POLYNOMIAL.value:
+        for input in inputs:
+            if input.test in [Tests.BOX_CORRECTION, Tests.HUYNH_FELDT, Tests.GEISSER_GREENHOUSE, Tests.HUYNH_FELDT, Tests.UNCORRECTED]:
+                orthonormalize_u_matrix = True
+    return orthonormalize_u_matrix

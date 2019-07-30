@@ -14,7 +14,9 @@ class IsuFactor(object):
                  name: str=None,
                  nature: str=None,
                  factor_type: IsuFactorType=None,
-                 values: []=None, in_hypothesis: bool=False,
+                 values: []=None,
+                 polynomial_order=None,
+                 in_hypothesis: bool=False,
                  hypothesis_type: HypothesisType =None,
                  child=None,
                  partial_matrix=None):
@@ -22,6 +24,7 @@ class IsuFactor(object):
         self.nature = nature
         self.factor_type = factor_type
         self.values = values
+        self.polynomial_order = polynomial_order
         self.in_hypothesis = in_hypothesis
         self.hypothesis_type = hypothesis_type
         self.child = child
@@ -37,6 +40,8 @@ class IsuFactor(object):
             self.nature = Nature(source['nature'])
         if source.get('valueNames'):
             self.values = [value for value in source['valueNames']]
+        if source.get('_polynomialOrder'):
+            self.polynomial_order = source['_polynomialOrder']
         if source.get('inHypothesis'):
             self.in_hypothesis = source['inHypothesis']
         if source.get('isuFactorNature'):
