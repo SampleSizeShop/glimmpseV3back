@@ -423,6 +423,8 @@ class LinearModel(object):
         elif no_groups <= 10:
             x = [float(val) for val in predictor.values]
             values = orpol.orpol(x)
+            values = np.matrix(values[:, 1:predictor.polynomial_order])
+            values = values.T
         else:
             warnings.warn('You have more than 10 valueNames in your main effect. We don\'t currently handle this :(')
         return values
@@ -436,7 +438,7 @@ class LinearModel(object):
         elif no_groups <= 10:
             x = [float(val) for val in repeated_measure.values]
             values = orpol.orpol(x)
-            values = np.matrix(values[:, 1:])
+            values = np.matrix(values[:, 1:repeated_measure.polynomial_order])
         else:
             warnings.warn('You have more than 10 valueNames in your main effect. We don\'t currently handle this :(')
         return values
