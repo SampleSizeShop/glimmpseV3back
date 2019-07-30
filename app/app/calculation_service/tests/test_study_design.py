@@ -88,13 +88,14 @@ class StudyDesignTestCase(unittest.TestCase):
         data = json_data.read()
         json_data.close()
         actual = StudyDesign().load_from_json(data)
+        actual.orthonormalize_u_matrix = False
         model = LinearModel()
         model.c_matrix = ContrastMatrix()
         model.c_matrix.hypothesis_type = HypothesisType.GLOBAL_TRENDS
         model.u_matrix = ContrastMatrix()
         model.u_matrix.hypothesis_type = HypothesisType.GLOBAL_TRENDS
 
-        model.from_study_design(actual, inputs)
+        model.from_study_design(actual, inputs, False)
         expected_epsilon = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                       total_N=model.total_n,
@@ -139,7 +140,7 @@ class StudyDesignTestCase(unittest.TestCase):
         json_data.close()
         actual = StudyDesign().load_from_json(data)
         model = LinearModel()
-        model.from_study_design(actual, inputs)
+        model.from_study_design(actual, inputs, False)
         expected_epsilon = unirep._chi_muller_muller_barton_1989(sigma_star=model.sigma_star,
                                                       rank_U=np.linalg.matrix_rank(model.u_matrix),
                                                       total_N=model.total_n,
