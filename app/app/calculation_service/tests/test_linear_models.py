@@ -52,6 +52,7 @@ class LinearModelsTestCase(unittest.TestCase):
         model = LinearModel()
         model.u_matrix = ContrastMatrix()
         model.u_matrix.hypothesis_type = HypothesisType.USER_DEFINED
+        model.orthonormalize_u_matrix = True
 
         actual = model._get_repeated_measures_u_matrix(isufactors1)
 
