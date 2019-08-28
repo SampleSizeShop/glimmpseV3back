@@ -223,7 +223,8 @@ class LinearModel(object):
         hypothesis = isu_factors.get_hypothesis()
         predictors = isu_factors.get_predictors()
         predictors_in_hypothesis = [f for f in hypothesis if type(f) == Predictor]
-        if len(predictors_in_hypothesis) > 0:
+        predictors_all = [f for f in predictors if type(f) == Predictor]
+        if len(predictors_all) > 0:
             tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
             groups = [c.get('value') for t in tables for r in t for c in r]
         return groups
