@@ -294,7 +294,8 @@ class LinearModel(object):
                                                         p.in_hypothesis]
         kron_components = kronecker_list(components)
         groups = self.get_groups(isu_factors)
-        return np.repeat(kron_components, groups, axis=0)
+        #return np.repeat(kron_components, groups, axis=0)
+        return np.diag(np.sqrt(groups))
 
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
