@@ -1,7 +1,6 @@
 import json
 import traceback
 import warnings
-from functools import reduce
 from json import JSONEncoder
 
 import numpy as np
@@ -330,8 +329,9 @@ class LinearModel(object):
                 u_matrix = isu_factors.uMatrix.values
         else:
             u_outcomes = np.identity(len(isu_factors.get_outcomes()))
+            u_cluster = np.matrix([[1]])
             u_repeated_measures = LinearModel._get_repeated_measures_u_matrix(self, isu_factors)
-            u_matrix = kronecker_list([u_outcomes, u_repeated_measures])
+            u_matrix = kronecker_list([u_outcomes, u_repeated_measures, u_cluster])
 
         if not isinstance(u_matrix, int) and np.linalg.matrix_rank(u_matrix) != u_matrix.shape[1]:
             raise GlimmpseValidationException("Your hypothesis is untestable because your within contrast matrix"
@@ -339,12 +339,11 @@ class LinearModel(object):
                                               "Please change your custom contrast matrix.")
         return u_matrix
 
-
     def _get_repeated_measures_u_matrix(self, isu_factors):
         if self.full_beta:
-            partial_u_list = [self.calculate_partial_u_matrix(r, isu_factors) for r in isu_factors.get_repeated_measures()]
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures()]
         else:
-            partial_u_list = [self.calculate_partial_u_matrix(r,isu_factors) for r in isu_factors.get_repeated_measures() if
+            partial_u_list = [self.calculate_partial_u_matrix(r) for r in isu_factors.get_repeated_measures() if
                               r.in_hypothesis]
         if len(partial_u_list) == 0:
             partial_u_list = [np.matrix([[1]])]
@@ -355,7 +354,7 @@ class LinearModel(object):
             u_repeated_measures = kronecker_list(partial_u_list)
         return u_repeated_measures
 
-    def calculate_partial_u_matrix(self, repeated_measure, isu_factors):
+    def calculate_partial_u_matrix(self, repeated_measure):
         if repeated_measure.in_hypothesis:
             if repeated_measure.hypothesis_type == HypothesisType.USER_DEFINED:
                 partial = repeated_measure.partial_matrix
@@ -369,8 +368,7 @@ class LinearModel(object):
                 partial = repeated_measure.partial_u_matrix
         else:
             partial = LinearModel.calculate_average_partial_u_matrix(repeated_measure)
-        u_cluster_factor = np.sqrt(self.calculate_total_ISU_num(isu_factors))
-        return partial*u_cluster_factor
+        return partial
 
     @staticmethod
     def _get_orthonormal_u_matrix(u_matrix):
@@ -506,16 +504,16 @@ class LinearModel(object):
                 ]
             else:
                 sigma_star_rep_measure_components = [
-                    self.calculate_rep_measure_component(measure, isu_factors) for measure in repeated_measures
+                    self.calculate_rep_measure_component(measure) for measure in repeated_measures
                 ]
                 sigma_star_rep_measure_components.append(np.identity(1))
             sigma_star_rep_measures = kronecker_list(sigma_star_rep_measure_components)
             return sigma_star_rep_measures
 
-    def calculate_rep_measure_component(self, repeated_measure, isu_factors):
+    def calculate_rep_measure_component(self, repeated_measure):
         st = np.diag(repeated_measure.standard_deviations)
         sigma_r = st * repeated_measure.correlation_matrix * st
-        u = self.calculate_partial_u_matrix(repeated_measure, isu_factors)
+        u = self.calculate_partial_u_matrix(repeated_measure)
         if self.orthonormalize_u_matrix:
             u = LinearModel._get_orthonormal_u_matrix(u)
         component = np.transpose(u) * sigma_r * u
@@ -535,14 +533,6 @@ class LinearModel(object):
         for c in components:
             cluster_sigma_star = cluster_sigma_star * c
         return cluster_sigma_star
-
-    def calculate_total_ISU_num(self, isu_factors):
-        if len(isu_factors.get_clusters()) > 0:
-            cluster_component = isu_factors.get_clusters()[0]
-            total_ISU = reduce(lambda x, y: x*y, [level.no_elements for level in cluster_component.levels])
-        else:
-            total_ISU = 1
-        return total_ISU
 
     def calc_theta(self):
         if self.c_matrix is None or self.hypothesis_beta is None or self.u_matrix is None:
