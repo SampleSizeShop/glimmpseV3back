@@ -285,7 +285,7 @@ class LinearModel(object):
 
     def calculate_design_matrix(self, isu_factors):
         groups = self.get_groups(isu_factors)
-        return np.diag(np.sqrt(groups))
+        return np.matrix(np.diag(np.sqrt(groups)))
 
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
