@@ -220,10 +220,9 @@ class LinearModel(object):
 
     def get_groups(self, isu_factors):
         groups = [1]
-        hypothesis = isu_factors.get_hypothesis()
         predictors = isu_factors.get_predictors()
-        predictors_in_hypothesis = [f for f in hypothesis if type(f) == Predictor]
-        if len(predictors_in_hypothesis) > 0:
+        predictors_all = [f for f in predictors if type(f) == Predictor]
+        if len(predictors_all) > 0:
             tables = [t.get('_table') for t in isu_factors.between_isu_relative_group_sizes]
             groups = [c.get('value') for t in tables for r in t for c in r]
         return groups
@@ -285,15 +284,8 @@ class LinearModel(object):
         return [col.get('value') for col in row]
 
     def calculate_design_matrix(self, isu_factors):
-        predictors = isu_factors.get_predictors()
-        if self.full_beta:
-            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors]
-        else:
-            components = [np.matrix(np.identity(1))] + [np.matrix(np.identity(len(p.values))) for p in predictors if
-                                                        p.in_hypothesis]
-        kron_components = kronecker_list(components)
         groups = self.get_groups(isu_factors)
-        return np.repeat(kron_components, groups, axis=0)
+        return np.matrix(np.diag(np.sqrt(groups)))
 
     def get_rep_n_from_study_design(self, study_design):
         return study_design.isu_factors.smallest_group_size
@@ -470,7 +462,7 @@ class LinearModel(object):
         if gaussian_covariate:
             adj = self.calculate_gaussian_adjustment(gaussian_covariate)
             sigma_star = sigma_star - adj
-        return  sigma_star
+        return sigma_star
 
     def calculate_gaussian_adjustment(self, gaussian_covariate):
         corellations = np.matrix(gaussian_covariate.corellations)
