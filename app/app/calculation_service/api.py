@@ -1,4 +1,5 @@
 import math
+import pkg_resources
 import traceback
 
 from pyglimmpse import unirep, multirep, samplesize
@@ -64,7 +65,8 @@ def calculate():
                 result = dict(test=model.getTest(),
                               samplesize=model.print_errors(),
                               power=model.print_errors(),
-                              model=model.to_dict())
+                              model=model.to_dict(),
+                              glimmpse_calc_version=pkg_resources.get_distribution('demoappback').version)
             elif scenario.solve_for == SolveFor.POWER:
                 result = _calculate_power(model)
             else:
@@ -73,7 +75,8 @@ def calculate():
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
-                          model=model.to_dict())
+                          model=model.to_dict(),
+                          glimmpse_calc_version=pkg_resources.get_distribution('demoappback').version)
         results.append(result)
 
     json_response = json.dumps(dict(status=200,
