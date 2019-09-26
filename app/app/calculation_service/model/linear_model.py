@@ -455,7 +455,7 @@ class LinearModel(object):
             cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
         else:
             cluster_component = np.matrix([[1]])
-        if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value and not isinstance(self.u_matrix, int):
+        if isu_factors.uMatrix.hypothesis_type  in [HypothesisType.CUSTOM_U_MATRIX.value, HypothesisType.POLYNOMIAL.value] and not isinstance(self.u_matrix, int):
             sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
         else:
             sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
@@ -488,7 +488,7 @@ class LinearModel(object):
         if len(repeated_measures) == 0:
             return np.matrix([[1]])
         else:
-            if isu_factors.uMatrix.hypothesis_type == HypothesisType.CUSTOM_U_MATRIX.value:
+            if isu_factors.uMatrix.hypothesis_type in [HypothesisType.CUSTOM_U_MATRIX.value, HypothesisType.POLYNOMIAL.value]:
                 sigma_star_rep_measure_components = [
                     self.calculate_rep_measure_sigma(measure) for measure in repeated_measures
                 ]
