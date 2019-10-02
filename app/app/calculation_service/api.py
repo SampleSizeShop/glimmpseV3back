@@ -101,6 +101,10 @@ def _calculate_sample_size(model):
     size = None
     if model.errors:
         pass
+    elif np.linalg.matrix_rank(model.u_matrix) == 1:  # B=1
+        test = multirep.special
+    elif (np.linalg.matrix_rank(model.u_matrix) > 1) & (np.linalg.matrix_rank(model.c_matrix) == 1) & (model.test in [Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD]):
+        test = multirep.special
     elif model.test == Tests.HOTELLING_LAWLEY:
         test = multirep.hlt_two_moment_null_approximator_obrien_shieh
     elif model.test == Tests.PILLAI_BARTLET:
@@ -126,6 +130,10 @@ def _calculate_power(model):
     power = None
     if model.errors:
         pass
+    elif np.linalg.matrix_rank(model.u_matrix) == 1:  # B=1
+        test = multirep.special
+    elif (np.linalg.matrix_rank(model.u_matrix) > 1) & (np.linalg.matrix_rank(model.c_matrix) == 1) & (model.test in [Tests.HOTELLING_LAWLEY, Tests.PILLAI_BARTLET, Tests.WILKS_LIKLIEHOOD]):
+        test = multirep.special
     elif model.test == Tests.HOTELLING_LAWLEY:
         test = multirep.hlt_two_moment_null_approximator_obrien_shieh
     elif model.test == Tests.PILLAI_BARTLET:
