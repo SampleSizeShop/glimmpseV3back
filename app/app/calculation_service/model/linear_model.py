@@ -184,7 +184,7 @@ class LinearModel(object):
             self.errors.add(e)
         except Exception as e:
             traceback.print_exc()
-            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wrong with our calculations. Please contact us."))
+            self.errors.add(GlimmpseValidationException("Sorry, something seems to have gone wrong with our calculations. Please contact us at samplesizeshop@gmail.com."))
 
     def calculate_noncentrality_distribution(self, study_design: StudyDesign):
         dist = NonCentralityDistribution(test=self.test,
