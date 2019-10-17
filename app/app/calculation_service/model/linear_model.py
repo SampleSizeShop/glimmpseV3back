@@ -35,6 +35,10 @@ class LinearModel(object):
                  hypothesis_beta: np.matrix = None,
                  c_matrix: np.matrix = None,
                  u_matrix: np.matrix = None,
+                 sigma_star_outcome_component: np.matrix = None,
+                 sigma_star_repeated_measure_component: np.matrix = None,
+                 sigma_star_cluster_component: float = None,
+                 sigma_star_gaussian_adjustment: np.matrix = None,
                  sigma_star: np.matrix = None,
                  theta_zero: np.matrix = None,
                  alpha: float = None,
@@ -74,6 +78,10 @@ class LinearModel(object):
         self.hypothesis_beta = hypothesis_beta
         self.c_matrix = c_matrix
         self.u_matrix = u_matrix
+        self.sigma_star_outcome_component = sigma_star_outcome_component
+        self.sigma_star_repeated_measure_component = sigma_star_repeated_measure_component
+        self.sigma_star_cluster_component = sigma_star_cluster_component
+        self.sigma_star_gaussian_adjustment = sigma_star_gaussian_adjustment
         self.sigma_star = sigma_star
         self.theta_zero = theta_zero
         self.alpha = alpha
@@ -108,6 +116,10 @@ class LinearModel(object):
                    hypothesis_beta=utilities.serialise_matrix(self.hypothesis_beta),
                    c_matrix=utilities.serialise_matrix(self.c_matrix),
                    u_matrix=utilities.serialise_matrix(self.u_matrix),
+                   sigma_star_outcome_component=utilities.serialise_matrix(self.sigma_star_outcome_component),
+                   sigma_star_repeated_measure_component=utilities.serialise_matrix(self.sigma_star_repeated_measure_component),
+                   sigma_star_cluster_component=utilities.serialise_matrix(np.matrix(self.sigma_star_cluster_component)),
+                   sigma_star_gaussian_adjustment=utilities.serialise_matrix(self.sigma_star_gaussian_adjustment),
                    sigma_star=utilities.serialise_matrix(self.sigma_star),
                    theta_zero=utilities.serialise_matrix(self.theta_zero),
                    alpha=self.alpha,
@@ -152,8 +164,11 @@ class LinearModel(object):
             self.hypothesis_beta = self.get_beta(study_design.isu_factors, inputs)
             self.c_matrix = self.calculate_c_matrix(study_design.isu_factors)
             self.u_matrix = self.calculate_u_matrix(study_design.isu_factors)
-            self.sigma_star = self.calculate_sigma_star(study_design.isu_factors, study_design.gaussian_covariate,
-                                                        inputs)
+            self.sigma_star_outcome_component = self.calculate_outcome_sigma_star(study_design.isu_factors, inputs)
+            self.sigma_star_repeated_measure_component = self.calculate_rep_measure_sigma_star(study_design.isu_factors)
+            self.sigma_star_cluster_component = self.calculate_cluster_sigma_star(study_design.isu_factors)
+            self.sigma_star_gaussian_adjustment = self.calculate_gaussian_adjustment(study_design.gaussian_covariate)
+            self.sigma_star = self.calculate_sigma_star(study_design.isu_factors.uMatrix.hypothesis_type)
             self.theta_zero = study_design.isu_factors.theta0
             self.alpha = inputs.alpha
             self.test = inputs.test
@@ -443,28 +458,25 @@ class LinearModel(object):
     def calculate_identity_partial_u_matrix(repeated_measure):
         return np.identity(len(repeated_measure.values))
 
-    def calculate_sigma_star(self, isu_factors: IsuFactors, gaussian_covariate: GaussianCovariate, inputs):
+    def calculate_sigma_star(self, hypothesis_type):
         """Calculate sigma star from the factors included in the hypothesis, unless full beta has been selected,
         in which case all factors should be used."""
-        outcome_component = self.calculate_outcome_sigma_star(isu_factors, inputs)
-        if len(isu_factors.get_repeated_measures()) > 0:
-            repeated_measure_component = self.calculate_rep_measure_sigma_star(isu_factors)
+
+        ##############################################################
+        # Important! if at any point this logic is changed, be sure to
+        # update the corresponding matrix display logic in the results
+        # page in the front end web app.
+        ##############################################################
+        if hypothesis_type in [HypothesisType.CUSTOM_U_MATRIX.value, HypothesisType.POLYNOMIAL.value] and not isinstance(self.u_matrix, int):
+            sigma_star = self.u_matrix.T * kronecker_list([self.sigma_star_outcome_component, self.sigma_star_repeated_measure_component, self.sigma_star_cluster_component]) * self.u_matrix
         else:
-            repeated_measure_component = np.matrix([[1]])
-        if len(isu_factors.get_clusters()) > 0:
-            cluster_component = self.calculate_cluster_sigma_star(isu_factors.get_clusters()[0])
-        else:
-            cluster_component = np.matrix([[1]])
-        if isu_factors.uMatrix.hypothesis_type  in [HypothesisType.CUSTOM_U_MATRIX.value, HypothesisType.POLYNOMIAL.value] and not isinstance(self.u_matrix, int):
-            sigma_star = self.u_matrix.T * kronecker_list([outcome_component, repeated_measure_component, cluster_component]) * self.u_matrix
-        else:
-            sigma_star = kronecker_list([outcome_component, repeated_measure_component, cluster_component])
-        if gaussian_covariate:
-            adj = self.calculate_gaussian_adjustment(gaussian_covariate)
-            sigma_star = sigma_star - adj
+            sigma_star = kronecker_list([self.sigma_star_outcome_component, self.sigma_star_repeated_measure_component, self.sigma_star_cluster_component])
+        sigma_star = sigma_star - self.sigma_star_gaussian_adjustment
         return sigma_star
 
     def calculate_gaussian_adjustment(self, gaussian_covariate):
+        if not gaussian_covariate:
+            return 0
         corellations = np.matrix(gaussian_covariate.corellations)
         t = self.u_matrix.T * corellations.T
         adj = t * (1 / np.power(gaussian_covariate.standard_deviation, 2)) * t.T
@@ -481,6 +493,8 @@ class LinearModel(object):
         return sigma_star_outcomes
 
     def calculate_rep_measure_sigma_star(self, isu_factors):
+        if len(isu_factors.get_repeated_measures()) == 0:
+            return np.matrix([[1]])
         if self.full_beta:
             repeated_measures = [measure for measure in isu_factors.get_repeated_measures()]
         else:
@@ -514,7 +528,10 @@ class LinearModel(object):
         sigma_r = st * repeated_measure.correlation_matrix * st
         return sigma_r
 
-    def calculate_cluster_sigma_star(self, cluster):
+    def calculate_cluster_sigma_star(self, isu_factors):
+        if len(isu_factors.get_clusters()) == 0:
+            return np.matrix([[1]])
+        cluster = isu_factors.get_clusters()[0]
         components = [
             (1 + (level.no_elements - 1) * level.intra_class_correlation) / level.no_elements
             for level in cluster.levels
