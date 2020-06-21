@@ -472,6 +472,10 @@ class LinearModel(object):
         else:
             sigma_star = kronecker_list([self.sigma_star_outcome_component, self.sigma_star_repeated_measure_component, self.sigma_star_cluster_component])
         sigma_star = sigma_star - self.sigma_star_gaussian_adjustment
+        try:
+            np.linalg.cholesky(sigma_star)
+        except np.linalg.LinAlgError:
+            raise GlimmpseValidationException(Constants.ERR_NOT_POSITIVE_DEFINITE.value)
         return sigma_star
 
     def calculate_gaussian_adjustment(self, gaussian_covariate):
