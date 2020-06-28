@@ -66,7 +66,7 @@ def calculate():
                               samplesize=model.print_errors(),
                               power=model.print_errors(),
                               model=model.to_dict(),
-                              glimmpse_calc_version=pkg_resources.get_distribution('demoappback').version)
+                              glimmpse_calc_version='0.0.23')
             elif scenario.solve_for == SolveFor.POWER:
                 result = _calculate_power(model)
             else:
@@ -76,7 +76,7 @@ def calculate():
                           samplesize=e.args[0],
                           power=e.args[0],
                           model=model.to_dict(),
-                          glimmpse_calc_version=pkg_resources.get_distribution('demoappback').version)
+                          glimmpse_calc_version='0.0.23')
         results.append(result)
 
     json_response = json.dumps(dict(status=200,
