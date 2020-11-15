@@ -494,6 +494,10 @@ class LinearModel(object):
         outcomes = isu_factors.get_outcomes()
         standard_deviations = np.identity(len(outcomes)) * [o.standard_deviation for o in outcomes] * np.sqrt(inputs.variance_scale_factor)
         sigma_star_outcomes = standard_deviations * isu_factors.outcome_correlation_matrix * standard_deviations
+        try:
+            np.linalg.cholesky(sigma_star_outcomes)
+        except np.linalg.LinAlgError:
+            self.errors.add(Constants.ERR_NOT_POSITIVE_DEFINITE_OUTCOME_CORRELATOINS.value)
         return sigma_star_outcomes
 
     def calculate_rep_measure_sigma_star(self, isu_factors):
