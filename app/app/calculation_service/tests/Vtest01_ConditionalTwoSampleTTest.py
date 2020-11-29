@@ -54,11 +54,11 @@ def json_power(json_path):
 #     return out_df
 
 
-df_vtest1 = json_power(r'C:\Users\liqian\Dropbox (UFL)\Project_QL\2017_GLIMMPSE_V3\PyGLIMMPSE\TEXT\Test01_V3_ConditionalTwoSampleTTest.json')
+df_vtest1 = json_power(r'./testInputs/Test01_V3_ConditionalTwoSampleTTest.json')
 df_vtest1.head()
 df_vtest1.shape
 
-df_v2results = pd.read_csv(r'C:\Users\liqian\Dropbox (UFL)\Project_QL\2017_GLIMMPSE_V3\PyGLIMMPSE\TEXT\Test01_V3_ConditionalTwoSampleTTest_v2results.csv')
+df_v2results = pd.read_csv(r'./testInputs/Test01_V3_ConditionalTwoSampleTTest_v2results.csv')
 df_v2results.head()
 df_v2results.shape
 
