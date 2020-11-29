@@ -34,7 +34,8 @@ def tex_table(file_path, V3_JSON, V2_results):
     _df_output = pd.merge(_df_vtest, _df_v2results, how='outer',
                           left_on=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'],
                           right_on=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'])
-    _df_output = _df_output[_df_output['Test_x'].notna()]
+    # _df_output = _df_output[_df_output['Test_x'].notna()]
+    _df_output = _df_output[_df_output['SAS_Power'].notna()]
     _df_output['deviation_sas_v3'] = abs(_df_output.Power - _df_output.SAS_Power).apply(lambda x: '%.7f' % x)
     _df_output['deviation_sim_v3'] = abs(_df_output.Power - _df_output.Sim_Power).apply(lambda x: '%.7f' % x)
     _df_output = _df_output.sort_values(by=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'])
@@ -52,6 +53,8 @@ def tex_table(file_path, V3_JSON, V2_results):
     _df_print = _df_output[
         ['Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'Test_x', 'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha']]
+
+    _df_print = _df_print[_df_print['Test_x'].notna()]
     return _df_print.to_latex(index=False)
 
 
