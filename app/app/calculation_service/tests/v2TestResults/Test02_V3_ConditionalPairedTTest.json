@@ -1,0 +1,274 @@
+{
+  "_glimmpse_ui_version": "0.0.2",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [],
+        "name": "outcome",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1.41421356237,
+        "gaussian_corellation": null
+      },
+      {
+        "valueNames": [
+          "1",
+          "2"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Repeated Measure",
+        "units": "",
+        "type": "Numeric",
+        "_noRepeats": 2,
+        "partialUMatrix": {
+          "name": "",
+          "logger": null,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1
+              ],
+              [
+                -1
+              ]
+            ],
+            "size": [
+              2,
+              1
+            ]
+          },
+          "_type": "MAIN_EFFECT"
+        },
+        "correlationMatrix": {
+          "lear": false,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                0.5
+              ],
+              [
+                0.5,
+                1
+              ]
+            ],
+            "size": [
+              2,
+              2
+            ]
+          },
+          "_names": [
+            "1",
+            "2"
+          ],
+          "base": 0.5,
+          "decay": 0.3,
+          "scaled": true
+        },
+        "standard_deviations": [
+          1,
+          1
+        ],
+        "name": "time",
+        "_polynomialOrder": 2,
+        "child": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "_tableId": {
+          "value": 1,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "Intercept",
+              "factorType": "Intercept",
+              "value": "Intercept"
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Intercept",
+                  "factorType": "Intercept",
+                  "value": "Intercept"
+                }
+              ]
+            }
+          ]
+        ],
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "Intercept",
+            "factorType": "Intercept",
+            "value": "Intercept"
+          }
+        ]
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "outcome",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "outcome",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "",
+                  "factorType": "Between ISU Predictor",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "outcome",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "",
+                  "factorType": "Between ISU Predictor",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      10
+    ],
+    "theta0": [
+      [
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": []
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": false,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "TestConditionalPairedTTest",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.05
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": null,
+  "_scaleFactor": [
+    0,
+    0.5,
+    1,
+    1.5,
+    2,
+    2.5
+  ],
+  "_varianceScaleFactors": [
+    1
+  ],
+  "_powerCurve": null
+}

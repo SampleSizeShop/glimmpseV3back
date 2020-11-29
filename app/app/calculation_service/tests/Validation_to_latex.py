@@ -29,11 +29,12 @@ def json_power(json_path):
 def tex_table(file_path, V3_JSON, V2_results):
     _df_vtest = json_power(file_path + V3_JSON)
 
-    _df_v2results = pd.read_csv(file_path + V2_results)
+    _df_v2results = pd.read_csv(file_path + V2_results,skipfooter=9, engine='python', na_values=('NaN', 'n/a', ' n/a'))
 
     _df_output = pd.merge(_df_vtest, _df_v2results, how='outer',
                           left_on=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'],
                           right_on=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'])
+    _df_output = _df_output[_df_output['Test_x'].notna()]
     _df_output['deviation_sas_v3'] = abs(_df_output.Power - _df_output.SAS_Power).apply(lambda x: '%.7f' % x)
     _df_output['deviation_sim_v3'] = abs(_df_output.Power - _df_output.Sim_Power).apply(lambda x: '%.7f' % x)
     _df_output = _df_output.sort_values(by=['Sigma Scale', 'Beta Scale', 'Total N', 'Alpha'])
@@ -54,9 +55,13 @@ def tex_table(file_path, V3_JSON, V2_results):
     return _df_print.to_latex(index=False)
 
 
-file_path = r'C:\Users\liqian\Dropbox (UFL)\Project_QL\2017_GLIMMPSE_V3\PyGLIMMPSE\TEXT\\'
+# file_path = r'C:\Users\liqian\Dropbox (UFL)\Project_QL\2017_GLIMMPSE_V3\PyGLIMMPSE\TEXT\\'
+file_path = r'v2TestResults/'
 
-test2 = tex_table(file_path, 'Test02_V3_ConditionalPairedTTest.json', 'Test02_V3_ConditionalPairedTTest_v2results.csv')
-test3 = tex_table(file_path, 'Test03_V3_ConditionalTwoSampleTTest3DPlot.json', 'Test03_V3_ConditionalTwoSampleTTest3DPlot_v2results.csv')
+test1 = tex_table(file_path, 'Test01_V3_ConditionalTwoSampleTTest.json', 'Example_1_Power_for_a_two_sample_ttest_for_several_error_variance_values_and_mean_differences.csv')
+test2 = tex_table(file_path, 'Test02_V3_ConditionalPairedTTest.json', 'Example_2_Power_results_for_a_Paired_Ttest.csv')
+test3 = tex_table(file_path, 'Test03_V3_ConditionalTwoSampleTTest3DPlot.json', 'Example_3_Power_for_a_two_sample_ttest_for_various_sample_sizes_and_mean_differences.csv')
 
+print(test1)
+print(test2)
 print(test3)
