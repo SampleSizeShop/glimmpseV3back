@@ -1,0 +1,544 @@
+{
+  "_glimmpse_ui_version": "0.0.2",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "drug",
+          "placebo"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "treatment",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 2,
+        "child": null
+      },
+      {
+        "valueNames": [],
+        "name": "treatment",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1.5,
+        "gaussian_corellation": null
+      },
+      {
+        "valueNames": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Repeated Measure",
+        "units": "",
+        "type": "Categorical",
+        "_noRepeats": 5,
+        "partialUMatrix": {
+          "name": "",
+          "logger": null,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                1,
+                1,
+                1
+              ],
+              [
+                -1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                -1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                -1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                -1
+              ]
+            ],
+            "size": [
+              5,
+              4
+            ]
+          },
+          "_type": "MAIN_EFFECT"
+        },
+        "correlationMatrix": {
+          "lear": false,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                0,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                1
+              ]
+            ],
+            "size": [
+              5,
+              5
+            ]
+          },
+          "_names": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ],
+          "base": 0.5,
+          "decay": 0.3,
+          "scaled": true
+        },
+        "standard_deviations": [
+          1.5,
+          0.375,
+          0.375,
+          0.375,
+          0.375
+        ],
+        "name": "time",
+        "_polynomialOrder": 5,
+        "child": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "_tableId": null,
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "treatment",
+            "factorType": "Between ISU Predictor",
+            "value": "drug"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "treatment",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "drug"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "5"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "treatment",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "treatment",
+                  "factorType": "Between ISU Predictor",
+                  "value": "placebo"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "5"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      10,
+      20,
+      40
+    ],
+    "theta0": [
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": []
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": true,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "Power for a time by treatment interaction using orthogonal polynomial contrast for time",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Hotelling Lawley Trace",
+    "Pillai-Bartlett Trace",
+    "Wilks Likelihood Ratio",
+    "Box Corrected",
+    "Geisser-Greenhouse Corrected",
+    "Huynh-Feldt Corrected",
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.05
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": null,
+  "_scaleFactor": [
+    1
+  ],
+  "_varianceScaleFactors": [
+    1
+  ],
+  "_powerCurve": null
+}

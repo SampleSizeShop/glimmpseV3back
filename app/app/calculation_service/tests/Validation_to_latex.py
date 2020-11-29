@@ -58,12 +58,18 @@ def tex_table(file_path, V3_JSON: [], V2_results):
 # file_path = r'C:\Users\liqian\Dropbox (UFL)\Project_QL\2017_GLIMMPSE_V3\PyGLIMMPSE\TEXT\\'
 file_path = r'v2TestResults/'
 
-test1 = tex_table(file_path, ['Test01_V3_ConditionalTwoSampleTTest.json'], 'Example_1_Power_for_a_two_sample_ttest_for_several_error_variance_values_and_mean_differences.csv')
-test2 = tex_table(file_path, ['Test02_V3_ConditionalPairedTTest.json'], 'Example_2_Power_results_for_a_Paired_Ttest.csv')
-test3 = tex_table(file_path, ['Test03_V3_ConditionalTwoSampleTTest3DPlot.json'], 'Example_3_Power_for_a_two_sample_ttest_for_various_sample_sizes_and_mean_differences.csv')
-test4 = tex_table(file_path, ['Example_4_Power_and_confidence_limits_for_a_univariate_model.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part2.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part3.json'], 'Example_4_Power_and_confidence_limits_for_a_univariate_model.csv')
+# test1 = tex_table(file_path, ['Test01_V3_ConditionalTwoSampleTTest.json'], 'Example_1_Power_for_a_two_sample_ttest_for_several_error_variance_values_and_mean_differences.csv')
+# test2 = tex_table(file_path, ['Test02_V3_ConditionalPairedTTest.json'], 'Example_2_Power_results_for_a_Paired_Ttest.csv')
+# test3 = tex_table(file_path, ['Test03_V3_ConditionalTwoSampleTTest3DPlot.json'], 'Example_3_Power_for_a_two_sample_ttest_for_various_sample_sizes_and_mean_differences.csv')
+# test4 = tex_table(file_path, ['Example_4_Power_and_confidence_limits_for_a_univariate_model.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part2.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part3.json'], 'Example_4_Power_and_confidence_limits_for_a_univariate_model.csv')
+# test5 = tex_table(file_path, ['Example_5_Power_for_a_test_of_interaction_in_a_multivariate_model.json'], 'Example_5_Power_for_a_test_of_interaction_in_a_multivariate_model.csv')
+# test6 = tex_table(file_path, ['Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.json'], 'Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.csv')
+test7 = tex_table(file_path, ['Example_7_Power_for_a_time_by_treatment_interaction_using_orthogonal_polynomial_contrast_for_time.json'], 'Example_7_Power_for_a_time_by_treatment_interaction_using_orthogonal_polynomial_contrast_for_time.csv')
 
-print(test1)
-print(test2)
-print(test3)
-print(test4)
+# print(test1)
+# print(test2)
+# print(test3)
+# print(test4)
+# print(test5)
+# print(test6)
+print(test7)
