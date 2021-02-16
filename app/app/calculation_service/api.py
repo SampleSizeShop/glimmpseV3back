@@ -220,6 +220,8 @@ def _power_to_dict(model, power):
     upper = None
     if power:
         pow = power.power
+        if type(pow) is tuple:
+            pow = 1 - pow[0]
         if math.isnan(pow):
             pow = -1
             model.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)

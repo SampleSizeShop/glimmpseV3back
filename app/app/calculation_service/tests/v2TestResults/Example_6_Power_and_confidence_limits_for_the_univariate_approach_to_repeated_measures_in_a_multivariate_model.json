@@ -1,5 +1,5 @@
 {
-  "_glimmpse_ui_version": "0.0.2",
+  "_glimmpse_ui_version": "0.0.1",
   "_stageReached": 29,
   "_currentStage": 28,
   "_isuFactors": {
@@ -33,8 +33,10 @@
           "type": "NOMINAL",
           "units": "",
           "_polynomialOrder": 5,
-          "child": null
-        }
+          "child": null,
+          "partialMatrix": null
+        },
+        "partialMatrix": null
       },
       {
         "valueNames": [
@@ -52,7 +54,8 @@
         "type": "NOMINAL",
         "units": "",
         "_polynomialOrder": 5,
-        "child": null
+        "child": null,
+        "partialMatrix": null
       },
       {
         "valueNames": [],
@@ -61,8 +64,10 @@
         "isuFactorNature": "All mean differences zero",
         "nature": "Within",
         "origin": "Outcome",
-        "standardDeviation": 0,
-        "gaussian_corellation": null
+        "standardDeviation": 1,
+        "gaussian_corellation": null,
+        "child": null,
+        "partialMatrix": null
       },
       {
         "valueNames": [
@@ -119,26 +124,26 @@
             "data": [
               [
                 1,
-                0,
-                0,
-                0
+                0.748,
+                0.586,
+                0.685
               ],
               [
-                0,
+                0.748,
                 1,
-                0,
-                0
+                0.668,
+                0.535
               ],
               [
-                0,
-                0,
+                0.586,
+                0.668,
                 1,
-                0
+                0.684
               ],
               [
-                0,
-                0,
-                0,
+                0.685,
+                0.535,
+                0.684,
                 1
               ]
             ],
@@ -158,10 +163,10 @@
           "scaled": true
         },
         "standard_deviations": [
-          0.0838,
-          0.0502,
-          0.0356,
-          0.0533
+          0.2894823,
+          0.2317326,
+          0.21,
+          0.2687006
         ],
         "name": "region",
         "_polynomialOrder": 4,
@@ -170,7 +175,6 @@
     ],
     "betweenIsuRelativeGroupSizes": [
       {
-        "_tableId": null,
         "dimensions": [
           {
             "order": 0,
@@ -360,7 +364,8 @@
               ]
             }
           ]
-        ]
+        ],
+        "_tableId": null
       }
     ],
     "marginalMeans": [
@@ -1631,7 +1636,7 @@
     "_parameters": true,
     "_optional": true
   },
-  "_name": "Power and confidence limits for the univariate approach to repeated measures in a multivariate model",
+  "_name": "Example 6. Power and confidence limits for the univariate approach to repeated measures in a multivariate model",
   "_targetEvent": "REJECTION",
   "_solveFor": "POWER",
   "_ciwidth": 1,
@@ -1643,13 +1648,7 @@
   ],
   "_quantiles": [],
   "_gaussianCovariate": null,
-  "_confidence_interval": {
-    "beta_known": true,
-    "lower_tail": 0.025,
-    "upper_tail": 0.025,
-    "rank_est": 1,
-    "n_est": 21
-  },
+  "_confidence_interval": null,
   "_scaleFactor": [
     1
   ],

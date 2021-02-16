@@ -1,5 +1,5 @@
 {
-  "_glimmpse_ui_version": "0.0.2",
+  "_glimmpse_ui_version": "0.0.1",
   "_stageReached": 29,
   "_currentStage": 28,
   "_isuFactors": {
@@ -19,7 +19,8 @@
         "type": "NOMINAL",
         "units": "",
         "_polynomialOrder": 4,
-        "child": null
+        "child": null,
+        "partialMatrix": null
       },
       {
         "valueNames": [],
@@ -28,8 +29,10 @@
         "isuFactorNature": "All mean differences zero",
         "nature": "Within",
         "origin": "Outcome",
-        "standardDeviation": 0,
-        "gaussian_corellation": null
+        "standardDeviation": 1,
+        "gaussian_corellation": null,
+        "child": null,
+        "partialMatrix": null
       },
       {
         "valueNames": [
@@ -117,7 +120,6 @@
     ],
     "betweenIsuRelativeGroupSizes": [
       {
-        "_tableId": null,
         "dimensions": [
           {
             "order": 0,
@@ -179,7 +181,8 @@
               ]
             }
           ]
-        ]
+        ],
+        "_tableId": null
       }
     ],
     "marginalMeans": [
@@ -198,7 +201,7 @@
         "_table": [
           [
             {
-              "value": 2,
+              "value": 1,
               "id": [
                 {
                   "order": 0,
@@ -577,13 +580,13 @@
   "_gaussianCovariate": null,
   "_confidence_interval": null,
   "_scaleFactor": [
-    1,
-    2
-  ],
-  "_varianceScaleFactors": [
     0.5,
     1,
     1.5,
+    2
+  ],
+  "_varianceScaleFactors": [
+    1,
     2
   ],
   "_powerCurve": null
