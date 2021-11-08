@@ -1648,7 +1648,13 @@
   ],
   "_quantiles": [],
   "_gaussianCovariate": null,
-  "_confidence_interval": null,
+  "_confidence_interval": {
+    "beta_known": true,
+    "lower_tail": 0.025,
+    "upper_tail": 0.025,
+    "rank_est": 2,
+    "n_est": 24
+  },
   "_scaleFactor": [
     1
   ],

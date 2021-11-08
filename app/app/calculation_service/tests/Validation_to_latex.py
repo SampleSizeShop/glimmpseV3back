@@ -238,6 +238,8 @@ def json_power_by_delta(json_path):
             result = _calculate_power(m)
             t2 = perf_counter()
             outdata = {'Power': result['power'],
+                       'Lower bound v3': result['lower_bound'],
+                       'Upper bound v3': result['upper_bound'],
                        'Test': result['test'],
                        'Sigma Scale': result['model']['variance_scale_factor'],
                        'Beta Scale': result['model']['means_scale_factor'],
@@ -359,15 +361,17 @@ def tex_table_test_4(file_path, output_name, V3_JSON: [], V2_results):
 
     _df_v2summary = get_summary_results(V2_results, _df_v2results, file_path)
 
-    _df_output, _df_print = get_print_output_with_concat(_df_v2results, _df_vtest, output_name)
+    _df_output, _df_print = get_print_output_with_concat(_df_v2results, _df_vtest, output_name, True)
 
     timings = pd.DataFrame({'Timing for': ['GLIMMPSE V3', 'GLIMMPSE V2', 'Simulation'],
                             'Total': [_df_output["Time"].sum(), _df_v2summary['Name']['Total Calculation Time'],
                                       _df_v2summary['Name']['Total Simulation Time']],
                             'Mean': [_df_output["Time"].mean(), _df_v2summary['Name']['Mean Calculation Time'],
                                      _df_v2summary['Name']['Mean Simulation Time']]})
-    deviations = pd.DataFrame({'GLIMMPSE V3 deviation from': ['Simulation', 'SAS', 'GLIMMPSE V2'],
-                               'Max. Deviation': [_df_output["deviation_sas_v3"].max(),
+    deviations = pd.DataFrame({'GLIMMPSE V3 deviation from': ['lower confidence interval v2', 'upper confidence interval v2', 'Simulation', 'SAS', 'GLIMMPSE V2'],
+                               'Max. Deviation': [_df_output["deviation_lower_v2_v3"].max(),
+                                                  _df_output["deviation_upper_v2_v3"].max(),
+                                                  _df_output["deviation_sas_v3"].max(),
                                                   _df_output["deviation_sim_v3"].max(),
                                                   _df_output["deviation_v2_v3"].max()]})
 
@@ -375,7 +379,7 @@ def tex_table_test_4(file_path, output_name, V3_JSON: [], V2_results):
                                                                                                longtable=True), list_inputs
 
 
-def get_print_output_with_concat(_df_v2results, _df_vtest, output_name):
+def get_print_output_with_concat(_df_v2results, _df_vtest, output_name, confidence_limits=False):
     _df_output = pd.concat([_df_vtest, _df_v2results], axis=1)
     _df_output['deviation_sas_v3'] = abs(_df_output.Power_v3 - _df_output.SAS_Power).apply(lambda x: '%.7f' % x)
     _df_output['deviation_sim_v3'] = abs(_df_output.Power_v3 - _df_output.Sim_Power).apply(lambda x: '%.7f' % x)
@@ -389,6 +393,7 @@ def get_print_output_with_concat(_df_v2results, _df_vtest, output_name):
     _df_output.deviation_sas_v3 = _df_output.deviation_sas_v3.apply('{:0<9}'.format)
     _df_output.Sim_Power = _df_output.Sim_Power.apply('{:0<9}'.format)
     _df_output.deviation_sim_v3 = _df_output.deviation_sim_v3.apply('{:0<9}'.format)
+    _df_output["Power_v2"] = _df_output["Power_v2"].apply(lambda x: '%.7f' % x)
     _df_output.Power_v2 = _df_output.Power_v2.apply('{:0<9}'.format)
     _df_output.deviation_v2_v3 = _df_output.deviation_v2_v3.apply('{:0<9}'.format)
     _df_output.to_excel(output_name + '.xlsx')
@@ -400,8 +405,24 @@ def get_print_output_with_concat(_df_v2results, _df_vtest, output_name):
         "deviation_sim_v3"].astype('str') + ")"
     _df_output["GLIMMPSE V2 Power (deviation)"] = _df_output["Power_v2"].astype('str') + " (" + _df_output[
         "deviation_sim_v3"].astype('str') + ")"
+    if confidence_limits:
+        _df_output['deviation_lower_v2_v3'] = abs(_df_output[_df_output.columns[1]] - _df_output.lower_v2).apply(lambda x: '%.7f' % x)
+        _df_output['deviation_upper_v2_v3'] = abs(_df_output[_df_output.columns[2]] - _df_output.upper_v2).apply(lambda x: '%.7f' % x)
+        _df_output[_df_output.columns[1]] = _df_output[_df_output.columns[1]].apply(lambda x: '%.7f' % x)
+        _df_output[_df_output.columns[2]] = _df_output[_df_output.columns[2]].apply(lambda x: '%.7f' % x)
+
+        _df_output["GLIMMPSE V3 lower (deviation)"] = _df_output[_df_output.columns[1]].astype('str') + \
+                                                      " (" + _df_output["deviation_lower_v2_v3"].astype('str') + ")"
+        _df_output["GLIMMPSE V3 upper (deviation)"] = _df_output[_df_output.columns[2]].astype('str') + \
+                                                      " (" + _df_output["deviation_upper_v2_v3"].astype('str') + ")"
+
     _df_print = _df_output[
         ['GLIMMPSE V3 Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'Test',
+         'Sigma Scale', 'Beta Scale', 'Total N',
+         'Alpha', 'Time_v3']]
+    if confidence_limits:
+        _df_print = _df_output[
+        ['GLIMMPSE V3 Power', 'GLIMMPSE V3 lower (deviation)', 'GLIMMPSE V3 upper (deviation)', 'SAS Power (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'lower_v2', 'upper_v2', 'Test',
          'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha', 'Time_v3']]
     _df_print = _df_print[_df_print['Test'].notna()]
@@ -534,21 +555,29 @@ def tex_table_gaussian(file_path, output_name, V3_JSON: [], V2_results):
                                                                                                longtable=True), list_inputs
 
 def tex_table_by_delta(file_path, output_name, V3_JSON: [], V2_results):
-    _df_vtest = pd.concat([json_power_by_delta(file_path + model) for model in V3_JSON], ignore_index=True)
-    _df_v2results = pd.read_csv(file_path + V2_results,skipfooter=9, engine='python', na_values=('NaN', 'n/a', ' n/a'))
+    list_inputs = get_inputs(V3_JSON, file_path)
+    _df_vtest = pd.concat([json_power_by_delta(file_path + model) for model in V3_JSON], ignore_index=True).add_suffix("_v3")
+    _df_v2results = pd.read_csv(file_path + V2_results,skipfooter=11, engine='python', na_values=('nan', 'NaN', 'n/a', ' n/a'))
     _df_output=pd.concat([_df_vtest, _df_v2results], axis=1)
     _df_output = _df_output[_df_output['SAS_Power'].notna()]
     _df_output.to_excel(output_name + '.xlsx')
-    # _df_output["SAS Power (deviation)"] = _df_output["SAS_Power"].astype('str') + " (" + _df_output[
-    #     "deviation_sas_v3"].astype('str') + ")"
-    # _df_output["Sim Power (deviation)"] = _df_output["Sim_Power"].astype('str') + " (" + _df_output[
-    #     "deviation_sim_v3"].astype('str') + ")"
-    # _df_print = _df_output[
-    #     ['Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'Test_x', 'Sigma Scale', 'Beta Scale', 'Total N',
-    #      'Alpha', 'Time']]
+    _df_v2summary = get_summary_results(V2_results, _df_v2results, file_path)
+    _df_output, _df_print = get_print_output_with_concat(_df_v2results, _df_vtest, output_name, True)
 
-    # _df_print = _df_print[_df_print['Test_x'].notna()]
-    # return _df_print.to_latex(index=False)
+    timings = pd.DataFrame({'Timing for': ['GLIMMPSE V3', 'GLIMMPSE V2', 'Simulation'],
+                            'Total': [_df_output["Time"].sum(), _df_v2summary['Name']['Total Calculation Time'],
+                                      _df_v2summary['Name']['Total Simulation Time']],
+                            'Mean': [_df_output["Time"].mean(), _df_v2summary['Name']['Mean Calculation Time'],
+                                     _df_v2summary['Name']['Mean Simulation Time']]})
+    deviations = pd.DataFrame({'GLIMMPSE V3 deviation from': ['lower confidence interval v2', 'upper confidence interval v2', 'Simulation', 'SAS', 'GLIMMPSE V2'],
+                               'Max. Deviation': [_df_output["deviation_lower_v2_v3"].max(),
+                                                  _df_output["deviation_upper_v2_v3"].max(),
+                                                  _df_output["deviation_sas_v3"].max(),
+                                                  _df_output["deviation_sim_v3"].max(),
+                                                  _df_output["deviation_v2_v3"].max()]})
+
+    return timings.to_latex(index=False), deviations.to_latex(index=False), _df_print.to_latex(index=False,
+                                                                                               longtable=True), list_inputs
 
 
 file_path = r'v2TestResults/'
@@ -571,13 +600,13 @@ test2_timings, test2_deviations, test2_results, test2_list_inputs = tex_table(fi
 test3_timings, test3_deviations, test3_results, test3_list_inputs = tex_table(file_path, TEST_3_FILENAME, ['Test03_V3_ConditionalTwoSampleTTest3DPlot.json'], 'Example_3_Power_for_a_two_sample_ttest_for_various_sample_sizes_and_mean_differences.csv')
 test4_timings, test4_deviations, test4_results, test4_list_inputs = tex_table_test_4(file_path,TEST_4_FILENAME, ['Example_4_Power_and_confidence_limits_for_a_univariate_model.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part2.json', 'Example_4_Power_and_confidence_limits_for_a_univariate_model_part3.json'], 'Example_4_Power_and_confidence_limits_for_a_univariate_model.csv')
 test5_timings, test5_deviations, test5_results, test5_list_inputs = tex_table_test_5(file_path, TEST_5_FILENAME, ['Example_5_Power_for_a_test_of_interaction_in_a_multivariate_model.json'], 'Example_5_Power_for_a_test_of_interaction_in_a_multivariate_model.csv')
-# test6_results = tex_table_by_delta(file_path, TEST_6_FILENAME, ['Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.json'], 'Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.csv')
+test6_timings, test6_deviations, test6_results, test6_list_inputs = tex_table_by_delta(file_path, TEST_6_FILENAME, ['Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.json'], 'Example_6_Power_and_confidence_limits_for_the_univariate_approach_to_repeated_measures_in_a_multivariate_model.csv')
 test7_timings, test7_deviations, test7_results, test7_list_inputs = tex_table_test7(file_path, TEST_7_FILENAME, ['Example_7_Power_for_a_time_by_treatment_interaction_using_orthogonal_polynomial_contrast_for_time.json'], 'Example_7_Power_for_a_time_by_treatment_interaction_using_orthogonal_polynomial_contrast_for_time.csv')
 
-gaussian_test1_timings, gaussian_test1_deviations, gaussian_test1_results, gaussian_test1_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_1_FILENAME, ['GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_1.json', 'GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_2.json', 'GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_3.json'], 'Example_1_Median_power_for_the_HotellingLawley_Trace_using_the_Satterthwaite_approximation.csv')
-gaussian_test4_timings, gaussian_test4_deviations, gaussian_test4_results, gaussian_test4_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_4_FILENAME, ['GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_1.json', 'GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_2.json','GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_3.json'], 'Example_4_Unconditional_power_for_the_HotellingLawley_Trace_using_Davies_algorithm.csv')
-gaussian_test5_timings, gaussian_test5_deviations, gaussian_test5_results, gaussian_test5_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_5_FILENAME,['GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_1.json', 'GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser_Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_2.json', 'GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser_Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_3.json'], 'Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_GeisserGreenhouse_and_HuynhFeldt_tests_using_the_Satterthwaite_approximation.csv')
-gaussian_test8_timings, gaussian_test8_deviations, gaussian_test8_results, gaussian_test8_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_8_FILENAME, ['GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_1.json', 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_2.json', 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_3.json'], 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_algorithm.csv')
+# gaussian_test1_timings, gaussian_test1_deviations, gaussian_test1_results, gaussian_test1_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_1_FILENAME, ['GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_1.json', 'GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_2.json', 'GLMM_F_g_Example_1_Median_power_for_the_Hotelling-Lawley_Trace_using_the_Satterthwaite_approximation_part_3.json'], 'Example_1_Median_power_for_the_HotellingLawley_Trace_using_the_Satterthwaite_approximation.csv')
+# gaussian_test4_timings, gaussian_test4_deviations, gaussian_test4_results, gaussian_test4_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_4_FILENAME, ['GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_1.json', 'GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_2.json','GLMM_F_g_Example_4_Unconditional_power_for_the_Hotelling-Lawley_Trace_using_Davies_Algorithm_part_3.json'], 'Example_4_Unconditional_power_for_the_HotellingLawley_Trace_using_Davies_algorithm.csv')
+# gaussian_test5_timings, gaussian_test5_deviations, gaussian_test5_results, gaussian_test5_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_5_FILENAME,['GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_1.json', 'GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser_Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_2.json', 'GLMM_F_g_Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser_Greenhouse_and_Huynh-Feldt_tests_using_the_Satterthwaite_approximation_part_3.json'], 'Example_5_Median_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_GeisserGreenhouse_and_HuynhFeldt_tests_using_the_Satterthwaite_approximation.csv')
+# gaussian_test8_timings, gaussian_test8_deviations, gaussian_test8_results, gaussian_test8_list_inputs = tex_table_gaussian(file_path, GAUSSIAN_TEST_8_FILENAME, ['GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_1.json', 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_2.json', 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_Algorithm_part_3.json'], 'GLMM_F_g_Example_8_Unconditional_power_for_the_uncorrected_univariate_approach_to_repeated_measures_Box_Geisser-Greenhouse_and_Huynh-Feldt_tests_using_Davies_algorithm.csv')
 
 TEST_1_TITLE = """GLMM(F) Example 1. Power for a two sample t-test for several error variance values and mean differences"""
 TEST_1_STUDY_DESIGN_DESCRIPTION ="""The study design for Example 1 is a balanced, two-group design.
@@ -590,9 +619,9 @@ We calculate power for a paired t-test comparing the mean responses at the pre- 
 express the paired t-test as a general linear hypothesis in a multivariate linear model."""
 
 TEST_3_TITLE="""GLMM(F) Example 3. Power for a two sample t-test for various sample sizes and mean differences"""
-TEST_3_STUDY_DESIGN_DESCRIPTION="""The study design for Example 3 is a balanced, two sample design witha single response variable. We calculate
+TEST_3_STUDY_DESIGN_DESCRIPTION="""The study design for Example 3 is a balanced, two sample design with a single response variable. We calculate
 power for a two-sample t-test comparing the mean responses between the two independent groups. The example
-demonstrates changes in power with di erent sample sizes and mean di erences."""
+demonstrates changes in power with different sample sizes and mean differences."""
 
 TEST_4_TITLE="""GLMM(F) Example 4. Power and con dence limits for a univariate
 model"""
@@ -608,6 +637,98 @@ TEST_5_STUDY_DESIGN_DESCRIPTION="""The study design for Example 5 is a balanced 
 We calculate power for a test of the group by time interaction. The unstructured covariance model is most
 appropriate for the design. The example demonstrates the di erence in power depending on the choice of
 statistical test when assumptions of sphericity are unlikely to hold."""
+
+TEST_6_TITLE="""GLMM(F) Example 6. Power and condence limits for the univariate approach to repeated measures in a multivariate model"""
+TEST_6_STUDY_DESIGN_DESCRIPTION="""The study design for Example 6 is a factorial design with two between participant factors and one within participant factor. Participants were categorized by gender and classied into ve age groups. For each participant,
+cerebral vessel tortuosity was measured in four regions of the brain. We calculate power for a test of the gender
+by region interaction. Condence limits are computed for the power values.
+The matrix inputs below show the starting point for the B matrix. The third column of the matrix (i.e. vessel
+tortuosity in the third region the brain) is modied throughout the validation experiment to progressively increase
+the eect of gender. Mean values for males are increased by 0.0008 at each iteration, while corresponding values
+for females are decremented by 0.0008. The process is restarted for each statistical test. For example, the first
+power calculated for a given test would use the following B matrix 
+
+\\mathbf{B} = \\begin{bmatrix}
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+\\end{bmatrix} + \\begin{bmatrix}
+0 & 0 & 0.0008 & 0 \\\\
+0 & 0 & 0.0008 & 0 \\\\
+0 & 0 & 0.0008 & 0 \\\\
+0 & 0 & 0.0008 & 0 \\\\
+0 & 0 & 0.0008 & 0 \\\\
+0 & 0 & -0.0008 & 0 \\\\
+0 & 0 & -0.0008 & 0 \\\\
+0 & 0 & -0.0008 & 0 \\\\
+0 & 0 & -0.0008 & 0 \\\\
+0 & 0 & -0.0008 & 0 \\\\
+\\end{bmatrix}
+
+= \\begin{bmatrix}
+2.9 & 3.2 & 3.5008 & 3.2 \\\\
+2.9 & 3.2 & 3.5008 & 3.2 \\\\
+2.9 & 3.2 & 3.5008 & 3.2 \\\\
+2.9 & 3.2 & 3.5008 & 3.2 \\\\
+2.9 & 3.2 & 3.5008 & 3.2 \\\\
+2.9 & 3.2 & 3.4992 & 3.2 \\\\
+2.9 & 3.2 & 3.4992 & 3.2 \\\\
+2.9 & 3.2 & 3.4992 & 3.2 \\\\
+2.9 & 3.2 & 3.4992 & 3.2 \\\\
+2.9 & 3.2 & 3.4992 & 3.2 \\\\
+\\end{bmatrix}
+
+And the last power calculated for a given test would use the following B matrix 
+
+\\mathbf{B} = \\begin{bmatrix}
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+2.9 & 3.2 & 3.5 & 3.2 \\\\
+\\end{bmatrix} + \\begin{bmatrix}
+0 & 0 & 0.2 & 0 \\\\
+0 & 0 & 0.2 & 0 \\\\
+0 & 0 & 0.2 & 0 \\\\
+0 & 0 & 0.2 & 0 \\\\
+0 & 0 & 0.2 & 0 \\\\
+0 & 0 & -0.2 & 0 \\\\
+0 & 0 & -0.2 & 0 \\\\
+0 & 0 & -0.2 & 0 \\\\
+0 & 0 & -0.2 & 0 \\\\
+0 & 0 & -0.2 & 0 \\\\
+\\end{bmatrix}
+
+= \\begin{bmatrix}
+2.9 & 3.2 & 3.7 & 3.2 \\\\
+2.9 & 3.2 & 3.7 & 3.2 \\\\
+2.9 & 3.2 & 3.7 & 3.2 \\\\
+2.9 & 3.2 & 3.7 & 3.2 \\\\
+2.9 & 3.2 & 3.7 & 3.2 \\\\
+2.9 & 3.2 & 3.3 & 3.2 \\\\
+2.9 & 3.2 & 3.3 & 3.2 \\\\
+2.9 & 3.2 & 3.3 & 3.2 \\\\
+2.9 & 3.2 & 3.3 & 3.2 \\\\
+2.9 & 3.2 & 3.3 & 3.2 \\\\
+\\end{bmatrix}
+
+
+This is based on an example presented in
+Gurka, M. J., Coey, C. S., & Muller, K. E. (2007). Internal pilots for a class of linear mixed models with
+Gaussian and compound symmetric data. Statistics in Medicine, 26(22), 4083-4099.
+"""
 
 TEST_7_TITLE="""Example 7. Power for a time by treatment interaction
 using orthogonal polynomial contrast for time"""
@@ -700,45 +821,45 @@ for the overall experiment and the mean times per power calculation. Summary sta
 absolute deviation between the power value calculated by GLIMMPSE V3, the JavaStatistics library and the results obtained from
 SAS or via simulation. The table in Section 3.3 shows the deviation values for each individual power comparison."""
 
-# all_names = [TEST_1_FILENAME]
-all_names = [TEST_1_FILENAME, TEST_2_FILENAME, TEST_3_FILENAME, TEST_4_FILENAME, TEST_5_FILENAME, TEST_7_FILENAME]
-all_titles = [TEST_1_TITLE, TEST_2_TITLE, TEST_3_TITLE, TEST_4_TITLE, TEST_5_TITLE, TEST_7_TITLE]
-all_descriptions = [TEST_1_STUDY_DESIGN_DESCRIPTION, TEST_2_STUDY_DESIGN_DESCRIPTION, TEST_3_STUDY_DESIGN_DESCRIPTION, TEST_4_STUDY_DESIGN_DESCRIPTION, TEST_5_STUDY_DESIGN_DESCRIPTION, TEST_7_STUDY_DESIGN_DESCRIPTION]
-all_list_inputs = [test1_list_inputs, test2_list_inputs, test3_list_inputs, test4_list_inputs, test5_list_inputs, test7_list_inputs]
-all_timings = [test1_timings, test2_timings, test3_timings, test4_timings, test5_timings, test7_timings]
-all_deviations = [test1_deviations, test2_deviations, test3_deviations, test4_deviations, test5_deviations, test7_deviations]
-all_results = [test1_results, test2_results, test3_results, test4_results, test5_results, test7_results]
+# all_names = [TEST_4_FILENAME]
+all_names = [TEST_1_FILENAME, TEST_2_FILENAME, TEST_3_FILENAME, TEST_4_FILENAME, TEST_5_FILENAME, TEST_6_FILENAME, TEST_7_FILENAME]
+all_titles = [TEST_1_TITLE, TEST_2_TITLE, TEST_3_TITLE, TEST_4_TITLE, TEST_5_TITLE, TEST_6_TITLE, TEST_7_TITLE]
+all_descriptions = [TEST_1_STUDY_DESIGN_DESCRIPTION, TEST_2_STUDY_DESIGN_DESCRIPTION, TEST_3_STUDY_DESIGN_DESCRIPTION, TEST_4_STUDY_DESIGN_DESCRIPTION, TEST_5_STUDY_DESIGN_DESCRIPTION, TEST_6_STUDY_DESIGN_DESCRIPTION, TEST_7_STUDY_DESIGN_DESCRIPTION]
+all_list_inputs = [test1_list_inputs, test2_list_inputs, test3_list_inputs, test4_list_inputs, test5_list_inputs, test6_list_inputs, test7_list_inputs]
+all_timings = [test1_timings, test2_timings, test3_timings, test4_timings, test5_timings,  test6_timings, test7_timings]
+all_deviations = [test1_deviations, test2_deviations, test3_deviations, test4_deviations, test5_deviations, test6_deviations, test7_deviations]
+all_results = [test1_results, test2_results, test3_results, test4_results, test5_results, test6_results, test7_results]
 
-all_gaussian_names = [GAUSSIAN_TEST_1_FILENAME]
-# all_gaussian_names = [GAUSSIAN_TEST_1_FILENAME, GAUSSIAN_TEST_4_FILENAME, GAUSSIAN_TEST_5_FILENAME, GAUSSIAN_TEST_8_FILENAME]
+# all_gaussian_names = [GAUSSIAN_TEST_1_FILENAME]
+all_gaussian_names = [GAUSSIAN_TEST_1_FILENAME, GAUSSIAN_TEST_4_FILENAME, GAUSSIAN_TEST_5_FILENAME, GAUSSIAN_TEST_8_FILENAME]
 all_gaussian_titles = [GAUSSIAN_TEST_1_TITLE,GAUSSIAN_TEST_4_TITLE,GAUSSIAN_TEST_5_TITLE,GAUSSIAN_TEST_8_TITLE,]
 all_gaussian_descriptions = [GAUSSIAN_TEST_1_STUDY_DESIGN_DESCRIPTION,GAUSSIAN_TEST_4_STUDY_DESIGN_DESCRIPTION,GAUSSIAN_TEST_5_STUDY_DESIGN_DESCRIPTION,GAUSSIAN_TEST_8_STUDY_DESIGN_DESCRIPTION,]
-all_gaussian_list_inputs = [gaussian_test1_list_inputs,gaussian_test4_list_inputs,gaussian_test5_list_inputs,gaussian_test8_list_inputs,]
-all_gaussian_timings = [gaussian_test1_timings,gaussian_test4_timings,gaussian_test5_timings,gaussian_test8_timings,]
-all_gaussian_deviations = [gaussian_test1_deviations,gaussian_test4_deviations,gaussian_test5_deviations,gaussian_test8_deviations,]
-all_gaussian_results = [gaussian_test1_results,gaussian_test4_results,gaussian_test5_results,gaussian_test8_results,]
+# all_gaussian_list_inputs = [gaussian_test1_list_inputs,gaussian_test4_list_inputs,gaussian_test5_list_inputs,gaussian_test8_list_inputs,]
+# all_gaussian_timings = [gaussian_test1_timings,gaussian_test4_timings,gaussian_test5_timings,gaussian_test8_timings,]
+# all_gaussian_deviations = [gaussian_test1_deviations,gaussian_test4_deviations,gaussian_test5_deviations,gaussian_test8_deviations,]
+# all_gaussian_results = [gaussian_test1_results,gaussian_test4_results,gaussian_test5_results,gaussian_test8_results,]
 
 
-# for n in all_names:
-#     write_tex_file(False,
-#                    n,
-#                    all_titles[all_names.index(n)],
-#                    INTRODUCTION,
-#                    all_descriptions[all_names.index(n)],
-#                    all_list_inputs[all_names.index(n)],
-#                    all_timings[all_names.index(n)],
-#                    all_deviations[all_names.index(n)],
-#                    all_results[all_names.index(n)])
-#     write_pdf(n)
+for n in all_names:
+    write_tex_file(False,
+                   n,
+                   all_titles[all_names.index(n)],
+                   INTRODUCTION,
+                   all_descriptions[all_names.index(n)],
+                   all_list_inputs[all_names.index(n)],
+                   all_timings[all_names.index(n)],
+                   all_deviations[all_names.index(n)],
+                   all_results[all_names.index(n)])
+    write_pdf(n)
 
-for n in all_gaussian_names:
-     write_tex_file(True,
-                    n,
-                    all_gaussian_titles[all_gaussian_names.index(n)],
-                    INTRODUCTION,
-                    all_gaussian_descriptions[all_gaussian_names.index(n)],
-                    all_gaussian_list_inputs[all_gaussian_names.index(n)],
-                    all_gaussian_timings[all_gaussian_names.index(n)],
-                    all_gaussian_deviations[all_gaussian_names.index(n)],
-                    all_gaussian_results[all_gaussian_names.index(n)])
-     write_pdf(n)
+# for n in all_gaussian_names:
+#      write_tex_file(True,
+#                     n,
+#                     all_gaussian_titles[all_gaussian_names.index(n)],
+#                     INTRODUCTION,
+#                     all_gaussian_descriptions[all_gaussian_names.index(n)],
+#                     all_gaussian_list_inputs[all_gaussian_names.index(n)],
+#                     all_gaussian_timings[all_gaussian_names.index(n)],
+#                     all_gaussian_deviations[all_gaussian_names.index(n)],
+#                     all_gaussian_results[all_gaussian_names.index(n)])
+#      write_pdf(n)
