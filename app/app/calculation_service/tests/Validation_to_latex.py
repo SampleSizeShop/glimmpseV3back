@@ -147,11 +147,11 @@ def write_tex_file(is_gaussian, filename, title, introduction, description, list
     f.write("\n")
     f.write("\\subsection{Timings}")
     f.write("\n")
-    f.write(timings_table)
+    f.write(timings_table.replace("\\begin{table}", "\\begin{table} \\n \\centering"))
     f.write("\n")
     f.write("\\subsection{Summary Statistics}")
     f.write("\n")
-    f.write(deviations_table)
+    f.write(deviations_table.replace("\\begin{table}", "\\begin{table} \\n \\centering"))
     f.write("\n")
     f.write("\\subsection{Full Validation Results}")
     f.write("\n")
@@ -286,7 +286,7 @@ def get_print_output(_df_v2results, _df_vtest, output_name):
     _df_output["GLIMMPSE V2 Power (deviation)"] = _df_output["Power_v2"].astype('str') + " (" + _df_output[
         "deviation_sim_v3"].astype('str') + ")"
     _df_print = _df_output[
-        ['GLIMMPSE V3 Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'Test',
+        ['GLIMMPSE V3 Power', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'Test',
          'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha', 'Time']]
     _df_print = _df_print[_df_print['Test'].notna()]
@@ -417,12 +417,12 @@ def get_print_output_with_concat(_df_v2results, _df_vtest, output_name, confiden
                                                       " (" + _df_output["deviation_upper_v2_v3"].astype('str') + ")"
 
     _df_print = _df_output[
-        ['GLIMMPSE V3 Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'Test',
+        ['GLIMMPSE V3 Power', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'Test',
          'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha', 'Time_v3']]
     if confidence_limits:
         _df_print = _df_output[
-        ['GLIMMPSE V3 Power', 'GLIMMPSE V3 lower (deviation)', 'GLIMMPSE V3 upper (deviation)', 'SAS Power (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'lower_v2', 'upper_v2', 'Test',
+        ['GLIMMPSE V3 Power', 'GLIMMPSE V3 lower (deviation)', 'GLIMMPSE V3 upper (deviation)', 'Sim Power (deviation)', 'GLIMMPSE V2 Power (deviation)', 'lower_v2', 'upper_v2', 'Test',
          'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha', 'Time_v3']]
     _df_print = _df_print[_df_print['Test'].notna()]
@@ -514,7 +514,7 @@ def tex_table_test_9(file_path, output_name, V3_JSON: [], V2_results):
     _df_output["Sim Power (deviation)"] = _df_output["Sim_Power"].astype('str') + " (" + _df_output[
         "deviation_sim_v3"].astype('str') + ")"
     _df_print = _df_output[
-        ['Power', 'SAS Power (deviation)', 'Sim Power (deviation)', 'Test_x', 'Sigma Scale', 'Beta Scale', 'Total N',
+        ['Power', 'Sim Power (deviation)', 'Test_x', 'Sigma Scale', 'Beta Scale', 'Total N',
          'Alpha', 'Time']]
 
     _df_print = _df_print[_df_print['Test_x'].notna()]
@@ -811,9 +811,9 @@ Glueck, D. H., & Muller, K. E. (2003). Adjusting power for a baseline covariate 
 Medicine, 22(16), 2535-2551."""
 
 INTRODUCTION = """The following report contains validation results for the JavaStatistics library, a component of the GLIMMPSE
-software system. For more information about GLIMMPSE and related publications, please visit
+software system. For more information about GLIMMPSE and related publications, please visit\\n
 
-https://samplesizeshop.org.
+https://samplesizeshop.org.\\n
 
 The automated validation tests shown below compare power values produced by the GLIMMPSE V3 to
 published results and also to simulation. Sources for published values include POWERLIB (Johnson et al. 2007)
