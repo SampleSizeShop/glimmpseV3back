@@ -13,7 +13,7 @@ RUN python3 -m pip install --no-cache-dir --index-url https://test.pypi.org/simp
 
 
 ENV LISTEN_PORT 5000
-EXPOSE 5000
+EXPOSE 5000 443
 ENV FLASK_APP=app
 ENV FLASK_DEBUG=true
 

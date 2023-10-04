@@ -18,8 +18,6 @@ sentry_sdk.init(
 )
 
 app = Flask(__name__)
-
-app = Flask(__name__)
 app.register_blueprint(api.bp)
 client = MongoClient('localhost', 27017)
 db = client['test-database']

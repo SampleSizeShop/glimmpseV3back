@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    version='0.0.1',
+    version='0.0.31',
     name='app',
     packages=find_packages(),
     include_package_data=True,

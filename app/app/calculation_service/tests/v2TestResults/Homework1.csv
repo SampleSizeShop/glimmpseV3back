@@ -1,0 +1,11 @@
+Power_v2,lower_v2,upper_v2,SAS_Power,deviation_sas_v2,Sim_Power,deviation_sim_v2,Test,Sigma Scale,Beta Scale,Total N,Alpha,PowerMethod,Quantile
+0.9090350,n/a,n/a,0.9090000,0.0000350,0.9102000,0.0011650,HOTELLING_LAWLEY_TRACE,1.0000000,1.0000000,40,0.0500000,CONDITIONAL_POWER,NaN
+===========================================
+Summary statistics: Test matrices printed by GLIMMPSE for original Homework 1
+===========================================
+Total Calculation Time: 0.057
+Mean Calculation Time: 0.057
+Total Simulation Time: 0.374
+Mean Simulation Time: 0.374
+Max Deviation from Published: 0.00003499
+Max Deviation from Simulation: 0.00116501
