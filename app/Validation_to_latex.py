@@ -302,7 +302,7 @@ def get_print_output(_df_v2results, _df_vtest, output_name):
     _df_output.deviation_sim_v3 = _df_output.deviation_sim_v3.apply('{:0<9}'.format)
     _df_output.Power_v2 = _df_output.Power_v2.apply('{:0<9}'.format)
     _df_output.deviation_v2_v3 = _df_output.deviation_v2_v3.apply('{:0<9}'.format)
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
     _df_output["Test"] = _df_output["Test_x"]
     _df_output["GLIMMPSE V3 Power"] = _df_output["Power"]
     _df_output["SAS Power (deviation)"] = _df_output["SAS_Power"].astype('str') + " (" + _df_output[
@@ -340,7 +340,7 @@ def get_print_output_additive(_df_v2results, _df_vtest, output_name):
     _df_output.deviation_sim_v3 = _df_output.deviation_sim_v3.apply('{:0<9}'.format)
     _df_output.Power_v2 = _df_output.Power_v2.apply('{:0<9}'.format)
     _df_output.deviation_v2_v3 = _df_output.deviation_v2_v3.apply('{:0<9}'.format)
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
     _df_output["Test"] = _df_output["Test_x"]
     _df_output["GLIMMPSE V3 Power"] = _df_output["Power"]
     _df_output["SAS Power (deviation)"] = _df_output["SAS_Power"].astype('str') + " (" + _df_output[
@@ -501,7 +501,7 @@ def get_print_output_with_concat(_df_v2results, _df_vtest, output_name, confiden
     _df_output["Power_v2"] = _df_output["Power_v2"].apply(lambda x: '%.7f' % x)
     _df_output.Power_v2 = _df_output.Power_v2.apply('{:0<9}'.format)
     _df_output.deviation_v2_v3 = _df_output.deviation_v2_v3.apply('{:0<9}'.format)
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
     _df_output["Test"] = _df_output["Test_v3"]
     _df_output["GLIMMPSE V3 Power"] = _df_output["Power_v3"]
     _df_output["SAS Power (deviation)"] = _df_output["SAS_Power"].astype('str') + " (" + _df_output[
@@ -578,7 +578,7 @@ def tex_table_test7(file_path, output_name, V3_JSON: [], V2_results):
     _df_output['deviation_sim_v2_calc'] = abs(_df_output.Power_v2 - _df_output.Sim_Power)
     _df_output['deviation_v2_v3'] = abs(_df_output.Power_v3 - _df_output.Power_v2)
 
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
 
 
     length = 24
@@ -613,7 +613,7 @@ def tex_table_test_9(file_path, output_name, V3_JSON: [], V2_results):
     _df_output['deviation_sim_v2_calc'] = abs(_df_output.Power_v2 - _df_output.Sim_Power)
     _df_output['deviation_v2_v3'] = abs(_df_output.Power - _df_output.Power_v2)
 
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
     _df_output["SAS Power (deviation)"] = _df_output["SAS_Power"].astype('str') + " (" + _df_output[
         "deviation_sas_v3"].astype('str') + ")"
     _df_output["Sim Power (deviation)"] = _df_output["Sim_Power"].astype('str') + " (" + _df_output[
@@ -641,7 +641,7 @@ def tex_table_gaussian(file_path, output_name, V3_JSON: [], V2_results):
     _df_output['deviation_sim_v3'] = abs(_df_output.Power_v3 - _df_output.Sim_Power).apply(lambda x: '%.7f' % x)
 
 
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
 
     _df_v2summary = get_summary_results(V2_results, _df_v2results, file_path)
     _df_output, _df_print = get_print_output_with_concat(_df_v2results, _df_vtest, output_name)
@@ -665,7 +665,7 @@ def tex_table_by_delta(file_path, output_name, V3_JSON: [], V2_results):
     _df_v2results = pd.read_csv(file_path + V2_results,skipfooter=11, engine='python', na_values=('nan', 'NaN', 'n/a', ' n/a'))
     _df_output=pd.concat([_df_vtest, _df_v2results], axis=1)
     _df_output = _df_output[_df_output['SAS_Power'].notna()]
-    _df_output.to_excel(output_name + '.xlsx')
+    # _df_output.to_excel(output_name + '.xlsx')
     _df_v2summary = get_summary_results(V2_results, _df_v2results, file_path)
     _df_output, _df_print = get_print_output_with_concat(_df_v2results, _df_vtest, output_name, True)
 
@@ -685,7 +685,7 @@ def tex_table_by_delta(file_path, output_name, V3_JSON: [], V2_results):
                                                                                                longtable=True), list_inputs
 
 
-file_path = r'v2TestResults/'
+file_path = r'app/calculation_service/tests/v2TestResults/'
 
 HOMEWORK_1_FILENAME = "Homework1"
 HOMEWORK_2_FILENAME = "Homework2"
@@ -1281,29 +1281,29 @@ all_gaussian_deviations = [gaussian_test1_deviations,gaussian_test4_deviations,g
 all_gaussian_results = [gaussian_test1_results,gaussian_test4_results,gaussian_test5_results,gaussian_test8_results,]
 
 
-for n in all_names:
-    write_tex_file(False,
-        n,
-        all_titles[all_names.index(n)],
-        INTRODUCTION,
-        all_descriptions[all_names.index(n)],
-        all_list_inputs[all_names.index(n)],
-        all_timings[all_names.index(n)],
-        all_deviations[all_names.index(n)],
-        all_results[all_names.index(n)])
-    write_pdf(n)
+# for n in all_names:
+#     write_tex_file(False,
+#         n,
+#         all_titles[all_names.index(n)],
+#         INTRODUCTION,
+#         all_descriptions[all_names.index(n)],
+#         all_list_inputs[all_names.index(n)],
+#         all_timings[all_names.index(n)],
+#         all_deviations[all_names.index(n)],
+#         all_results[all_names.index(n)])
+#     write_pdf(n)
 
 write_tex_results_file(V3_RESULTS_TABLE)
 write_pdf('V3ResultsTable.tex')
 
-for n in all_gaussian_names:
-     write_tex_file(True,
-                    n,
-                    all_gaussian_titles[all_gaussian_names.index(n)],
-                    INTRODUCTION,
-                    all_gaussian_descriptions[all_gaussian_names.index(n)],
-                    all_gaussian_list_inputs[all_gaussian_names.index(n)],
-                    all_gaussian_timings[all_gaussian_names.index(n)],
-                    all_gaussian_deviations[all_gaussian_names.index(n)],
-                    all_gaussian_results[all_gaussian_names.index(n)])
-     write_pdf(n)
+# for n in all_gaussian_names:
+#      write_tex_file(True,
+#                     n,
+#                     all_gaussian_titles[all_gaussian_names.index(n)],
+#                     INTRODUCTION,
+#                     all_gaussian_descriptions[all_gaussian_names.index(n)],
+#                     all_gaussian_list_inputs[all_gaussian_names.index(n)],
+#                     all_gaussian_timings[all_gaussian_names.index(n)],
+#                     all_gaussian_deviations[all_gaussian_names.index(n)],
+#                     all_gaussian_results[all_gaussian_names.index(n)])
+#      write_pdf(n)

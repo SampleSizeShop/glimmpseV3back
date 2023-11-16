@@ -1,0 +1,544 @@
+{
+  "_glimmpse_ui_version": "0.0.2",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "A",
+          "B"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "Group",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 2,
+        "child": null
+      },
+      {
+        "valueNames": [],
+        "name": "Y",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1.22474487,
+        "gaussian_corellation": null
+      },
+      {
+        "valueNames": [
+          "2",
+          "4",
+          "6",
+          "8",
+          "10"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Repeated Measure",
+        "units": "",
+        "type": "Numeric",
+        "_noRepeats": 5,
+        "partialUMatrix": {
+          "name": "",
+          "logger": null,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                1,
+                1,
+                1
+              ],
+              [
+                -1,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                -1,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                -1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                -1
+              ]
+            ],
+            "size": [
+              5,
+              4
+            ]
+          },
+          "_type": "MAIN_EFFECT"
+        },
+        "correlationMatrix": {
+          "lear": true,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                0.25,
+                0.25,
+                0.25,
+                0.25
+              ],
+              [
+                0.25,
+                1,
+                0.25,
+                0.25,
+                0.25
+              ],
+              [
+                0.25,
+                0.25,
+                1,
+                0.25,
+                0.25
+              ],
+              [
+                0.25,
+                0.25,
+                0.25,
+                1,
+                0.25
+              ],
+              [
+                0.25,
+                0.25,
+                0.25,
+                0.25,
+                1
+              ]
+            ],
+            "size": [
+              5,
+              5
+            ]
+          },
+          "_names": [
+            "2",
+            "4",
+            "6",
+            "8",
+            "10"
+          ],
+          "base": 0.25,
+          "decay": 0,
+          "scaled": true
+        },
+        "standard_deviations": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "name": "Time",
+        "_polynomialOrder": 5,
+        "child": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "_tableId": null,
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "Group",
+            "factorType": "Between ISU Predictor",
+            "value": "A"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "Y",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "6"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "8"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "A"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "10"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "6"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "8"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "Y",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "Group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "B"
+                },
+                {
+                  "order": 0,
+                  "factorName": "Time",
+                  "factorType": "Repeated Measure",
+                  "value": "10"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      10,
+      20,
+      40
+    ],
+    "theta0": [
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": []
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": true,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "Powerlib Example 7",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Hotelling Lawley Trace",
+    "Pillai-Bartlett Trace",
+    "Wilks Likelihood Ratio",
+    "Box Corrected",
+    "Geisser-Greenhouse Corrected",
+    "Huynh-Feldt Corrected",
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.05
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": null,
+  "_scaleFactor": [
+    1
+  ],
+  "_varianceScaleFactors": [
+    1
+  ],
+  "_powerCurve": null
+}

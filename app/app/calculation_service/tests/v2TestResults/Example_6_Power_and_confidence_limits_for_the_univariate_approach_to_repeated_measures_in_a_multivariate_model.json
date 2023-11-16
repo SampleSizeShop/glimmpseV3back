@@ -1,0 +1,1665 @@
+{
+  "_glimmpse_ui_version": "0.0.1",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "male",
+          "female"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "gender",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 2,
+        "child": {
+          "valueNames": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "inHypothesis": false,
+          "isuFactorNature": "All mean differences zero",
+          "nature": "Between",
+          "origin": "Between ISU Predictor",
+          "name": "age",
+          "type": "NOMINAL",
+          "units": "",
+          "_polynomialOrder": 5,
+          "child": null,
+          "partialMatrix": null
+        },
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "age",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 5,
+        "child": null,
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [],
+        "name": "tortuosity",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1,
+        "gaussian_corellation": null,
+        "child": null,
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Repeated Measure",
+        "units": "",
+        "type": "Categorical",
+        "_noRepeats": 4,
+        "partialUMatrix": {
+          "name": "",
+          "logger": null,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                1,
+                1
+              ],
+              [
+                -1,
+                0,
+                0
+              ],
+              [
+                0,
+                -1,
+                0
+              ],
+              [
+                0,
+                0,
+                -1
+              ]
+            ],
+            "size": [
+              4,
+              3
+            ]
+          },
+          "_type": "MAIN_EFFECT"
+        },
+        "correlationMatrix": {
+          "lear": false,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                0.748,
+                0.586,
+                0.685
+              ],
+              [
+                0.748,
+                1,
+                0.668,
+                0.535
+              ],
+              [
+                0.586,
+                0.668,
+                1,
+                0.684
+              ],
+              [
+                0.685,
+                0.535,
+                0.684,
+                1
+              ]
+            ],
+            "size": [
+              4,
+              4
+            ]
+          },
+          "_names": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "base": 0.5,
+          "decay": 0.3,
+          "scaled": true
+        },
+        "standard_deviations": [
+          0.2894823,
+          0.2317326,
+          0.21,
+          0.2687006
+        ],
+        "name": "region",
+        "_polynomialOrder": 4,
+        "child": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "gender",
+            "factorType": "Between ISU Predictor",
+            "value": "male"
+          },
+          {
+            "order": 0,
+            "factorName": "age",
+            "factorType": "Between ISU Predictor",
+            "value": "0"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                }
+              ]
+            }
+          ]
+        ],
+        "_tableId": null
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "tortuosity",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "male"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 0,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "0"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 1,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 2,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 3,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 2.9,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 3.5,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "value": 3.2,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "tortuosity",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "gender",
+                  "factorType": "Between ISU Predictor",
+                  "value": "female"
+                },
+                {
+                  "order": 4,
+                  "factorName": "age",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "region",
+                  "factorType": "Repeated Measure",
+                  "value": "4"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "theta0": [
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": []
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": true,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "Example 6. Power and confidence limits for the univariate approach to repeated measures in a multivariate model",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Geisser-Greenhouse Corrected"
+  ],
+  "_typeOneErrorRate": [
+    0.0083333
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": {
+    "beta_known": true,
+    "lower_tail": 0.025,
+    "upper_tail": 0.025,
+    "rank_est": 2,
+    "n_est": 24
+  },
+  "_scaleFactor": [
+    1
+  ],
+  "_varianceScaleFactors": [
+    1
+  ],
+  "_powerCurve": null
+}

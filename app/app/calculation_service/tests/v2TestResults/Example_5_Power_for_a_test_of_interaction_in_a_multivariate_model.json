@@ -1,0 +1,593 @@
+{
+  "_glimmpse_ui_version": "0.0.1",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "grp",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 4,
+        "child": null,
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [],
+        "name": "a",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1,
+        "gaussian_corellation": null,
+        "child": null,
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [
+          "1",
+          "2",
+          "3"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Repeated Measure",
+        "units": "",
+        "type": "Categorical",
+        "_noRepeats": 3,
+        "partialUMatrix": {
+          "name": "",
+          "logger": null,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                1
+              ],
+              [
+                -1,
+                0
+              ],
+              [
+                0,
+                -1
+              ]
+            ],
+            "size": [
+              3,
+              2
+            ]
+          },
+          "_type": "MAIN_EFFECT"
+        },
+        "correlationMatrix": {
+          "lear": false,
+          "_values": {
+            "mathjs": "DenseMatrix",
+            "data": [
+              [
+                1,
+                0.4,
+                0.4
+              ],
+              [
+                0.4,
+                1,
+                0.4
+              ],
+              [
+                0.4,
+                0.4,
+                1
+              ]
+            ],
+            "size": [
+              3,
+              3
+            ]
+          },
+          "_names": [
+            "1",
+            "2",
+            "3"
+          ],
+          "base": 0.5,
+          "decay": 0.3,
+          "scaled": true
+        },
+        "standard_deviations": [
+          1,
+          1,
+          1
+        ],
+        "name": "time",
+        "_polynomialOrder": 3,
+        "child": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "grp",
+            "factorType": "Between ISU Predictor",
+            "value": "1"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 2,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 3,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                }
+              ]
+            }
+          ]
+        ],
+        "_tableId": null
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "a",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 2,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 2,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 2,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "3"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 3,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "1"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 3,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "2"
+                }
+              ]
+            },
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "a",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 3,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "4"
+                },
+                {
+                  "order": 0,
+                  "factorName": "time",
+                  "factorType": "Repeated Measure",
+                  "value": "3"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      5,
+      10
+    ],
+    "theta0": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": [
+        "a",
+        "d"
+      ]
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": true,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "Example 5. Power for a test of interaction in a multivariate model",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Hotelling Lawley Trace",
+    "Pillai-Bartlett Trace",
+    "Wilks Likelihood Ratio",
+    "Box Corrected",
+    "Geisser-Greenhouse Corrected",
+    "Huynh-Feldt Corrected",
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.01
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": null,
+  "_scaleFactor": [
+    0.5,
+    1,
+    1.5,
+    2
+  ],
+  "_varianceScaleFactors": [
+    1,
+    2
+  ],
+  "_powerCurve": null
+}

@@ -1,0 +1,296 @@
+{
+  "_glimmpse_ui_version": "0.0.2",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "grp1",
+          "grp2"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "grp",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 2,
+        "child": null,
+        "partialMatrix": null
+      },
+      {
+        "valueNames": [],
+        "name": "o1",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 0.2607680962,
+        "gaussian_corellation": null,
+        "child": null,
+        "partialMatrix": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "grp",
+            "factorType": "Between ISU Predictor",
+            "value": "grp1"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "grp1"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "grp2"
+                }
+              ]
+            }
+          ]
+        ],
+        "_tableId": null
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "o1",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "o1",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "grp1"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 0.75,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "o1",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "grp",
+                  "factorType": "Between ISU Predictor",
+                  "value": "grp2"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      12
+    ],
+    "theta0": [
+      [
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": [
+        "o1",
+        "o2"
+      ]
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": true,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "Example 4. Power and con\u001cdence limits for a univariate model",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.01
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": {
+    "beta_known": true,
+    "lower_tail": 0.05,
+    "upper_tail": 0.0,
+    "rank_est": 2,
+    "n_est": 24
+  },
+  "_scaleFactor": [
+    0.01,
+    0.02,
+    0.03,
+    0.04,
+    0.05,
+    0.06,
+    0.07,
+    0.08,
+    0.09,
+    0.1,
+    0.11,
+    0.12,
+    0.13,
+    0.14,
+    0.15,
+    0.16,
+    0.17,
+    0.18,
+    0.19,
+    0.2,
+    0.21,
+    0.22,
+    0.23,
+    0.24,
+    0.25,
+    0.26,
+    0.27,
+    0.28,
+    0.29,
+    0.3,
+    0.31,
+    0.32,
+    0.33,
+    0.34,
+    0.35,
+    0.36,
+    0.37,
+    0.38,
+    0.39,
+    0.4,
+    0.41,
+    0.42,
+    0.43,
+    0.44,
+    0.45,
+    0.46,
+    0.47,
+    0.48,
+    0.49,
+    0.5,
+    0.51,
+    0.52,
+    0.53,
+    0.54,
+    0.55,
+    0.56,
+    0.57,
+    0.58,
+    0.59,
+    0.6,
+    0.61,
+    0.62,
+    0.63,
+    0.64,
+    0.65,
+    0.66,
+    0.67,
+    0.68,
+    0.69,
+    0.7,
+    0.71,
+    0.72,
+    0.73,
+    0.74,
+    0.75
+  ],
+  "_varianceScaleFactors": [
+    1
+  ],
+  "_powerCurve": null
+}

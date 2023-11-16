@@ -3,6 +3,7 @@ import pkg_resources
 import traceback
 
 from pyglimmpse import unirep, multirep, samplesize
+from sentry_sdk import capture_exception
 
 import json, random
 from flask import Blueprint, Response, request
@@ -35,6 +36,12 @@ def jsonify_tex(texString):
 #     cur = db.expressions.find({'name': '{0}'.format(random.randrange(1, 6, 1))})
 #     expr = cur.next()['expression']
 #     return jsonify_tex(expr)
+
+
+@bp.route('/debug-sentry')
+@cross_origin()
+def trigger_error():
+    division_by_zero = 1 / 0
 
 
 @bp.route('/clientsidelog', methods=['POST'])
@@ -72,6 +79,8 @@ def calculate():
             else:
                 result = _calculate_sample_size(model)
         except GlimmpseValidationException as e:
+            capture_exception(e)
+            model.errors.add(e)
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -161,6 +170,8 @@ def _samplesize(test, model, **kwargs):
     if model.confidence_interval:
         kwargs['confidence_interval'] = model.confidence_interval
     kwargs['tolerance'] = 1e-12
+    if model.target_power >=1:
+        model.target_power = 0.999999
     try:
         size, power = samplesize.samplesize(test=test,
                                             rank_C=np.linalg.matrix_rank(model.c_matrix),
@@ -220,6 +231,8 @@ def _power_to_dict(model, power):
     upper = None
     if power:
         pow = power.power
+        if type(pow) is tuple:
+            pow = 1 - pow[0]
         if math.isnan(pow):
             pow = -1
             model.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)

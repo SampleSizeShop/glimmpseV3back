@@ -1,0 +1,262 @@
+{
+  "_glimmpse_ui_version": "0.0.2",
+  "_stageReached": 29,
+  "_currentStage": 28,
+  "_isuFactors": {
+    "variables": [
+      {
+        "valueNames": [
+          "1",
+          "2"
+        ],
+        "inHypothesis": true,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Between",
+        "origin": "Between ISU Predictor",
+        "name": "group",
+        "type": "NOMINAL",
+        "units": "",
+        "_polynomialOrder": 2,
+        "child": null
+      },
+      {
+        "valueNames": [],
+        "name": "outcome",
+        "inHypothesis": false,
+        "isuFactorNature": "All mean differences zero",
+        "nature": "Within",
+        "origin": "Outcome",
+        "standardDeviation": 1,
+        "gaussian_corellation": null
+      }
+    ],
+    "betweenIsuRelativeGroupSizes": [
+      {
+        "_tableId": null,
+        "dimensions": [
+          {
+            "order": 0,
+            "factorName": "group",
+            "factorType": "Between ISU Predictor",
+            "value": "1"
+          }
+        ],
+        "_table": [
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 1,
+                  "factorName": "group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "marginalMeans": [
+      {
+        "_tableId": {
+          "value": null,
+          "id": [
+            {
+              "order": 0,
+              "factorName": "outcome",
+              "factorType": "Outcome",
+              "value": ""
+            }
+          ]
+        },
+        "_table": [
+          [
+            {
+              "value": 0,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "outcome",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 0,
+                  "factorName": "group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "1"
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "value": 1,
+              "id": [
+                {
+                  "order": 0,
+                  "factorName": "outcome",
+                  "factorType": "Outcome",
+                  "value": ""
+                },
+                {
+                  "order": 1,
+                  "factorName": "group",
+                  "factorType": "Between ISU Predictor",
+                  "value": "2"
+                }
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    "smallestGroupSize": [
+      10
+    ],
+    "theta0": [
+      [
+        0
+      ]
+    ],
+    "outcomeCorrelationMatrix": {
+      "lear": false,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [
+          [
+            1
+          ]
+        ],
+        "size": [
+          1,
+          1
+        ]
+      },
+      "base": 0.5,
+      "decay": 0.3,
+      "scaled": true,
+      "_names": []
+    },
+    "cMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    },
+    "uMatrix": {
+      "name": "",
+      "logger": null,
+      "_values": {
+        "mathjs": "DenseMatrix",
+        "data": [],
+        "size": [
+          0
+        ]
+      },
+      "_type": "All mean differences zero"
+    }
+  },
+  "_power": [],
+  "_define_full_beta": false,
+  "_progress": {
+    "_design": true,
+    "_hypothesis": true,
+    "_dimensions": true,
+    "_parameters": true,
+    "_optional": true
+  },
+  "_name": "TestConditionalTwoSampleTTest",
+  "_targetEvent": "REJECTION",
+  "_solveFor": "POWER",
+  "_ciwidth": 1,
+  "_selectedTests": [
+    "Uncorrected"
+  ],
+  "_typeOneErrorRate": [
+    0.05
+  ],
+  "_quantiles": [],
+  "_gaussianCovariate": null,
+  "_confidence_interval": null,
+  "_scaleFactor": [
+    0.0000000, 
+	0.0500000, 
+	0.1000000, 
+	0.1500000, 
+	0.2000000, 
+	0.2500000, 
+	0.3000000, 
+	0.3500000, 
+	0.4000000, 
+	0.4500000,
+	0.5000000, 
+	0.5500000, 
+	0.6000000, 
+	0.6500000, 
+	0.7000000, 
+	0.7500000, 
+	0.8000000, 
+	0.8500000, 
+	0.9000000, 
+	0.9500000,
+	1.0000000, 
+	1.0500000, 
+	1.1000000, 
+	1.1500000, 
+	1.2000000, 
+	1.2500000, 
+	1.3000000, 
+	1.3500000, 
+	1.4000000, 
+	1.4500000,
+	1.5000000, 
+	1.5500000, 
+	1.6000000, 
+	1.6500000, 
+	1.7000000, 
+	1.7500000, 
+	1.8000000, 
+	1.8500000, 
+	1.9000000, 
+	1.9500000,
+	2.0000000, 
+	2.0500000, 
+	2.1000000, 
+	2.1500000, 
+	2.2000000, 
+	2.2500000, 
+	2.3000000, 
+	2.3500000, 
+	2.4000000, 
+	2.4500000,
+	2.5000000
+  ],
+  "_varianceScaleFactors": [
+    0.32,
+    1,
+    2.05
+  ],
+  "_powerCurve": null
+}

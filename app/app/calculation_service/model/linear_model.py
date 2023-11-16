@@ -176,7 +176,6 @@ class LinearModel(object):
             self.target_power = inputs.target_power
             self.scale_factor = inputs.scale_factor
             self.variance_scale_factor = inputs.variance_scale_factor
-            self.test = inputs.test
             self.smallest_group_size = inputs.smallest_group_size
             self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
             self.calc_metadata()
@@ -195,6 +194,8 @@ class LinearModel(object):
                     self.errors.update(self.noncentrality_distribution.errors)
             else:
                 self.noncentrality_distribution = None
+            if self.test == Tests.HUYNH_FELDT and self.nu_e < 4 and study_design.solve_for == SolveFor.POWER:
+                    self.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
         except (GlimmpseValidationException, GlimmpseCalculationException) as e:
             self.errors.add(e)
         except Exception as e:
@@ -544,10 +545,38 @@ class LinearModel(object):
             (1 + (level.no_elements - 1) * level.intra_class_correlation) / level.no_elements
             for level in cluster.levels
         ]
-        cluster_sigma_star = 1
-        for c in components:
-            cluster_sigma_star = cluster_sigma_star * c
-        return cluster_sigma_star
+        k = [level.no_elements for level in cluster.levels]
+        rho = [level.intra_class_correlation for level in cluster.levels]
+        cluster_sigma_star_additive = self.calc_additive_sigscale(rho[::-1], k[::-1])
+        return cluster_sigma_star_additive
+
+    def calc_additive_sigscale(self, rho, K):
+        FACTOR = 1
+        KSTARD = 1
+        DMAX = len(rho)
+        D=0
+        while D < DMAX:
+            KSTARD = KSTARD * K[D]
+            p = (1 - 1 / KSTARD)
+            FACTOR = FACTOR / K[D] + rho[D] * p
+            D = D+1
+        return FACTOR
+
+
+    # private double calculateSigScale(double [][] Rho, double [][]K) {
+    #     //*Inputs: RHO= D x 1 vector of correlations in interval [0,1); <- column
+    #     //*        K  = D x 1 vector of nested cluster dimensions; <-
+    #     //*Assumes integer D>0;  *Limit D to <=10 or so;
+    #     //*Level 1 nested within level 2, nested within level 3, etc.;
+    #     double FACTOR=1;
+    #     double KSTARD=1;
+    #     int DMAX=Rho.length;
+    #     for (int D=0; D < DMAX; D++) {
+    #         KSTARD = KSTARD * K[D][0];
+    #         FACTOR = FACTOR / K[D][0] + Rho[D][0] * (1 - 1 / KSTARD);
+    #     }
+    #     return FACTOR;
+    # }
 
     def calc_theta(self):
         if self.c_matrix is None or self.hypothesis_beta is None or self.u_matrix is None:
