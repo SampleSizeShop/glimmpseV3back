@@ -80,6 +80,7 @@ def calculate():
                 result = _calculate_sample_size(model)
         except GlimmpseValidationException as e:
             capture_exception(e)
+            model.errors.add(e)
             result = dict(test=model.test.value,
                           samplesize=e.args[0],
                           power=e.args[0],
@@ -169,6 +170,8 @@ def _samplesize(test, model, **kwargs):
     if model.confidence_interval:
         kwargs['confidence_interval'] = model.confidence_interval
     kwargs['tolerance'] = 1e-12
+    if model.target_power >=1:
+        model.target_power = 0.999999
     try:
         size, power = samplesize.samplesize(test=test,
                                             rank_C=np.linalg.matrix_rank(model.c_matrix),

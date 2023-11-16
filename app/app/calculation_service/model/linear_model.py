@@ -176,7 +176,6 @@ class LinearModel(object):
             self.target_power = inputs.target_power
             self.scale_factor = inputs.scale_factor
             self.variance_scale_factor = inputs.variance_scale_factor
-            self.test = inputs.test
             self.smallest_group_size = inputs.smallest_group_size
             self.total_n = self.calculate_total_n(study_design.isu_factors, inputs)
             self.calc_metadata()
@@ -195,6 +194,8 @@ class LinearModel(object):
                     self.errors.update(self.noncentrality_distribution.errors)
             else:
                 self.noncentrality_distribution = None
+            if self.test == Tests.HUYNH_FELDT and self.nu_e < 4 and study_design.solve_for == SolveFor.POWER:
+                    self.errors.add(Constants.ERR_ERROR_DEG_FREEDOM)
         except (GlimmpseValidationException, GlimmpseCalculationException) as e:
             self.errors.add(e)
         except Exception as e:
