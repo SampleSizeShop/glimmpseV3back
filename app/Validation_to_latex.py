@@ -1281,29 +1281,29 @@ all_gaussian_deviations = [gaussian_test1_deviations,gaussian_test4_deviations,g
 all_gaussian_results = [gaussian_test1_results,gaussian_test4_results,gaussian_test5_results,gaussian_test8_results,]
 
 
-# for n in all_names:
-#     write_tex_file(False,
-#         n,
-#         all_titles[all_names.index(n)],
-#         INTRODUCTION,
-#         all_descriptions[all_names.index(n)],
-#         all_list_inputs[all_names.index(n)],
-#         all_timings[all_names.index(n)],
-#         all_deviations[all_names.index(n)],
-#         all_results[all_names.index(n)])
-#     write_pdf(n)
+for n in all_names:
+    write_tex_file(False,
+        n,
+        all_titles[all_names.index(n)],
+        INTRODUCTION,
+        all_descriptions[all_names.index(n)],
+        all_list_inputs[all_names.index(n)],
+        all_timings[all_names.index(n)],
+        all_deviations[all_names.index(n)],
+        all_results[all_names.index(n)])
+    write_pdf(n)
 
 write_tex_results_file(V3_RESULTS_TABLE)
 write_pdf('V3ResultsTable.tex')
 
-# for n in all_gaussian_names:
-#      write_tex_file(True,
-#                     n,
-#                     all_gaussian_titles[all_gaussian_names.index(n)],
-#                     INTRODUCTION,
-#                     all_gaussian_descriptions[all_gaussian_names.index(n)],
-#                     all_gaussian_list_inputs[all_gaussian_names.index(n)],
-#                     all_gaussian_timings[all_gaussian_names.index(n)],
-#                     all_gaussian_deviations[all_gaussian_names.index(n)],
-#                     all_gaussian_results[all_gaussian_names.index(n)])
-#      write_pdf(n)
+for n in all_gaussian_names:
+     write_tex_file(True,
+                    n,
+                    all_gaussian_titles[all_gaussian_names.index(n)],
+                    INTRODUCTION,
+                    all_gaussian_descriptions[all_gaussian_names.index(n)],
+                    all_gaussian_list_inputs[all_gaussian_names.index(n)],
+                    all_gaussian_timings[all_gaussian_names.index(n)],
+                    all_gaussian_deviations[all_gaussian_names.index(n)],
+                    all_gaussian_results[all_gaussian_names.index(n)])
+     write_pdf(n)
